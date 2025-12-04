@@ -2,18 +2,24 @@ services:
   github-runner:
     image: myoung34/github-runner:latest
     restart: unless-stopped
+    stop_grace_period: 60s
     environment:
       - REPO_URL=https://github.com/${GITHUB_REPO}
       - RUNNER_TOKEN=${GITHUB_RUNNER_TOKEN}
       - RUNNER_NAME=${GITHUB_RUNNER_NAME:-fitness-copilot-runner}
-      - RUNNER_LABELS=${GITHUB_RUNNER_LABELS:-self-hosted,staging,production}
+      - LABELS=${GITHUB_RUNNER_LABELS:-self-hosted,staging,production}
       - RUNNER_WORKDIR=/tmp/runner/work
       - DOCKER_ENABLED=true
+      - EPHEMERAL=false
+      - DISABLE_AUTO_UPDATE=true
+      - RUNNER_SCOPE=repo
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - runner-work:/tmp/runner/work
+      - runner-config:/actions-runner
     labels:
       - "com.centurylinklabs.watchtower.enable=false"
 
 volumes:
   runner-work:
+  runner-config:
