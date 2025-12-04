@@ -37,6 +37,8 @@ SECRETS=(
   "SMTP_PASSWORD"
   "EMAILS_FROM_EMAIL"
   "SENTRY_DSN"
+  "DOCKER_IMAGE_BACKEND"
+  "DOCKER_IMAGE_FRONTEND"
 )
 
 echo "Syncing secrets from $ENV_FILE to GitHub..."
