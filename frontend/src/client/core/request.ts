@@ -203,8 +203,18 @@ export const sendRequest = async <T>(
 ): Promise<AxiosResponse<T>> => {
   const controller = new AbortController()
 
+  // Convert FormData to URLSearchParams for application/x-www-form-urlencoded
+  let requestData = body ?? formData
+  if (formData && options.mediaType === "application/x-www-form-urlencoded") {
+    const params = new URLSearchParams()
+    formData.forEach((value, key) => {
+      params.append(key, value as string)
+    })
+    requestData = params
+  }
+
   let requestConfig: AxiosRequestConfig = {
-    data: body ?? formData,
+    data: requestData,
     headers,
     method: options.method,
     signal: controller.signal,
