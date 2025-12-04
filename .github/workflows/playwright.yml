@@ -26,6 +26,8 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
         working-directory: frontend
+      - name: Create traefik network
+        run: docker network create traefik-public || true
       - run: docker compose up -d --wait
       - name: Run Playwright tests
         run: npm run test:e2e
