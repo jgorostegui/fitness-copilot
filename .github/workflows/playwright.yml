@@ -26,13 +26,33 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
         working-directory: frontend
+      - name: Create frontend .env file
+        run: |
+          cat > frontend/.env << EOF
+          VITE_API_URL=http://localhost:8000
+          MAILCATCHER_HOST=http://localhost:1080
+          EOF
       - name: Create traefik network
         run: docker network create traefik-public || true
       - name: Start services
         run: docker compose up -d --wait backend frontend db mailcatcher proxy adminer
+      - name: Wait for mailcatcher to be ready
+        run: |
+          timeout 30 bash -c 'until curl -f http://localhost:1080/messages > /dev/null 2>&1; do sleep 1; done'
+      - name: Verify services are running
+        run: |
+          echo "Backend health check:"
+          curl -f http://localhost:8000/api/v1/utils/health-check || exit 1
+          echo "Frontend is up:"
+          curl -f http://localhost:5173 > /dev/null || exit 1
+          echo "Mailcatcher is up:"
+          curl -f http://localhost:1080/messages > /dev/null || exit 1
       - name: Run Playwright tests
         run: npm run test:e2e
         working-directory: frontend
+        env:
+          VITE_API_URL: http://localhost:8000
+          MAILCATCHER_HOST: http://localhost:1080
       - run: docker compose down -v --remove-orphans
       - name: Upload test report
         if: ${{ !cancelled() }}
