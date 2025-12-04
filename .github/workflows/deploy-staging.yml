@@ -59,5 +59,7 @@ jobs:
           DOCKER_IMAGE_BACKEND=${{ env.DOCKER_IMAGE_BACKEND }}
           DOCKER_IMAGE_FRONTEND=${{ env.DOCKER_IMAGE_FRONTEND }}
           EOF
+      - name: Create traefik network if not exists
+        run: docker network create traefik-public || true
       - run: docker compose -f docker-compose.yml --project-name ${{ secrets.STACK_NAME_STAGING }} build
       - run: docker compose -f docker-compose.yml --project-name ${{ secrets.STACK_NAME_STAGING }} up -d

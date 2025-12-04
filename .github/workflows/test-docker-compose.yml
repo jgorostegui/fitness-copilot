@@ -18,6 +18,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Create .env from example
         run: cp .env.example .env
+      - name: Create traefik network
+        run: docker network create traefik-public || true
       - run: docker compose build
       - run: docker compose down -v --remove-orphans
       - run: docker compose up -d --wait backend frontend adminer
