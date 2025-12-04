@@ -152,8 +152,11 @@ test.describe("Change password successfully", () => {
     await page.goto("/settings")
     await page.getByRole("tab", { name: "Password" }).click()
     await page.getByPlaceholder("Current Password").fill(password)
+    await page.getByPlaceholder("Current Password").blur()
     await page.getByPlaceholder("New Password").fill(NewPassword)
+    await page.getByPlaceholder("New Password").blur()
     await page.getByPlaceholder("Confirm Password").fill(NewPassword)
+    await page.getByPlaceholder("Confirm Password").blur()
     await page.getByRole("button", { name: "Save" }).click()
     await expect(page.getByText("Password updated successfully.")).toBeVisible()
 
@@ -221,8 +224,11 @@ test.describe("Change password with invalid data", () => {
     await page.goto("/settings")
     await page.getByRole("tab", { name: "Password" }).click()
     await page.getByPlaceholder("Current Password").fill(password)
+    await page.getByPlaceholder("Current Password").blur()
     await page.getByPlaceholder("New Password").fill(password)
+    await page.getByPlaceholder("New Password").blur()
     await page.getByPlaceholder("Confirm Password").fill(password)
+    await page.getByPlaceholder("Confirm Password").blur()
     await page.getByRole("button", { name: "Save" }).click()
     await expect(
       page.getByText("New password cannot be the same as the current one"),

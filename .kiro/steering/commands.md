@@ -4,23 +4,20 @@ All commands run from project root using `just`.
 
 ## Quick Start
 ```bash
-just dev           # Start backend + db (hot-reload)
-just frontend      # Start frontend (hot-reload)
-just backend       # Start backend locally (no Docker)
-just up            # Start in detached mode
-just down          # Stop all services
-just status        # Check service status
+just dev           # Backend + db (hot-reload)
+just frontend      # Frontend (hot-reload)
+just backend       # Backend locally (no Docker)
 ```
 
 ## Development Workflows
 
-### Standard (Recommended)
+### Standard
 ```bash
 just dev
 ```
-Backend + database with hot-reload. Frontend serves static files.
+Backend + database with hot-reload. Frontend serves static.
 
-### With Frontend Hot-Reload
+### Full Hot-Reload
 ```bash
 # Terminal 1
 just dev
@@ -30,51 +27,79 @@ just frontend
 ```
 Both backend and frontend with hot-reload.
 
-### Local Backend (No Docker)
+### Local Backend
 ```bash
-# Terminal 1: Database
-docker compose up -d db mailcatcher
+# Terminal 1
+just db
 
-# Terminal 2: Backend
+# Terminal 2
 just backend
 ```
-Fastest backend reload, requires Python setup.
+Fastest reload, requires Python setup.
 
-## Shell Access
+## Docker Management
 ```bash
-just sh           # Backend shell (quick alias)
-just shell-db     # PostgreSQL shell
+just up            # Start all services
+just down          # Stop all services
+just clean         # Stop and remove volumes
+just status        # Check service status
+just logs          # View all logs
+just build         # Rebuild images
 ```
 
-## Testing
+## Shell Access (Inside Docker)
 ```bash
-just tb           # Backend tests (Docker)
-just tf           # Frontend unit tests (Vitest)
-just test         # Run all tests
+just sh            # Backend shell
+just db-shell      # PostgreSQL shell
+just frontend-shell # Frontend shell
 ```
 
-## Database
+## Testing (Host Machine)
+```bash
+just test          # All tests
+just tb            # Backend tests (alias)
+just tf            # Frontend tests (alias)
+just te            # E2E tests (alias)
+just test-e2e-ui   # E2E with UI
+```
+
+## Testing (Inside Docker)
+```bash
+just docker-test                    # All tests in Docker
+just docker-test-backend            # Backend tests in Docker
+just docker-test-backend-args "-x"  # Backend tests with args
+```
+
+## E2E Testing
+```bash
+just e2e-up           # Start full stack
+just e2e-run          # Run E2E tests (from host)
+just e2e-run-docker   # Run E2E tests (inside Docker)
+just e2e-run-headed   # Run E2E with visible browser
+just e2e-down         # Stop stack
+just e2e              # Full cycle: up, test, down
+```
+
+## Database (Inside Docker)
 ```bash
 just migrate                    # Run migrations
-just migration "description"    # Create new migration
+just migration "description"    # Create migration
+just migrate-rollback           # Rollback last
+just migrate-history            # Show history
 ```
 
-## Code Quality
+## Code Quality (Host Machine)
 ```bash
-just lint         # Run all linters
-just format       # Format all code
-just pre-commit   # Run pre-commit hooks
+just lint          # All linters
+just format        # Format all code
+just pre-commit    # Run pre-commit hooks
 ```
 
-## Build
+## Build & Utilities
 ```bash
 just generate-client   # Regenerate OpenAPI client
-just build             # Build Docker images
-```
-
-## Secrets Management
-```bash
-just sync-secrets      # Sync local .env secrets to GitHub Actions
+just secret            # Generate secret key
+just sync-secrets      # Sync .env to GitHub
 ```
 
 ## GitHub Actions Runner
