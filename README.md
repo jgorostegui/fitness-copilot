@@ -35,8 +35,6 @@
 
 
 
-
-
 ### Dashboard Login
 
 [![API docs](img/login.png)](https://github.com/fastapi/full-stack-fastapi-template)
