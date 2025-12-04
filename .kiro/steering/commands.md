@@ -42,6 +42,11 @@ just generate-client   # Regenerate OpenAPI client
 just build             # Build Docker images
 ```
 
+## Secrets Management
+```bash
+just sync-secrets      # Sync local .env secrets to GitHub Actions
+```
+
 ## GitHub Actions Runner
 ```bash
 just runner-start      # Start self-hosted runner
