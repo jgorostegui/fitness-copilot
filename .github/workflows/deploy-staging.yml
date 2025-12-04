@@ -40,6 +40,7 @@ jobs:
         run: |
           cat > .env << EOF
           ENVIRONMENT=${{ env.ENVIRONMENT }}
+          PROJECT_NAME=${{ env.PROJECT_NAME }}
           DOMAIN=${{ env.DOMAIN }}
           STACK_NAME=${{ env.STACK_NAME }}
           SECRET_KEY=${{ env.SECRET_KEY }}

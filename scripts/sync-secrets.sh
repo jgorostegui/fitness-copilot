@@ -25,6 +25,8 @@ fi
 # Secrets to sync - format: "GITHUB_SECRET_NAME:ENV_VAR_NAME" or just "NAME" if same
 # All required vars from docker-compose.yml
 SECRETS=(
+  # Project
+  "PROJECT_NAME"
   # Domain/Stack (mapped for staging/production)
   "DOMAIN_STAGING:DOMAIN"
   "DOMAIN_PRODUCTION:DOMAIN"
