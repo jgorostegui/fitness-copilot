@@ -228,65 +228,50 @@ The input variables, with their default values (some auto generated) are:
 ### Quick Start
 
 ```bash
-# Option 1: Docker with backend hot-reload (fastest setup)
-just dev
-
-# Option 2: Full hot-reload (recommended for active development)
-# Terminal 1:
-just dev
-
-# Terminal 2:
-just dev-frontend
+just dev        # Start backend + db (hot-reload)
+just frontend   # Optional: Run in 2nd terminal for frontend hot-reload
 ```
 
-### Development Options
+### Development Workflows
 
-**Option 1: Docker with Backend Hot-Reload**
+**Standard (Recommended)**
 ```bash
 just dev
 ```
-- Backend: Hot-reload enabled ✅
-- Frontend: Static build (no hot-reload) ❌
-- Best for: Backend-focused development
+Backend + database with hot-reload. Frontend serves static files.
 
-**Option 2: Full Hot-Reload (Recommended)**
+**With Frontend Hot-Reload**
 ```bash
-# Terminal 1: Backend + Database
+# Terminal 1
 just dev
 
-# Terminal 2: Frontend dev server
-just dev-frontend
+# Terminal 2  
+just frontend
 ```
-- Backend: Hot-reload enabled ✅
-- Frontend: Hot-reload enabled ✅
-- Best for: Full-stack development
+Both backend and frontend with hot-reload.
 
-**Option 3: Everything Local (No Docker)**
+**Local Backend (No Docker)**
 ```bash
-# Terminal 1: Database only
+# Terminal 1: Database
 docker compose up -d db mailcatcher
 
 # Terminal 2: Backend
-just dev-backend
-
-# Terminal 3: Frontend
-just dev-frontend
+just backend
 ```
-- Fastest reload times
-- Requires local Python + Node.js setup
+Fastest backend reload, requires Python setup.
 
 ### Common Commands
 
 ```bash
-just dev              # Start dev environment
-just dev-frontend     # Start frontend with hot-reload
-just dev-backend      # Start backend locally with hot-reload
-just test             # Run all tests
-just tb               # Run backend tests
-just tf               # Run frontend tests
-just te               # Run E2E tests
-just lint             # Run all linters
-just migrate          # Run database migrations
+just dev          # Start backend + db
+just frontend     # Start frontend with hot-reload
+just backend      # Start backend locally
+just test         # Run all tests
+just tb           # Run backend tests
+just tf           # Run frontend tests
+just te           # Run E2E tests
+just lint         # Run all linters
+just migrate      # Run database migrations
 ```
 
 See [commands.md](./.kiro/steering/commands.md) for all available commands.

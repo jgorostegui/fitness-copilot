@@ -4,41 +4,41 @@ All commands run from project root using `just`.
 
 ## Quick Start
 ```bash
-just dev               # Start dev with hot-reload (backend only)
-just dev-frontend      # Start frontend dev server (hot-reload)
-just dev-backend       # Start backend dev server locally (hot-reload)
-just up                # Start in detached mode
-just down              # Stop all services
-just status            # Check service status
+just dev           # Start backend + db (hot-reload)
+just frontend      # Start frontend (hot-reload)
+just backend       # Start backend locally (no Docker)
+just up            # Start in detached mode
+just down          # Stop all services
+just status        # Check service status
 ```
 
-## Development Workflow
+## Development Workflows
 
-### Option 1: Docker with Backend Hot-Reload
+### Standard (Recommended)
 ```bash
-just dev               # Backend hot-reload, frontend serves static files
+just dev
 ```
+Backend + database with hot-reload. Frontend serves static files.
 
-### Option 2: Full Hot-Reload (Recommended)
+### With Frontend Hot-Reload
 ```bash
-# Terminal 1: Start backend + database
+# Terminal 1
 just dev
 
-# Terminal 2: Start frontend with hot-reload
-just dev-frontend
+# Terminal 2
+just frontend
 ```
+Both backend and frontend with hot-reload.
 
-### Option 3: Everything Local (No Docker)
+### Local Backend (No Docker)
 ```bash
-# Terminal 1: Start database
+# Terminal 1: Database
 docker compose up -d db mailcatcher
 
 # Terminal 2: Backend
-just dev-backend
-
-# Terminal 3: Frontend
-just dev-frontend
+just backend
 ```
+Fastest backend reload, requires Python setup.
 
 ## Shell Access
 ```bash
