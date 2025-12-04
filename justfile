@@ -6,24 +6,17 @@ default:
 
 # ============== Development ==============
 
-# Start development environment with hot-reload (backend only)
+# Start development (backend + db with hot-reload)
 dev:
     docker compose watch
 
-# Start frontend dev server with hot-reload (run in separate terminal)
-dev-frontend:
+# Start frontend dev server with hot-reload
+frontend:
     cd frontend && npm run dev
 
-# Start backend dev server locally with hot-reload (run in separate terminal)
-dev-backend:
+# Start backend locally (no Docker, requires: docker compose up -d db mailcatcher)
+backend:
     cd backend && uv run fastapi dev app/main.py
-
-# Start full dev environment (Docker backend + local frontend)
-dev-full:
-    @echo "Starting backend in Docker with hot-reload..."
-    @docker compose up -d db mailcatcher
-    @echo "Run 'just dev-frontend' in another terminal for frontend hot-reload"
-    docker compose watch
 
 # Start development environment in detached mode
 up:
