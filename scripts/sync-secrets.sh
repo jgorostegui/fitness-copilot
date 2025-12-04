@@ -23,20 +23,32 @@ if ! gh auth status &> /dev/null; then
 fi
 
 # Secrets to sync - format: "GITHUB_SECRET_NAME:ENV_VAR_NAME" or just "NAME" if same
+# All required vars from docker-compose.yml
 SECRETS=(
+  # Domain/Stack (mapped for staging/production)
   "DOMAIN_STAGING:DOMAIN"
   "DOMAIN_PRODUCTION:DOMAIN"
   "STACK_NAME_STAGING:STACK_NAME"
   "STACK_NAME_PRODUCTION:STACK_NAME"
+  # Backend
   "SECRET_KEY"
   "FIRST_SUPERUSER"
   "FIRST_SUPERUSER_PASSWORD"
+  "FRONTEND_HOST"
+  "BACKEND_CORS_ORIGINS"
+  # Database
   "POSTGRES_PASSWORD"
+  "POSTGRES_USER"
+  "POSTGRES_DB"
+  "POSTGRES_PORT"
+  # Email
   "SMTP_HOST"
   "SMTP_USER"
   "SMTP_PASSWORD"
   "EMAILS_FROM_EMAIL"
+  # Monitoring
   "SENTRY_DSN"
+  # Docker images
   "DOCKER_IMAGE_BACKEND"
   "DOCKER_IMAGE_FRONTEND"
 )
