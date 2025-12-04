@@ -28,7 +28,8 @@ jobs:
         working-directory: frontend
       - name: Create traefik network
         run: docker network create traefik-public || true
-      - run: docker compose up -d --wait
+      - name: Start services
+        run: docker compose up -d --wait backend frontend db mailcatcher proxy adminer
       - name: Run Playwright tests
         run: npm run test:e2e
         working-directory: frontend

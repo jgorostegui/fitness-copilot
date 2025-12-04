@@ -95,6 +95,35 @@ test-frontend-e2e:
 test-frontend-e2e-ui:
     cd frontend && npx playwright test --ui
 
+# ============== E2E Testing (CI-like) ==============
+
+# Start stack for E2E tests (without playwright container)
+e2e-up:
+    docker network create traefik-public || true
+    docker compose up -d --wait backend frontend db mailcatcher proxy adminer
+
+# Run E2E tests against running stack (local playwright)
+e2e-run:
+    cd frontend && npx playwright test
+
+# Run E2E tests with headed browser (visible)
+e2e-run-headed:
+    cd frontend && npx playwright test --headed
+
+# Run E2E tests in Docker container
+e2e-run-docker:
+    docker compose run --rm playwright npx playwright test
+
+# Stop E2E stack and cleanup
+e2e-down:
+    docker compose down -v --remove-orphans
+
+# Full E2E test cycle (start, test, stop)
+e2e: e2e-up e2e-run e2e-down
+
+# E2E alias
+te: e2e-run
+
 # Run frontend linting
 lint-frontend:
     cd frontend && npm run lint

@@ -13,6 +13,7 @@ jobs:
       - production
     env:
       ENVIRONMENT: production
+      PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
       DOMAIN: ${{ secrets.DOMAIN_PRODUCTION }}
       STACK_NAME: ${{ secrets.STACK_NAME_PRODUCTION }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
@@ -39,6 +40,7 @@ jobs:
         run: |
           cat > .env << EOF
           ENVIRONMENT=${{ env.ENVIRONMENT }}
+          PROJECT_NAME=${{ env.PROJECT_NAME }}
           DOMAIN=${{ env.DOMAIN }}
           STACK_NAME=${{ env.STACK_NAME }}
           SECRET_KEY=${{ env.SECRET_KEY }}
