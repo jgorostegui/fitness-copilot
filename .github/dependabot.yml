@@ -7,6 +7,10 @@ updates:
       interval: daily
     commit-message:
       prefix: ⬆
+    groups:
+      github-actions:
+        patterns:
+          - "*"
   # Python (Backend)
   - package-ecosystem: pip
     directory: /backend
@@ -14,6 +18,10 @@ updates:
       interval: daily
     commit-message:
       prefix: ⬆
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
   # npm (Frontend)
   - package-ecosystem: npm
     directory: /frontend
@@ -21,3 +29,7 @@ updates:
       interval: daily
     commit-message:
       prefix: ⬆
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
