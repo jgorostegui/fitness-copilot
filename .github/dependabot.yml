@@ -7,9 +7,16 @@ updates:
       interval: daily
     commit-message:
       prefix: ⬆
-  # Python
+  # Python (Backend)
   - package-ecosystem: pip
-    directory: /
+    directory: /backend
+    schedule:
+      interval: daily
+    commit-message:
+      prefix: ⬆
+  # npm (Frontend)
+  - package-ecosystem: npm
+    directory: /frontend
     schedule:
       interval: daily
     commit-message:
