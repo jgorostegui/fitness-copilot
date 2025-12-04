@@ -223,6 +223,74 @@ The input variables, with their default values (some auto generated) are:
 - `postgres_password`: (default: `"changethis"`) The password for the PostgreSQL database, stored in .env, you can generate one with the method above.
 - `sentry_dsn`: (default: "") The DSN for Sentry, if you are using it, you can set it later in .env.
 
+## Development
+
+### Quick Start
+
+```bash
+# Option 1: Docker with backend hot-reload (fastest setup)
+just dev
+
+# Option 2: Full hot-reload (recommended for active development)
+# Terminal 1:
+just dev
+
+# Terminal 2:
+just dev-frontend
+```
+
+### Development Options
+
+**Option 1: Docker with Backend Hot-Reload**
+```bash
+just dev
+```
+- Backend: Hot-reload enabled ✅
+- Frontend: Static build (no hot-reload) ❌
+- Best for: Backend-focused development
+
+**Option 2: Full Hot-Reload (Recommended)**
+```bash
+# Terminal 1: Backend + Database
+just dev
+
+# Terminal 2: Frontend dev server
+just dev-frontend
+```
+- Backend: Hot-reload enabled ✅
+- Frontend: Hot-reload enabled ✅
+- Best for: Full-stack development
+
+**Option 3: Everything Local (No Docker)**
+```bash
+# Terminal 1: Database only
+docker compose up -d db mailcatcher
+
+# Terminal 2: Backend
+just dev-backend
+
+# Terminal 3: Frontend
+just dev-frontend
+```
+- Fastest reload times
+- Requires local Python + Node.js setup
+
+### Common Commands
+
+```bash
+just dev              # Start dev environment
+just dev-frontend     # Start frontend with hot-reload
+just dev-backend      # Start backend locally with hot-reload
+just test             # Run all tests
+just tb               # Run backend tests
+just tf               # Run frontend tests
+just te               # Run E2E tests
+just lint             # Run all linters
+just migrate          # Run database migrations
+```
+
+See [commands.md](./.kiro/steering/commands.md) for all available commands.
+
 ## Backend Development
 
 Backend docs: [backend/README.md](./backend/README.md).
@@ -235,7 +303,7 @@ Frontend docs: [frontend/README.md](./frontend/README.md).
 
 Deployment docs: [deployment.md](./deployment.md).
 
-## Development
+## Development Details
 
 General development docs: [development.md](./development.md).
 

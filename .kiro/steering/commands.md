@@ -4,10 +4,40 @@ All commands run from project root using `just`.
 
 ## Quick Start
 ```bash
-just dev          # Start dev environment with hot-reload
-just up           # Start in detached mode
-just down         # Stop all services
-just status       # Check service status
+just dev               # Start dev with hot-reload (backend only)
+just dev-frontend      # Start frontend dev server (hot-reload)
+just dev-backend       # Start backend dev server locally (hot-reload)
+just up                # Start in detached mode
+just down              # Stop all services
+just status            # Check service status
+```
+
+## Development Workflow
+
+### Option 1: Docker with Backend Hot-Reload
+```bash
+just dev               # Backend hot-reload, frontend serves static files
+```
+
+### Option 2: Full Hot-Reload (Recommended)
+```bash
+# Terminal 1: Start backend + database
+just dev
+
+# Terminal 2: Start frontend with hot-reload
+just dev-frontend
+```
+
+### Option 3: Everything Local (No Docker)
+```bash
+# Terminal 1: Start database
+docker compose up -d db mailcatcher
+
+# Terminal 2: Backend
+just dev-backend
+
+# Terminal 3: Frontend
+just dev-frontend
 ```
 
 ## Shell Access
