@@ -170,9 +170,17 @@ secret:
 runner-start:
     docker compose -f docker-compose.runner.yml -p github-runner up -d
 
-# Stop GitHub Actions runner
+# Stop GitHub Actions runner gracefully
 runner-stop:
+    docker compose -f docker-compose.runner.yml -p github-runner stop -t 60
     docker compose -f docker-compose.runner.yml -p github-runner down
+
+# Force stop and clean runner (use when stuck)
+runner-kill:
+    docker compose -f docker-compose.runner.yml -p github-runner down -v --remove-orphans -t 5
+
+# Restart runner (clean restart)
+runner-restart: runner-stop runner-start
 
 # View runner logs
 runner-logs:
@@ -181,3 +189,7 @@ runner-logs:
 # Check runner status
 runner-status:
     docker compose -f docker-compose.runner.yml -p github-runner ps
+
+# Sync secrets from .env to GitHub
+sync-secrets:
+    ./scripts/sync-secrets.sh
