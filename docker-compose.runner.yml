@@ -5,7 +5,9 @@ services:
     stop_grace_period: 60s
     environment:
       - REPO_URL=https://github.com/${GITHUB_REPO}
-      - RUNNER_TOKEN=${GITHUB_RUNNER_TOKEN}
+      # Use ACCESS_TOKEN (PAT, long-lived) OR RUNNER_TOKEN (short-lived, from GitHub UI)
+      - ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN:-}
+      - RUNNER_TOKEN=${GITHUB_RUNNER_TOKEN:-}
       - RUNNER_NAME=${GITHUB_RUNNER_NAME:-fitness-copilot-runner}
       - LABELS=${GITHUB_RUNNER_LABELS:-self-hosted,staging,production}
       - RUNNER_WORKDIR=/tmp/runner/work
