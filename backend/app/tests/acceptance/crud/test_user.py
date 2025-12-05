@@ -1,3 +1,10 @@
+"""
+CRUD integration tests for User operations.
+
+These are Medium (Integration) tests - require DB.
+"""
+
+import pytest
 from fastapi.encoders import jsonable_encoder
 from sqlmodel import Session
 
@@ -7,6 +14,7 @@ from app.models import User, UserCreate, UserUpdate
 from app.tests.utils.utils import random_email, random_lower_string
 
 
+@pytest.mark.acceptance
 def test_create_user(db: Session) -> None:
     email = random_email()
     password = random_lower_string()
@@ -16,6 +24,7 @@ def test_create_user(db: Session) -> None:
     assert hasattr(user, "hashed_password")
 
 
+@pytest.mark.acceptance
 def test_authenticate_user(db: Session) -> None:
     email = random_email()
     password = random_lower_string()
@@ -26,6 +35,7 @@ def test_authenticate_user(db: Session) -> None:
     assert user.email == authenticated_user.email
 
 
+@pytest.mark.acceptance
 def test_not_authenticate_user(db: Session) -> None:
     email = random_email()
     password = random_lower_string()
@@ -33,6 +43,7 @@ def test_not_authenticate_user(db: Session) -> None:
     assert user is None
 
 
+@pytest.mark.acceptance
 def test_check_if_user_is_active(db: Session) -> None:
     email = random_email()
     password = random_lower_string()
@@ -41,6 +52,7 @@ def test_check_if_user_is_active(db: Session) -> None:
     assert user.is_active is True
 
 
+@pytest.mark.acceptance
 def test_check_if_user_is_active_inactive(db: Session) -> None:
     email = random_email()
     password = random_lower_string()
@@ -49,6 +61,7 @@ def test_check_if_user_is_active_inactive(db: Session) -> None:
     assert user.is_active
 
 
+@pytest.mark.acceptance
 def test_check_if_user_is_superuser(db: Session) -> None:
     email = random_email()
     password = random_lower_string()
@@ -57,6 +70,7 @@ def test_check_if_user_is_superuser(db: Session) -> None:
     assert user.is_superuser is True
 
 
+@pytest.mark.acceptance
 def test_check_if_user_is_superuser_normal_user(db: Session) -> None:
     username = random_email()
     password = random_lower_string()
@@ -65,6 +79,7 @@ def test_check_if_user_is_superuser_normal_user(db: Session) -> None:
     assert user.is_superuser is False
 
 
+@pytest.mark.acceptance
 def test_get_user(db: Session) -> None:
     password = random_lower_string()
     username = random_email()
@@ -76,6 +91,7 @@ def test_get_user(db: Session) -> None:
     assert jsonable_encoder(user) == jsonable_encoder(user_2)
 
 
+@pytest.mark.acceptance
 def test_update_user(db: Session) -> None:
     password = random_lower_string()
     email = random_email()

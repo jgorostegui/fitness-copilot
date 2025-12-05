@@ -1,3 +1,10 @@
+"""
+API integration tests for private endpoints.
+
+These are Medium (Integration) tests - require DB.
+"""
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
@@ -5,6 +12,7 @@ from app.core.config import settings
 from app.models import User
 
 
+@pytest.mark.acceptance
 def test_create_user(client: TestClient, db: Session) -> None:
     r = client.post(
         f"{settings.API_V1_STR}/private/users/",
