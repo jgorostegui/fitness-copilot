@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Profile } from "@/client"
 import type { UserProfilePublic, UserProfileUpdate } from "@/client"
+import { Profile } from "@/client"
 
 export const PROFILE_QUERY_KEY = ["profile", "me"]
 

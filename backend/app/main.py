@@ -1,8 +1,10 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import sentry_sdk
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
+from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session
 from starlette.middleware.cors import CORSMiddleware
 
@@ -49,3 +51,13 @@ if settings.all_cors_origins:
     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Mount demo images for vision testing (only in local environment)
+if settings.ENVIRONMENT == "local":
+    demo_images_path = Path(__file__).parent.parent.parent / "demo-images"
+    if demo_images_path.exists():
+        app.mount(
+            "/static/demo-images",
+            StaticFiles(directory=str(demo_images_path)),
+            name="demo-images",
+        )

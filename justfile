@@ -92,9 +92,10 @@ docker-test-acceptance:
     docker compose exec backend uv run pytest -m acceptance -v
 
 # Run integration tests in Docker (live external services, skipped by default)
+# Uses -s to show LLM output for debugging
 docker-test-integration:
     @echo "Running integration tests in Docker (live external services)..."
-    docker compose exec backend bash -c "RUN_INTEGRATION_TESTS=1 uv run pytest -m integration -v"
+    docker compose exec backend bash -c "RUN_INTEGRATION_TESTS=1 uv run pytest -m integration -v -s --tb=short"
 
 # Run tests with coverage in Docker
 docker-test-coverage:
@@ -123,9 +124,10 @@ test-acceptance:
     cd backend && uv run pytest -m acceptance -v
 
 # Run integration tests (Large - live external services, skipped by default)
+# Uses -s to show LLM output for debugging
 test-integration:
     @echo "Running integration tests (Large - live external services)..."
-    cd backend && RUN_INTEGRATION_TESTS=1 uv run pytest -m integration -v
+    cd backend && RUN_INTEGRATION_TESTS=1 uv run pytest -m integration -v -s --tb=short
 
 test-frontend:
     cd frontend && npm run test
@@ -153,17 +155,17 @@ e2e: e2e-up test-e2e e2e-down
 
 # ============== Code Quality (Host) ==============
 
-# Lint all (same as CI)
+# Lint all with auto-fix
 lint: lint-backend lint-frontend
 
-# Lint backend (ruff check + format check)
+# Lint backend with auto-fix (ruff check --fix + format)
 lint-backend:
-    cd backend && uv run ruff check app
-    cd backend && uv run ruff format app --check
+    cd backend && uv run ruff check app --fix
+    cd backend && uv run ruff format app
 
-# Lint frontend
+# Lint frontend with auto-fix
 lint-frontend:
-    cd frontend && npm run lint
+    cd frontend && npx biome check --fix ./
 
 # Format all
 format: format-backend format-frontend

@@ -326,6 +326,34 @@ export type HttpValidationError = {
 };
 
 /**
+ * ImageUploadRequest
+ *
+ * Request model for image upload.
+ */
+export type ImageUploadRequest = {
+    /**
+     * Image Base64
+     */
+    image_base64: string;
+    /**
+     * Content Type
+     */
+    content_type?: string;
+};
+
+/**
+ * ImageUploadResponse
+ *
+ * Response model for image upload.
+ */
+export type ImageUploadResponse = {
+    /**
+     * Attachmentid
+     */
+    attachmentId: string;
+};
+
+/**
  * MealLogCreate
  */
 export type MealLogCreate = {
@@ -1839,6 +1867,31 @@ export type ChatSendMessageResponses = {
 };
 
 export type ChatSendMessageResponse = ChatSendMessageResponses[keyof ChatSendMessageResponses];
+
+export type UploadUploadImageData = {
+    body: ImageUploadRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/upload/image';
+};
+
+export type UploadUploadImageErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UploadUploadImageError = UploadUploadImageErrors[keyof UploadUploadImageErrors];
+
+export type UploadUploadImageResponses = {
+    /**
+     * Successful Response
+     */
+    200: ImageUploadResponse;
+};
+
+export type UploadUploadImageResponse = UploadUploadImageResponses[keyof UploadUploadImageResponses];
 
 export type PrivateCreateUserData = {
     body: PrivateUserCreate;

@@ -2,60 +2,60 @@
 
 ## Task List
 
-- [ ] 1. Extend GoogleLLMProvider with vision capabilities
-  - [ ] 1.1 Add `analyze_image()` method to GoogleLLMProvider
+- [x] 1. Extend GoogleLLMProvider with vision capabilities
+  - [x] 1.1 Add `analyze_image()` method to GoogleLLMProvider
     - Accept `prompt`, `image_url`, and optional `image_base64` parameters
     - Build Gemini content parts with text and image
     - Handle timeout (30s) and errors gracefully
     - Return extracted text or None on failure
     - _Requirements: 4.2, 4.3, 4.5_
-  - [ ] 1.2 Add `extract_json_from_image()` method to GoogleLLMProvider
+  - [x] 1.2 Add `extract_json_from_image()` method to GoogleLLMProvider
     - Similar to `extract_json()` but with image input
     - Use `response_mime_type="application/json"` for structured output
     - Parse JSON response with existing `_parse_json()` method
     - _Requirements: 4.2_
-  - [ ] 1.3 Write property test for image input formats
+  - [x] 1.3 Write property test for image input formats
     - **Property 10: Both image input formats accepted**
     - **Validates: Requirements 4.3**
 
-- [ ] 2. Create VisionService with image classification
-  - [ ] 2.1 Create `backend/app/services/vision.py`
+- [x] 2. Create VisionService with image classification
+  - [x] 2.1 Create `backend/app/services/vision.py`
     - Define `ImageCategory` enum (GYM_EQUIPMENT, FOOD, UNKNOWN)
     - Define `GymEquipmentAnalysis` dataclass
     - Define `FoodAnalysis` dataclass
     - Define `VisionResult` dataclass
     - _Requirements: 1.1_
-  - [ ] 2.2 Implement `_classify_image()` method
+  - [x] 2.2 Implement `_classify_image()` method
     - Build classification prompt for Gemini
     - Parse response to determine category
     - Return ImageCategory enum value
     - _Requirements: 1.1_
-  - [ ] 2.3 Write property test for classification categories
+  - [x] 2.3 Write property test for classification categories
     - **Property 1: Image classification produces valid category**
     - **Validates: Requirements 1.1**
 
-- [ ] 3. Implement gym equipment analysis
-  - [ ] 3.1 Implement `_analyze_gym_equipment()` method
+- [x] 3. Implement gym equipment analysis
+  - [x] 3.1 Implement `_analyze_gym_equipment()` method
     - Build prompt for exercise identification and form cues
     - Extract JSON with exercise_name, form_cues, sets, reps, weight
     - Return GymEquipmentAnalysis with defaults on failure
     - _Requirements: 2.1, 2.2, 2.3_
-  - [ ] 3.2 Write property test for gym analysis fields
+  - [x] 3.2 Write property test for gym analysis fields
     - **Property 5: Gym analysis contains required fields**
     - **Validates: Requirements 2.1, 2.2, 2.3**
 
-- [ ] 4. Implement food analysis
-  - [ ] 4.1 Implement `_analyze_food()` method
+- [x] 4. Implement food analysis
+  - [x] 4.1 Implement `_analyze_food()` method
     - Build prompt for meal identification and macro estimation
     - Extract JSON with meal_name, calories, protein_g, carbs_g, fat_g
     - Return FoodAnalysis with defaults on failure
     - _Requirements: 3.1, 3.2, 3.3_
-  - [ ] 4.2 Write property test for food analysis fields
+  - [x] 4.2 Write property test for food analysis fields
     - **Property 7: Food analysis contains required fields**
     - **Validates: Requirements 3.1, 3.2, 3.3**
 
-- [ ] 5. Create Context Builder for LLM prompts
-  - [ ] 5.1 Create `backend/app/services/context.py`
+- [x] 5. Create Context Builder for LLM prompts
+  - [x] 5.1 Create `backend/app/services/context.py`
     - Define `UserContext` dataclass with profile, progress, training plan, and chat history
     - Implement `ContextBuilder.build_context()` method
     - Query User model for profile data
@@ -64,63 +64,63 @@
     - Query recent chat messages (last 5)
     - _Requirements: 2.3 (training plan context), 3.1 (goal context)_
 
-- [ ] 6. Implement main analyze_image flow with context
-  - [ ] 6.1 Implement `analyze_image()` method in VisionService
+- [x] 6. Implement main analyze_image flow with context
+  - [x] 6.1 Implement `analyze_image()` method in VisionService
     - Accept optional `context: UserContext` parameter
     - Check if LLM is available, return fallback if not
     - Call `_classify_image()` to determine category
     - Route to `_analyze_gym_equipment()` or `_analyze_food()` with context
     - Return VisionResult with appropriate analysis
     - _Requirements: 1.2, 1.3, 1.4, 7.1_
-  - [ ] 6.2 Write property test for classification routing
+  - [x] 6.2 Write property test for classification routing
     - **Property 2: Classification routes to correct analyzer**
     - **Validates: Requirements 1.2, 1.3**
-  - [ ] 6.3 Write property test for unknown classification
+  - [x] 6.3 Write property test for unknown classification
     - **Property 3: Unknown classification returns helpful guidance**
     - **Validates: Requirements 1.4**
-  - [ ] 6.4 Write property test for LLM disabled fallback
+  - [x] 6.4 Write property test for LLM disabled fallback
     - **Property 11: LLM disabled returns fallback**
     - **Validates: Requirements 7.1, 7.3**
 
-- [ ] 7. Integrate VisionService with BrainService
-  - [ ] 7.1 Update BrainService to use VisionService
+- [x] 7. Integrate VisionService with BrainService
+  - [x] 7.1 Update BrainService to use VisionService
     - Add `_vision` property with lazy loading
     - Update `_handle_image_attachment()` to call VisionService
     - Format gym analysis response with exercise name, form cues, and logged values
     - Format food analysis response with meal name and macros
     - Return appropriate action_type (LOG_EXERCISE or LOG_FOOD)
     - _Requirements: 4.1, 2.4, 3.4_
-  - [ ] 7.2 Write property test for gym action type
+  - [x] 7.2 Write property test for gym action type
     - **Property 6: Gym analysis produces LOG_EXERCISE action**
     - **Validates: Requirements 2.4**
-  - [ ] 7.3 Write property test for food action type
+  - [x] 7.3 Write property test for food action type
     - **Property 8: Food analysis produces LOG_FOOD action**
     - **Validates: Requirements 3.4**
-  - [ ] 7.4 Write property test for image routing
+  - [x] 7.4 Write property test for image routing
     - **Property 9: Image attachments route to VisionService**
     - **Validates: Requirements 4.1**
 
-- [ ] 8. Add error handling and graceful degradation
-  - [ ] 8.1 Implement error handling in VisionService
+- [x] 8. Add error handling and graceful degradation
+  - [x] 8.1 Implement error handling in VisionService
     - Catch LLM timeout errors and return helpful message
     - Catch API errors and return graceful fallback
     - Log errors for debugging
     - _Requirements: 1.5, 4.4_
-  - [ ] 8.2 Write property test for error handling
+  - [x] 8.2 Write property test for error handling
     - **Property 4: Vision errors degrade gracefully**
     - **Validates: Requirements 1.5, 4.4**
 
-- [ ] 9. Create ChatAttachment model and upload endpoint
-  - [ ] 9.1 Add ChatAttachment model to models.py
+- [x] 9. Create ChatAttachment model and upload endpoint
+  - [x] 9.1 Add ChatAttachment model to models.py
     - Define ChatAttachment SQLModel with id, user_id, content_type, data (LargeBinary), created_at
     - Add foreign key to user.id with CASCADE delete
     - _Requirements: 5.2, 5.3_
-  - [ ] 9.2 Create Alembic migration for chat_attachment table
+  - [x] 9.2 Create Alembic migration for chat_attachment table
     - Create migration file for chat_attachment table
     - Add index on user_id
     - Run migration and verify
     - _Requirements: 5.2_
-  - [ ] 9.3 Create upload API route
+  - [x] 9.3 Create upload API route
     - Create `backend/app/api/routes/upload.py`
     - Implement POST /api/v1/upload/image endpoint
     - Accept base64 image data and content_type
@@ -129,21 +129,21 @@
     - Register router in main.py
     - _Requirements: 5.2_
 
-- [ ] 10. Serve demo images as static files (for testing)
-  - [ ] 10.1 Mount static files in FastAPI
+- [x] 10. Serve demo images as static files (for testing)
+  - [x] 10.1 Mount static files in FastAPI
     - Add StaticFiles mount for `/static/demo-images/`
     - Verify leg-press.jpg and salad-chicken-breasts.jpg are accessible
     - _Requirements: 6.1, 6.2_
 
-- [ ] 11. Update chat API route for async vision
-  - [ ] 11.1 Make POST /chat/messages async-compatible
+- [x] 11. Update chat API route for async vision
+  - [x] 11.1 Make POST /chat/messages async-compatible
     - Update route to handle async vision processing
     - Retrieve image from ChatAttachment table by attachment_id
     - Convert to base64 and pass to BrainService._handle_image_attachment()
     - Keep sync processing for text messages
     - _Requirements: 4.1, 5.3_
 
-- [ ] 12. Checkpoint - Backend vision testing
+- [x] 12. Checkpoint - Backend vision testing
   - Ensure all backend tests pass
   - Manual test: Upload leg-press.jpg via POST /upload/image → get attachment_id
   - Manual test: POST /chat/messages with attachment_id → verify LOG_EXERCISE response
@@ -151,53 +151,53 @@
   - Manual test: POST /chat/messages with LLM_ENABLED=false → verify fallback response
   - Ask the user if questions arise
 
-- [ ] 13. Write acceptance tests for vision endpoints
-  - [ ] 13.1 Test image upload endpoint
+- [x] 13. Write acceptance tests for vision endpoints
+  - [x] 13.1 Test image upload endpoint
     - POST /upload/image with base64 image data
     - Verify response contains attachment_id
     - Verify ChatAttachment record is created
     - _Requirements: 5.2_
-  - [ ] 13.2 Test gym equipment image flow
+  - [x] 13.2 Test gym equipment image flow
     - Upload leg-press.jpg, get attachment_id
     - Send message with attachment_type=image and attachment_id
     - Verify response has action_type=log_exercise
     - Verify ExerciseLog is created
     - _Requirements: 2.4, 2.5_
-  - [ ] 13.3 Test food image flow
+  - [x] 13.3 Test food image flow
     - Upload salad-chicken-breasts.jpg, get attachment_id
     - Send message with attachment_type=image and attachment_id
     - Verify response has action_type=log_food
     - Verify MealLog is created
     - _Requirements: 3.4, 3.5_
-  - [ ] 13.4 Test LLM disabled fallback
+  - [x] 13.4 Test LLM disabled fallback
     - Set LLM_ENABLED=false
     - Upload image and send message
     - Verify response has action_type=none with helpful message
     - _Requirements: 7.1, 7.3_
 
-- [ ] 14. Regenerate OpenAPI client
+- [x] 14. Regenerate OpenAPI client
   - Run `./scripts/generate-client.sh`
   - Verify UploadService is generated with uploadImage method
   - Verify types include ImageUploadRequest, ImageUploadResponse
   - _Enables frontend integration_
 
-- [ ] 15. Create useImageUpload hook
-  - [ ] 15.1 Create `frontend/src/hooks/useImageUpload.ts`
+- [x] 15. Create useImageUpload hook
+  - [x] 15.1 Create `frontend/src/hooks/useImageUpload.ts`
     - Implement fileToBase64 helper function
     - Use TanStack Mutation for POST /upload/image
     - Return uploadImage function and isUploading state
     - _Requirements: 5.2_
 
-- [ ] 16. Update ChatInterface for image upload
-  - [ ] 16.1 Integrate useImageUpload hook
+- [x] 16. Update ChatInterface for image upload
+  - [x] 16.1 Integrate useImageUpload hook
     - On file select: call uploadImage to get attachment_id
     - Store attachment_id in state (not base64)
     - Send attachment_id in attachment_url field when sending message
     - Show upload progress indicator
     - _Requirements: 5.1, 5.2, 5.3, 5.7_
 
-- [ ] 17. Create VisionResponseCard component
-  - [ ] 17.1 Create `frontend/src/components/Fitness/VisionResponseCard.tsx`
+- [x] 17. Create VisionResponseCard component
+  - [x] 17.1 Create `frontend/src/components/Fitness/VisionResponseCard.tsx`
     - Handle gym equipment analysis display (exercise name, form cues, logged values)
     - Handle food analysis display (meal name, macros grid)
     - Show "Logged" confirmation badge
@@ -206,14 +206,24 @@
     - **Property 12: ActionCard renders for vision responses**
     - **Validates: Requirements 5.6, 8.4**
 
-- [ ] 18. Integrate VisionResponseCard in ChatInterface
-  - [ ] 18.1 Update message rendering for vision responses
+- [x] 18. Integrate VisionResponseCard in ChatInterface
+  - [x] 18.1 Update message rendering for vision responses
     - Detect vision responses by checking action_data for form_cues or macro fields
     - Render VisionResponseCard instead of generic ActionCard for vision responses
     - Show loading indicator while waiting for vision response
     - _Requirements: 5.4, 5.5, 5.7_
 
-- [ ] 19. Final Checkpoint - Test all flows
+- [ ] 19. Review LLM_ENABLED=true working flow with live Gemini API
+  - Start dev environment with `LLM_ENABLED=true` and valid `GOOGLE_API_KEY`
+  - Manual test: Upload leg-press.jpg → verify Gemini classifies as gym_equipment
+  - Manual test: Verify gym analysis returns real exercise name, form cues, and suggested values
+  - Manual test: Upload salad-chicken-breasts.jpg → verify Gemini classifies as food
+  - Manual test: Verify food analysis returns real meal name and macro estimates
+  - Manual test: Verify context (user goal, today's progress) influences LLM responses
+  - Manual test: Test with unknown image → verify helpful guidance message
+  - _Requirements: 4.2, 4.3, 7.2_
+
+- [ ] 20. Final Checkpoint - Test all flows
   - Ensure all tests pass, ask the user if questions arise
   - Manual test: Click camera → select image → upload → verify gym/food analysis displayed
   - Manual test: Verify Monitor updates after vision logging

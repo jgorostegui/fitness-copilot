@@ -1,13 +1,20 @@
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Logs } from "@/client"
-import type { DailyLogsResponse } from "@/client/types.gen"
+import type {
+  DailyLogsResponse,
+  ExerciseLogCreate,
+  MealLogCreate,
+} from "@/client/types.gen"
 
 export const LOGS_QUERY_KEY = ["logs", "today"]
+export const SUMMARY_QUERY_KEY = ["summary", "today"]
 
 /**
- * Hook for fetching today's meal and exercise logs.
+ * Hook for fetching and creating today's meal and exercise logs.
  */
 export function useLogs(enabled = true) {
+  const queryClient = useQueryClient()
+
   const query = useQuery({
     queryKey: LOGS_QUERY_KEY,
     queryFn: async () => {
@@ -21,6 +28,34 @@ export function useLogs(enabled = true) {
     staleTime: 1000 * 30, // 30 seconds
   })
 
+  const logMealMutation = useMutation({
+    mutationFn: async (meal: MealLogCreate) => {
+      const response = await Logs.logsLogMeal({ body: meal })
+      if (response.error) {
+        throw response.error
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: LOGS_QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: SUMMARY_QUERY_KEY })
+    },
+  })
+
+  const logExerciseMutation = useMutation({
+    mutationFn: async (exercise: ExerciseLogCreate) => {
+      const response = await Logs.logsLogExercise({ body: exercise })
+      if (response.error) {
+        throw response.error
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: LOGS_QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: SUMMARY_QUERY_KEY })
+    },
+  })
+
   return {
     mealLogs: query.data?.mealLogs ?? [],
     exerciseLogs: query.data?.exerciseLogs ?? [],
@@ -28,5 +63,11 @@ export function useLogs(enabled = true) {
     isError: query.isError,
     error: query.error,
     refetch: query.refetch,
+    logMeal: logMealMutation.mutate,
+    logMealAsync: logMealMutation.mutateAsync,
+    isLoggingMeal: logMealMutation.isPending,
+    logExercise: logExerciseMutation.mutate,
+    logExerciseAsync: logExerciseMutation.mutateAsync,
+    isLoggingExercise: logExerciseMutation.isPending,
   }
 }

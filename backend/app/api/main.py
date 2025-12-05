@@ -10,6 +10,7 @@ from app.api.routes import (
     profile,
     programs,
     summary,
+    upload,
     users,
     utils,
 )
@@ -25,6 +26,7 @@ api_router.include_router(plans.router)
 api_router.include_router(logs.router)
 api_router.include_router(summary.router)
 api_router.include_router(chat.router)
+api_router.include_router(upload.router)
 
 if settings.ENVIRONMENT == "local":
     api_router.include_router(private.router)

@@ -122,3 +122,29 @@ class Settings(BaseSettings):
 
 
 settings = Settings()  # type: ignore
+
+
+def print_settings() -> None:
+    """Print key settings for debugging."""
+    print("\n" + "=" * 60)
+    print("⚙️  SETTINGS LOADED")
+    print("=" * 60)
+    print(f"  ENVIRONMENT:    {settings.ENVIRONMENT}")
+    print(f"  PROJECT_NAME:   {settings.PROJECT_NAME}")
+    print(f"  FRONTEND_HOST:  {settings.FRONTEND_HOST}")
+    print(f"  POSTGRES_SERVER:{settings.POSTGRES_SERVER}:{settings.POSTGRES_PORT}")
+    print(f"  POSTGRES_DB:    {settings.POSTGRES_DB}")
+    print("-" * 60)
+    print("  LLM Settings:")
+    print(f"    LLM_ENABLED:    {settings.LLM_ENABLED}")
+    print(f"    LLM_MODEL:      {settings.LLM_MODEL}")
+    api_key_display = (
+        "***" + settings.GOOGLE_API_KEY[-4:] if settings.GOOGLE_API_KEY else "NOT SET"
+    )
+    print(f"    GOOGLE_API_KEY: {api_key_display}")
+    print("=" * 60 + "\n")
+
+
+# Print settings only in local environment (not in production/staging)
+if settings.ENVIRONMENT == "local":
+    print_settings()

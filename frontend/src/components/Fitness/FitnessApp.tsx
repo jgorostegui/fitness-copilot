@@ -48,23 +48,39 @@ export const FitnessApp = () => {
 
   // Use API hooks for real data
   const { summary } = useSummary(isAuthenticated)
-  const { mealLogs: apiMealLogs, exerciseLogs: apiExerciseLogs } =
-    useLogs(isAuthenticated)
+  const {
+    mealLogs: apiMealLogs,
+    exerciseLogs: apiExerciseLogs,
+    logMeal,
+    logExercise,
+  } = useLogs(isAuthenticated)
   const { sendMessage, clearMessages } = useChat(isAuthenticated)
 
-  // Quick-add handlers that use chat API
+  // Quick-add handlers that use direct log API (not chat)
   const addMealLog = useCallback(
     (meal: Omit<MealLog, "id" | "time">) => {
-      sendMessage({ content: meal.name })
+      logMeal({
+        meal_name: meal.name,
+        meal_type: meal.type || "snack",
+        calories: meal.calories,
+        protein_g: meal.protein,
+        carbs_g: 0,
+        fat_g: 0,
+      })
     },
-    [sendMessage],
+    [logMeal],
   )
 
   const addExerciseLog = useCallback(
     (exercise: Omit<ExerciseLog, "id" | "time">) => {
-      sendMessage({ content: exercise.name })
+      logExercise({
+        exercise_name: exercise.name,
+        sets: exercise.sets,
+        reps: exercise.reps,
+        weight_kg: exercise.weight,
+      })
     },
-    [sendMessage],
+    [logExercise],
   )
 
   // Map API logs to local types

@@ -4,12 +4,15 @@ Chat API endpoints.
 Provides endpoints for the Oracle chat interface.
 """
 
+import base64
+
 from fastapi import APIRouter, Query
 
 from app.api.deps import CurrentUser, SessionDep
 from app.crud_chat import create_chat_message, delete_chat_messages, get_chat_messages
 from app.models import (
     ChatActionType,
+    ChatAttachment,
     ChatAttachmentType,
     ChatMessageCreate,
     ChatMessagePublic,
@@ -54,7 +57,7 @@ def get_messages(
 
 
 @router.post("/messages", response_model=ChatMessagePublic)
-def send_message(
+async def send_message(
     session: SessionDep,
     current_user: CurrentUser,
     message_in: ChatMessageCreate,
@@ -64,7 +67,7 @@ def send_message(
 
     This endpoint:
     1. Saves the user message
-    2. Processes it through the Brain service
+    2. Processes it through the Brain service (async for images)
     3. Creates logs if action_type is log_food or log_exercise
     4. Saves the assistant response
     5. Returns the assistant response
@@ -88,11 +91,34 @@ def send_message(
     )
 
     # Process through Brain service
-    brain = BrainService()
-    brain_response = brain.process_message(
-        content=message_in.content,
-        attachment_type=attachment_type,
-    )
+    brain = BrainService(session=session)
+
+    # Handle image attachments with async vision processing
+    if attachment_type == ChatAttachmentType.IMAGE and message_in.attachment_url:
+        # Retrieve image from ChatAttachment table by attachment_id
+        image_base64 = None
+        try:
+            import uuid as uuid_module
+
+            attachment_id = uuid_module.UUID(message_in.attachment_url)
+            attachment = session.get(ChatAttachment, attachment_id)
+            if attachment:
+                image_base64 = base64.b64encode(attachment.data).decode("utf-8")
+        except (ValueError, TypeError):
+            # Invalid UUID, treat as URL
+            pass
+
+        brain_response = await brain._handle_image_attachment(
+            user_id=current_user.id,
+            image_base64=image_base64,
+            image_url=message_in.attachment_url if not image_base64 else None,
+        )
+    else:
+        # Sync processing for text messages
+        brain_response = brain.process_message(
+            content=message_in.content,
+            attachment_type=attachment_type,
+        )
 
     # Create logs based on action type
     if (

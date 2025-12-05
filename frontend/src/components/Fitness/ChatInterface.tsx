@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Flex,
   IconButton,
   Input,
@@ -9,17 +8,23 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useEffect, useRef, useState } from "react"
-import { FiCamera, FiMic, FiSend, FiX } from "react-icons/fi"
-import { TODAY_ROUTINE } from "@/constants/fitness"
-import { useChat } from "@/hooks/useChat"
-import { useLogs } from "@/hooks/useLogs"
-import { useSummary } from "@/hooks/useSummary"
+import { FiCamera, FiMic, FiSend } from "react-icons/fi"
 import type {
-  ChatAttachmentType,
   ChatMessagePublic,
   ExerciseLogPublic,
   MealLogPublic,
 } from "@/client/types.gen"
+import { ActionCard } from "@/components/Fitness/ActionCard"
+import { AuthenticatedImage } from "@/components/Fitness/AuthenticatedImage"
+import { ContextWidget } from "@/components/Fitness/ContextWidget"
+import {
+  isVisionResponse,
+  VisionResponseCard,
+} from "@/components/Fitness/VisionResponseCard"
+import { useChat } from "@/hooks/useChat"
+import { useImageUpload } from "@/hooks/useImageUpload"
+import { useLogs } from "@/hooks/useLogs"
+import { useSummary } from "@/hooks/useSummary"
 import type { DailyStats, ExerciseLog, MealLog } from "@/types/fitness"
 
 // Convert API exercise log to local type
@@ -42,407 +47,17 @@ const mapMealLog = (log: MealLogPublic): MealLog => ({
   type: log.mealType as MealLog["type"],
 })
 
-const ActionCard = ({
-  type,
-  data,
-  stats,
-}: {
-  type: string
-  data: Record<string, unknown>
-  stats: DailyStats
-}) => {
-  const [animate, setAnimate] = useState(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setAnimate(true), 100)
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (type === "log_food") {
-    const itemCalories = (data?.calories as number) || 0
-    const previousTotal = Math.max(0, stats.caloriesConsumed - itemCalories)
-    const prevPercent = Math.min(
-      100,
-      (previousTotal / stats.caloriesTarget) * 100,
-    )
-    const currentPercent = Math.min(
-      100,
-      (stats.caloriesConsumed / stats.caloriesTarget) * 100,
-    )
-
-    return (
-      <Box
-        mt={2}
-        bg="white"
-        border="1px"
-        borderColor="gray.200"
-        borderRadius="xl"
-        p={3}
-        maxW="280px"
-      >
-        <Flex justify="space-between" align="center" mb={2}>
-          <Flex align="center" gap={2}>
-            <Box bg="orange.50" p={1.5} borderRadius="lg" color="orange.500">
-              🔥
-            </Box>
-            <Box>
-              <Text fontSize="sm" fontWeight="bold">
-                {(data.food as string) || (data.name as string)}
-              </Text>
-              <Text fontSize="xs" color="gray.500">
-                Logged to Daily Intake
-              </Text>
-            </Box>
-          </Flex>
-          <Box textAlign="right">
-            <Text fontSize="sm" fontWeight="bold">
-              +{itemCalories}
-            </Text>
-            <Text fontSize="xs" color="gray.400">
-              KCAL
-            </Text>
-          </Box>
-        </Flex>
-        <Box>
-          <Flex justify="space-between" fontSize="xs" color="gray.500" mb={1}>
-            <Text>Daily Energy</Text>
-            <Text>
-              {stats.caloriesConsumed} / {stats.caloriesTarget}
-            </Text>
-          </Flex>
-          <Box
-            h={2}
-            bg="gray.100"
-            borderRadius="full"
-            overflow="hidden"
-            position="relative"
-          >
-            <Box
-              position="absolute"
-              top={0}
-              left={0}
-              h="full"
-              bg="gray.300"
-              borderRadius="full"
-              w={`${prevPercent}%`}
-              transition="width 1s"
-            />
-            <Box
-              position="absolute"
-              top={0}
-              h="full"
-              bg="blue.500"
-              borderRadius="full"
-              left={`${prevPercent}%`}
-              w={animate ? `${currentPercent - prevPercent}%` : "0%"}
-              transition="width 1s"
-              boxShadow="0 0 10px rgba(59,130,246,0.5)"
-            />
-          </Box>
-        </Box>
-        {(data.protein as number) > 0 && (
-          <Flex
-            mt={2}
-            align="center"
-            gap={1}
-            fontSize="xs"
-            color="green.600"
-            bg="green.50"
-            px={2}
-            py={1}
-            borderRadius="md"
-            w="fit-content"
-          >
-            ✓ {data.protein as number}g Protein Added
-          </Flex>
-        )}
-      </Box>
-    )
-  }
-
-  if (type === "log_exercise") {
-    return (
-      <Box
-        mt={2}
-        bg="white"
-        border="1px"
-        borderColor="gray.200"
-        borderRadius="xl"
-        p={3}
-        maxW="280px"
-      >
-        <Flex justify="space-between" align="center" mb={2}>
-          <Flex align="center" gap={2}>
-            <Box bg="purple.50" p={1.5} borderRadius="lg" color="purple.500">
-              🏋️
-            </Box>
-            <Box>
-              <Text fontSize="sm" fontWeight="bold">
-                {(data.exercise as string) || (data.name as string)}
-              </Text>
-              <Text fontSize="xs" color="gray.500">
-                Workout Logged
-              </Text>
-            </Box>
-          </Flex>
-          <Text fontSize="sm" fontWeight="bold">
-            {(data.weight_kg as number) || (data.weight as number) || 0}kg
-          </Text>
-        </Flex>
-        <Flex gap={2}>
-          <Box flex={1} bg="gray.50" p={2} borderRadius="lg" textAlign="center">
-            <Text fontSize="sm" fontWeight="bold">
-              {data.sets as number}
-            </Text>
-            <Text fontSize="xs" color="gray.400">
-              SETS
-            </Text>
-          </Box>
-          <Box flex={1} bg="gray.50" p={2} borderRadius="lg" textAlign="center">
-            <Text fontSize="sm" fontWeight="bold">
-              {data.reps as number}
-            </Text>
-            <Text fontSize="xs" color="gray.400">
-              REPS
-            </Text>
-          </Box>
-        </Flex>
-      </Box>
-    )
-  }
-
-  return null
-}
-
-const ContextWidget = ({
-  mode,
-  toggleMode,
-  stats,
-  exerciseLogs,
-  mealLogs,
-  onQuickLog,
-}: {
-  mode: "gym" | "kitchen"
-  toggleMode: () => void
-  stats: DailyStats
-  exerciseLogs: ExerciseLog[]
-  mealLogs: MealLog[]
-  onQuickLog: (text: string) => void
-}) => {
-  const [sessionTime, setSessionTime] = useState(0)
-
-  useEffect(() => {
-    const timer = setInterval(() => setSessionTime((prev) => prev + 1), 1000)
-    return () => clearInterval(timer)
-  }, [])
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, "0")}`
-  }
-
-  if (mode === "gym") {
-    const completedNames = new Set(
-      exerciseLogs.map((l) => l.name.toLowerCase()),
-    )
-    const nextIndex = TODAY_ROUTINE.findIndex(
-      (r) => !completedNames.has(r.exercise.toLowerCase()),
-    )
-    const currentTarget = nextIndex !== -1 ? TODAY_ROUTINE[nextIndex] : null
-    const allDone = nextIndex === -1 && TODAY_ROUTINE.length > 0
-
-    return (
-      <Box
-        bg="white"
-        borderBottom="1px"
-        borderColor="gray.200"
-        px={4}
-        py={3}
-        cursor="pointer"
-        onClick={toggleMode}
-        _active={{ bg: "gray.50" }}
-      >
-        <Flex justify="space-between" align="start">
-          <Box>
-            <Text
-              fontSize="xs"
-              fontWeight="bold"
-              color="blue.600"
-              bg="blue.50"
-              px={2}
-              py={0.5}
-              borderRadius="sm"
-              w="fit-content"
-              mb={1}
-            >
-              🏋️ GYM MODE
-            </Text>
-            <Text fontSize="lg" fontWeight="bold">
-              {allDone
-                ? "Session Complete ✓"
-                : currentTarget?.exercise || "Rest Day"}
-            </Text>
-            {!allDone && currentTarget && (
-              <Flex gap={2} mt={1}>
-                <Text
-                  fontSize="xs"
-                  bg="gray.100"
-                  px={1.5}
-                  py={0.5}
-                  borderRadius="sm"
-                >
-                  {currentTarget.sets} Sets
-                </Text>
-                <Text
-                  fontSize="xs"
-                  bg="gray.100"
-                  px={1.5}
-                  py={0.5}
-                  borderRadius="sm"
-                >
-                  {currentTarget.reps} Reps
-                </Text>
-                <Text fontSize="xs" color="blue.600">
-                  {currentTarget.target}
-                </Text>
-              </Flex>
-            )}
-          </Box>
-          <Box textAlign="right">
-            <Text fontSize="xs" color="gray.400">
-              Session
-            </Text>
-            <Text fontSize="xl" fontWeight="bold" fontFamily="mono">
-              {formatTime(sessionTime)}
-            </Text>
-          </Box>
-        </Flex>
-        <Text fontSize="xs" color="gray.400" mt={2} textAlign="center">
-          Tap to switch to Kitchen mode
-        </Text>
-      </Box>
-    )
-  }
-
-  const caloriesLeft = Math.max(
-    0,
-    stats.caloriesTarget - stats.caloriesConsumed,
-  )
-  const recentLogs = mealLogs.slice(-3).reverse()
-
-  return (
-    <Box bg="white" borderBottom="1px" borderColor="gray.200" px={4} py={3}>
-      <Flex
-        justify="space-between"
-        align="start"
-        cursor="pointer"
-        onClick={toggleMode}
-        _active={{ opacity: 0.8 }}
-      >
-        <Box>
-          <Text
-            fontSize="xs"
-            fontWeight="bold"
-            color="green.600"
-            bg="green.50"
-            px={2}
-            py={0.5}
-            borderRadius="sm"
-            w="fit-content"
-            mb={1}
-          >
-            🍽️ KITCHEN MODE
-          </Text>
-          <Flex align="baseline" gap={1}>
-            <Text fontSize="3xl" fontWeight="bold">
-              {Math.round(caloriesLeft)}
-            </Text>
-            <Text fontSize="xs" fontWeight="bold" color="gray.400">
-              kcal left
-            </Text>
-          </Flex>
-        </Box>
-        <Box textAlign="right">
-          <Text fontSize="xs" color="gray.400">
-            Protein Left
-          </Text>
-          <Text fontSize="xl" fontWeight="bold" fontFamily="mono">
-            {Math.max(
-              0,
-              Math.round(stats.proteinTarget - stats.proteinConsumed),
-            )}
-            g
-          </Text>
-        </Box>
-      </Flex>
-
-      <Box mt={3}>
-        <Text fontSize="xs" fontWeight="bold" color="gray.400" mb={2}>
-          QUICK ADD
-        </Text>
-        <Flex gap={2} flexWrap="wrap">
-          {[
-            { emoji: "🍌", name: "Banana", text: "I ate a Banana" },
-            { emoji: "🥤", name: "Shake", text: "I had a Protein Shake" },
-            { emoji: "☕", name: "Coffee", text: "I drank a Coffee" },
-            { emoji: "🥚", name: "Eggs", text: "I ate 2 Eggs" },
-          ].map((item, idx) => (
-            <Button
-              key={idx}
-              size="sm"
-              variant="outline"
-              onClick={(e) => {
-                e.stopPropagation()
-                onQuickLog(item.text)
-              }}
-            >
-              {item.emoji} {item.name}
-            </Button>
-          ))}
-        </Flex>
-      </Box>
-
-      {recentLogs.length > 0 && (
-        <Flex gap={2} mt={3} overflow="hidden">
-          {recentLogs.map((log) => (
-            <Flex
-              key={log.id}
-              align="center"
-              gap={1}
-              bg="gray.50"
-              px={2}
-              py={1}
-              borderRadius="full"
-              border="1px"
-              borderColor="gray.100"
-            >
-              <Box w={1.5} h={1.5} borderRadius="full" bg="green.400" />
-              <Text fontSize="xs" color="gray.600" maxW="80px" truncate>
-                {log.name}
-              </Text>
-            </Flex>
-          ))}
-        </Flex>
-      )}
-
-      <Text fontSize="xs" color="gray.400" mt={2} textAlign="center">
-        Tap to switch to Gym mode
-      </Text>
-    </Box>
-  )
-}
-
-export const ChatInterface = () => {
+export function ChatInterface() {
   const [inputText, setInputText] = useState("")
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [isRecording, setIsRecording] = useState(false)
   const [widgetMode, setWidgetMode] = useState<"gym" | "kitchen">("gym")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const recordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Use API hooks
   const { messages, isLoading, sendMessage, isSending } = useChat()
+  const { uploadImage, isUploading } = useImageUpload()
   const { mealLogs: apiMealLogs, exerciseLogs: apiExerciseLogs } = useLogs()
   const { summary } = useSummary()
 
@@ -462,7 +77,7 @@ export const ChatInterface = () => {
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+  }, [])
 
   // Update widget mode based on last message action
   useEffect(() => {
@@ -474,59 +89,52 @@ export const ChatInterface = () => {
     }
   }, [messages])
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      const reader = new FileReader()
-      reader.onload = (ev) => setSelectedImage(ev.target?.result as string)
-      reader.readAsDataURL(e.target.files[0])
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || isSending || isUploading) return
+
+    // Reset file input so same file can be selected again
+    e.target.value = ""
+
+    try {
+      const attachmentId = await uploadImage(file)
+      sendMessage({
+        content: "Analyze this image",
+        attachment_type: "image",
+        attachment_url: attachmentId,
+      })
+    } catch (error) {
+      console.error("Image upload failed:", error)
     }
   }
 
   const handleSend = async (textOverride?: string) => {
     const textToSend = textOverride || inputText
-    if ((!textToSend.trim() && !selectedImage) || isSending) return
+    if (!textToSend.trim() || isSending) return
 
-    // Determine attachment type
-    let attachmentType: ChatAttachmentType = "none"
-    if (selectedImage) {
-      attachmentType = "image"
-    }
-
-    // Send message via API
-    // Note: We send a placeholder URL for images since base64 is too large for DB
-    // In production, images would be uploaded to S3/storage first
     sendMessage({
-      content: textToSend || "Analyze this image",
-      attachment_type: attachmentType,
-      attachment_url: selectedImage ? "mock://image-upload" : undefined,
+      content: textToSend,
+      attachment_type: "none",
     })
 
     setInputText("")
-    setSelectedImage(null)
   }
-
-  const recordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const startRecording = () => {
     if (isSending) return
     setIsRecording(true)
-    // Start a timeout - if held for 1.5s+, we'll send the voice message on release
-    recordingTimeoutRef.current = setTimeout(() => {
-      // Mark that we've held long enough
-    }, 500)
+    recordingTimeoutRef.current = setTimeout(() => {}, 500)
   }
 
   const stopRecording = () => {
     if (!isRecording) return
     setIsRecording(false)
 
-    // Clear any pending timeout
     if (recordingTimeoutRef.current) {
       clearTimeout(recordingTimeoutRef.current)
       recordingTimeoutRef.current = null
     }
 
-    // Send the voice message
     sendMessage({
       content: "I just did 3 sets of leg press at 100kg",
       attachment_type: "audio",
@@ -534,7 +142,6 @@ export const ChatInterface = () => {
     })
   }
 
-  // Render message from API
   const renderMessage = (msg: ChatMessagePublic) => {
     const isUser = msg.role === "user"
     const timestamp = new Date(msg.createdAt)
@@ -560,7 +167,7 @@ export const ChatInterface = () => {
             <Box mb={2} borderRadius="lg" overflow="hidden">
               {msg.attachmentUrl.startsWith("mock://") ? (
                 <Flex
-                  bg="gray.100"
+                  bg={isUser ? "blue.400" : "gray.100"}
                   p={4}
                   align="center"
                   justify="center"
@@ -568,16 +175,27 @@ export const ChatInterface = () => {
                   minH="80px"
                 >
                   <Text fontSize="2xl">📷</Text>
-                  <Text fontSize="sm" color="gray.500" ml={2}>
+                  <Text
+                    fontSize="sm"
+                    color={isUser ? "blue.100" : "gray.500"}
+                    ml={2}
+                  >
                     Image attached
                   </Text>
                 </Flex>
-              ) : (
+              ) : msg.attachmentUrl.startsWith("http") ? (
                 <img
                   src={msg.attachmentUrl}
-                  alt="Upload"
-                  style={{ maxHeight: "150px", objectFit: "cover" }}
+                  alt="User attachment"
+                  style={{
+                    maxHeight: "150px",
+                    maxWidth: "100%",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                  }}
                 />
+              ) : (
+                <AuthenticatedImage attachmentId={msg.attachmentUrl} />
               )}
             </Box>
           )}
@@ -586,13 +204,24 @@ export const ChatInterface = () => {
           </Text>
         </Box>
 
-        {msg.actionType && msg.actionType !== "none" && msg.actionData && (
-          <ActionCard
-            type={msg.actionType}
-            data={msg.actionData as Record<string, unknown>}
-            stats={stats}
-          />
-        )}
+        {msg.actionType &&
+          msg.actionType !== "none" &&
+          msg.actionData &&
+          (isVisionResponse(
+            msg.actionType,
+            msg.actionData as Record<string, unknown>,
+          ) ? (
+            <VisionResponseCard
+              actionType={msg.actionType as "log_exercise" | "log_food"}
+              actionData={msg.actionData as Record<string, unknown>}
+            />
+          ) : (
+            <ActionCard
+              type={msg.actionType}
+              data={msg.actionData as Record<string, unknown>}
+              stats={stats}
+            />
+          ))}
 
         <Text fontSize="xs" color="gray.400" mt={1} px={1}>
           {timestamp.toLocaleTimeString([], {
@@ -693,36 +322,12 @@ export const ChatInterface = () => {
         p={3}
         pb={4}
       >
-        {selectedImage && (
-          <Flex
-            mb={2}
-            bg="gray.50"
-            p={2}
-            borderRadius="lg"
-            align="center"
-            gap={2}
-          >
-            <img
-              src={selectedImage}
-              alt="Preview"
-              style={{
-                width: "40px",
-                height: "40px",
-                objectFit: "cover",
-                borderRadius: "8px",
-              }}
-            />
+        {isUploading && (
+          <Flex mb={2} align="center" gap={2}>
+            <Spinner size="xs" color="blue.500" />
             <Text fontSize="xs" color="gray.500">
-              Image attached
+              Uploading image...
             </Text>
-            <IconButton
-              aria-label="Remove image"
-              size="xs"
-              variant="ghost"
-              onClick={() => setSelectedImage(null)}
-            >
-              <FiX />
-            </IconButton>
           </Flex>
         )}
 
@@ -772,7 +377,7 @@ export const ChatInterface = () => {
             aria-label="Send"
             colorPalette="blue"
             borderRadius="full"
-            disabled={(!inputText && !selectedImage) || isSending}
+            disabled={!inputText || isSending || isUploading}
             onClick={() => handleSend()}
           >
             <FiSend />

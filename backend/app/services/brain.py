@@ -7,9 +7,19 @@ Uses a two-tier approach:
 2. Tier 2 - LLM extraction: For unknown foods or complex exercise descriptions
 """
 
+from __future__ import annotations
+
+import uuid
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from app.models import ChatActionType, ChatAttachmentType
+
+if TYPE_CHECKING:
+    from sqlmodel import Session
+
+    from app.services.context import ContextBuilder, UserContext
+    from app.services.vision import VisionService
 
 
 @dataclass
@@ -100,10 +110,13 @@ class BrainService:
         "legpress",
     }
 
-    def __init__(self) -> None:
+    def __init__(self, session: Session | None = None) -> None:
         """Initialize the Brain service."""
         # LLM provider is loaded lazily when needed
         self._llm = None
+        self._vision: VisionService | None = None
+        self._context_builder: ContextBuilder | None = None
+        self._session = session
 
     @property
     def llm(self):
@@ -113,6 +126,30 @@ class BrainService:
 
             self._llm = get_llm_provider()
         return self._llm
+
+    @property
+    def vision(self) -> VisionService:
+        """Lazy load Vision service."""
+        if self._vision is None:
+            from app.services.vision import VisionService
+
+            self._vision = VisionService()
+        return self._vision
+
+    @property
+    def context_builder(self) -> ContextBuilder:
+        """Lazy load Context builder."""
+        if self._context_builder is None:
+            from app.services.context import ContextBuilder
+
+            self._context_builder = ContextBuilder()
+        return self._context_builder
+
+    def _build_context(self, user_id: uuid.UUID) -> UserContext | None:
+        """Build context for LLM prompts."""
+        if not self._session:
+            return None
+        return self.context_builder.build_context(self._session, user_id)
 
     def _has_food_keywords(self, content: str) -> bool:
         """Check if content contains food-related keywords or known food names."""
@@ -254,9 +291,10 @@ class BrainService:
         attachment_type: ChatAttachmentType = ChatAttachmentType.NONE,
     ) -> BrainResponse:
         """
-        Process a chat message and return a response.
+        Process a chat message and return a response (sync version for text).
 
-        This is the main entry point for the Brain service.
+        This is the main entry point for the Brain service for text messages.
+        For image attachments, use process_message_async instead.
 
         Args:
             content: The message content
@@ -265,11 +303,16 @@ class BrainService:
         Returns:
             BrainResponse with content, action_type, and optional action_data
         """
-        # Handle attachments first (placeholder responses)
-        if attachment_type == ChatAttachmentType.IMAGE:
-            return self._handle_image_attachment()
+        # Handle audio attachments (placeholder response)
         if attachment_type == ChatAttachmentType.AUDIO:
             return self._handle_audio_attachment()
+
+        # For image attachments, return a message indicating async processing needed
+        if attachment_type == ChatAttachmentType.IMAGE:
+            return BrainResponse(
+                content="Processing image... Please use the async endpoint.",
+                action_type=ChatActionType.NONE,
+            )
 
         # Check for reset command
         if "reset" in content.lower():
@@ -297,10 +340,82 @@ class BrainService:
             action_type=ChatActionType.RESET,
         )
 
-    def _handle_image_attachment(self) -> BrainResponse:
-        """Handle image attachment with hardcoded response."""
+    async def _handle_image_attachment(
+        self,
+        user_id: uuid.UUID | None = None,
+        image_base64: str | None = None,
+        image_url: str | None = None,
+    ) -> BrainResponse:
+        """Handle image attachment with vision analysis."""
+        from app.services.vision import ImageCategory
+
+        # Build context for the prompt
+        context = None
+        if user_id:
+            context = self._build_context(user_id)
+
+        # Analyze image with context
+        result = await self.vision.analyze_image(
+            image_url=image_url,
+            image_base64=image_base64,
+            context=context,
+        )
+
+        if result.error_message:
+            return BrainResponse(
+                content=result.error_message,
+                action_type=ChatActionType.NONE,
+            )
+
+        if result.category == ImageCategory.GYM_EQUIPMENT and result.gym_analysis:
+            ga = result.gym_analysis
+            cues_text = "\n".join(f"• {cue}" for cue in ga.form_cues)
+            weight_str = (
+                f" @ {ga.suggested_weight_kg}kg" if ga.suggested_weight_kg > 0 else ""
+            )
+
+            # Add goal-specific advice if available
+            advice = (
+                f"\n\n💡 {ga.goal_specific_advice}" if ga.goal_specific_advice else ""
+            )
+            plan_note = " (from today's plan)" if ga.in_todays_plan else ""
+
+            return BrainResponse(
+                content=f"🏋️ {ga.exercise_name}{plan_note}\n\n{cues_text}\n\n💪 Logged: {ga.suggested_sets}x{ga.suggested_reps}{weight_str}{advice}",
+                action_type=ChatActionType.LOG_EXERCISE,
+                action_data={
+                    "exercise_name": ga.exercise_name,
+                    "sets": ga.suggested_sets,
+                    "reps": ga.suggested_reps,
+                    "weight_kg": ga.suggested_weight_kg,
+                    "form_cues": ga.form_cues,
+                },
+            )
+
+        if result.category == ImageCategory.FOOD and result.food_analysis:
+            fa = result.food_analysis
+
+            # Add goal-specific advice and progress context
+            advice = (
+                f"\n\n💡 {fa.goal_specific_advice}" if fa.goal_specific_advice else ""
+            )
+
+            return BrainResponse(
+                content=f"🍽️ {fa.meal_name}\n\n📊 {fa.calories} kcal | {fa.protein_g}g protein | {fa.carbs_g}g carbs | {fa.fat_g}g fat\n\n✅ Logged to today's meals!{advice}",
+                action_type=ChatActionType.LOG_FOOD,
+                action_data={
+                    "meal_name": fa.meal_name,
+                    "meal_type": "snack",
+                    "calories": fa.calories,
+                    "protein_g": fa.protein_g,
+                    "carbs_g": fa.carbs_g,
+                    "fat_g": fa.fat_g,
+                },
+            )
+
         return BrainResponse(
-            content="I see what looks like a healthy meal! For now, tell me what you ate and I'll log it.",
+            content=result.error_message
+            or "I couldn't analyze this image. Please describe what you're showing me.",
             action_type=ChatActionType.NONE,
         )
 

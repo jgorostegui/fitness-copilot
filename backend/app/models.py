@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import Enum
 
 from pydantic import ConfigDict, EmailStr
-from sqlalchemy import JSON
+from sqlalchemy import JSON, Column, LargeBinary
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -500,3 +500,35 @@ class ChatMessagesPublic(CamelModel):
 
     data: list[ChatMessagePublic]
     count: int
+
+
+# ============================================================================
+# Chat Attachment
+# ============================================================================
+
+
+class ChatAttachment(SQLModel, table=True):
+    """Stores uploaded images for chat messages."""
+
+    __tablename__ = "chat_attachment"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE", index=True
+    )
+    content_type: str = Field(max_length=50)  # e.g., "image/jpeg"
+    data: bytes = Field(sa_column=Column(LargeBinary))  # Store raw image bytes
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ImageUploadRequest(SQLModel):
+    """Request model for image upload."""
+
+    image_base64: str  # Base64-encoded image data
+    content_type: str = "image/jpeg"
+
+
+class ImageUploadResponse(CamelModel):
+    """Response model for image upload."""
+
+    attachment_id: str

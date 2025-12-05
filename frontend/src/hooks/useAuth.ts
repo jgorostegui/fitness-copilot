@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
-import { client } from "@/client/client.gen"
+import { useCallback, useEffect, useState } from "react"
 import { Demo } from "@/client"
+import { client } from "@/client/client.gen"
 
 const TOKEN_KEY = "fitness_copilot_token"
 

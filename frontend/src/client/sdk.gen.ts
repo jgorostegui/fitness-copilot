@@ -2,7 +2,7 @@
 
 import { type Client, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { ChatClearMessagesData, ChatClearMessagesResponses, ChatGetMessagesData, ChatGetMessagesErrors, ChatGetMessagesResponses, ChatSendMessageData, ChatSendMessageErrors, ChatSendMessageResponses, DemoDemoLoginData, DemoDemoLoginErrors, DemoDemoLoginResponses, DemoGetDemoUsersData, DemoGetDemoUsersResponses, LoginLoginAccessTokenData, LoginLoginAccessTokenErrors, LoginLoginAccessTokenResponses, LoginRecoverPasswordData, LoginRecoverPasswordErrors, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentErrors, LoginRecoverPasswordHtmlContentResponses, LoginRecoverPasswordResponses, LoginResetPasswordData, LoginResetPasswordErrors, LoginResetPasswordResponses, LoginTestTokenData, LoginTestTokenResponses, LogsGetTodaysLogsData, LogsGetTodaysLogsResponses, LogsLogExerciseData, LogsLogExerciseErrors, LogsLogExerciseResponses, LogsLogMealData, LogsLogMealErrors, LogsLogMealResponses, PlansGetTodaysMealPlanData, PlansGetTodaysMealPlanResponses, PlansGetTodaysTrainingData, PlansGetTodaysTrainingResponses, PrivateCreateUserData, PrivateCreateUserErrors, PrivateCreateUserResponses, ProfileGetCurrentUserMetricsData, ProfileGetCurrentUserMetricsResponses, ProfileGetCurrentUserProfileData, ProfileGetCurrentUserProfileResponses, ProfileUpdateCurrentUserProfileData, ProfileUpdateCurrentUserProfileErrors, ProfileUpdateCurrentUserProfileResponses, ProgramsGetProgramRoutinesData, ProgramsGetProgramRoutinesErrors, ProgramsGetProgramRoutinesResponses, ProgramsListTrainingProgramsData, ProgramsListTrainingProgramsResponses, ProgramsSelectProgramData, ProgramsSelectProgramErrors, ProgramsSelectProgramResponses, SummaryGetTodaysSummaryData, SummaryGetTodaysSummaryResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersDeleteUserData, UsersDeleteUserErrors, UsersDeleteUserMeData, UsersDeleteUserMeResponses, UsersDeleteUserResponses, UsersReadUserByIdData, UsersReadUserByIdErrors, UsersReadUserByIdResponses, UsersReadUserMeData, UsersReadUserMeResponses, UsersReadUsersData, UsersReadUsersErrors, UsersReadUsersResponses, UsersRegisterUserData, UsersRegisterUserErrors, UsersRegisterUserResponses, UsersUpdatePasswordMeData, UsersUpdatePasswordMeErrors, UsersUpdatePasswordMeResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserMeData, UsersUpdateUserMeErrors, UsersUpdateUserMeResponses, UsersUpdateUserResponses, UtilsHealthCheckData, UtilsHealthCheckResponses, UtilsTestEmailData, UtilsTestEmailErrors, UtilsTestEmailResponses } from './types.gen';
+import type { ChatClearMessagesData, ChatClearMessagesResponses, ChatGetMessagesData, ChatGetMessagesErrors, ChatGetMessagesResponses, ChatSendMessageData, ChatSendMessageErrors, ChatSendMessageResponses, DemoDemoLoginData, DemoDemoLoginErrors, DemoDemoLoginResponses, DemoGetDemoUsersData, DemoGetDemoUsersResponses, LoginLoginAccessTokenData, LoginLoginAccessTokenErrors, LoginLoginAccessTokenResponses, LoginRecoverPasswordData, LoginRecoverPasswordErrors, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentErrors, LoginRecoverPasswordHtmlContentResponses, LoginRecoverPasswordResponses, LoginResetPasswordData, LoginResetPasswordErrors, LoginResetPasswordResponses, LoginTestTokenData, LoginTestTokenResponses, LogsGetTodaysLogsData, LogsGetTodaysLogsResponses, LogsLogExerciseData, LogsLogExerciseErrors, LogsLogExerciseResponses, LogsLogMealData, LogsLogMealErrors, LogsLogMealResponses, PlansGetTodaysMealPlanData, PlansGetTodaysMealPlanResponses, PlansGetTodaysTrainingData, PlansGetTodaysTrainingResponses, PrivateCreateUserData, PrivateCreateUserErrors, PrivateCreateUserResponses, ProfileGetCurrentUserMetricsData, ProfileGetCurrentUserMetricsResponses, ProfileGetCurrentUserProfileData, ProfileGetCurrentUserProfileResponses, ProfileUpdateCurrentUserProfileData, ProfileUpdateCurrentUserProfileErrors, ProfileUpdateCurrentUserProfileResponses, ProgramsGetProgramRoutinesData, ProgramsGetProgramRoutinesErrors, ProgramsGetProgramRoutinesResponses, ProgramsListTrainingProgramsData, ProgramsListTrainingProgramsResponses, ProgramsSelectProgramData, ProgramsSelectProgramErrors, ProgramsSelectProgramResponses, SummaryGetTodaysSummaryData, SummaryGetTodaysSummaryResponses, UploadUploadImageData, UploadUploadImageErrors, UploadUploadImageResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersDeleteUserData, UsersDeleteUserErrors, UsersDeleteUserMeData, UsersDeleteUserMeResponses, UsersDeleteUserResponses, UsersReadUserByIdData, UsersReadUserByIdErrors, UsersReadUserByIdResponses, UsersReadUserMeData, UsersReadUserMeResponses, UsersReadUsersData, UsersReadUsersErrors, UsersReadUsersResponses, UsersRegisterUserData, UsersRegisterUserErrors, UsersRegisterUserResponses, UsersUpdatePasswordMeData, UsersUpdatePasswordMeErrors, UsersUpdatePasswordMeResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserMeData, UsersUpdateUserMeErrors, UsersUpdateUserMeResponses, UsersUpdateUserResponses, UtilsHealthCheckData, UtilsHealthCheckResponses, UtilsTestEmailData, UtilsTestEmailErrors, UtilsTestEmailResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -503,7 +503,7 @@ export class Chat {
      *
      * This endpoint:
      * 1. Saves the user message
-     * 2. Processes it through the Brain service
+     * 2. Processes it through the Brain service (async for images)
      * 3. Creates logs if action_type is log_food or log_exercise
      * 4. Saves the assistant response
      * 5. Returns the assistant response
@@ -512,6 +512,28 @@ export class Chat {
         return (options.client ?? client).post<ChatSendMessageResponses, ChatSendMessageErrors, ThrowOnError>({
             security: [{ scheme: 'bearer', type: 'http' }],
             url: '/api/v1/chat/messages',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
+
+export class Upload {
+    /**
+     * Upload Image
+     *
+     * Upload an image and return an attachment ID.
+     *
+     * The image is stored in the database and can be referenced
+     * in chat messages via the attachment_url field.
+     */
+    public static uploadUploadImage<ThrowOnError extends boolean = false>(options: Options<UploadUploadImageData, ThrowOnError>) {
+        return (options.client ?? client).post<UploadUploadImageResponses, UploadUploadImageErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/upload/image',
             ...options,
             headers: {
                 'Content-Type': 'application/json',

@@ -9,10 +9,10 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { FiArrowLeft } from "react-icons/fi"
 import { useState } from "react"
-import type { UserProfilePublic } from "../../client/types.gen"
+import { FiArrowLeft } from "react-icons/fi"
 import type { PlanType, UserProfile } from "@/types/fitness"
+import type { UserProfilePublic } from "../../client/types.gen"
 
 interface OnboardingProps {
   onComplete: (profile: UserProfile) => void | Promise<void>
