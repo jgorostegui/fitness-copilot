@@ -1,4 +1,4 @@
-# Design Document: Slices 0-3 + Demo Mode
+# Design Document: Conversational Core
 
 ## Overview
 

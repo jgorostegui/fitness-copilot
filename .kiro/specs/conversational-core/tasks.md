@@ -1,4 +1,4 @@
-# Implementation Plan: Slices 0-3 + Demo Mode
+# Implementation Plan: Conversational Core
 
 ## Task List
 

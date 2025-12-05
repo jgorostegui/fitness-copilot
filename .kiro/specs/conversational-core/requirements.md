@@ -1,4 +1,4 @@
-# Requirements Document: Slices 0-3 + Demo Mode
+# Requirements Document: Conversational Core
 
 ## Introduction
 
