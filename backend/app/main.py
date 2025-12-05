@@ -1,14 +1,31 @@
+from contextlib import asynccontextmanager
+
 import sentry_sdk
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
+from sqlmodel import Session
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
 from app.core.config import settings
+from app.core.db import engine
+from app.services.mock_data import mock_data_service
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
     return f"{route.tags[0]}-{route.name}"
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan events."""
+    # Startup: load mock training programs
+    with Session(engine) as session:
+        count = mock_data_service.load_training_programs(session)
+        if count > 0:
+            print(f"Loaded {count} training programs")
+    yield
+    # Shutdown: cleanup if needed
 
 
 if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
@@ -18,6 +35,7 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     generate_unique_id_function=custom_generate_unique_id,
+    lifespan=lifespan,
 )
 
 # Set all CORS enabled origins
