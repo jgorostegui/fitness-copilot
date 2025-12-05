@@ -149,22 +149,27 @@ docker-e2e-full: e2e-up docker-e2e e2e-down
 
 # ============== Code Quality (Host) ==============
 
+# Lint all (same as CI)
 lint: lint-backend lint-frontend
 
+# Lint backend (ruff check + format check)
 lint-backend:
-    cd backend && uv run ruff check .
+    cd backend && uv run ruff check app
+    cd backend && uv run ruff format app --check
 
-lint-fix:
-    cd backend && uv run ruff check --fix .
-
+# Lint frontend
 lint-frontend:
     cd frontend && npm run lint
 
+# Format all
 format: format-backend format-frontend
 
+# Format backend (ruff check --fix + ruff format)
 format-backend:
-    cd backend && uv run ruff format .
+    cd backend && uv run ruff check app --fix
+    cd backend && uv run ruff format app
 
+# Format frontend
 format-frontend:
     cd frontend && npx biome format --write ./
 
@@ -172,12 +177,7 @@ pre-commit:
     uv run pre-commit run --all-files
 
 # Run all quality checks (lint + format check)
-check: lint format-check
-
-format-check:
-    @echo "Checking code formatting..."
-    cd backend && uv run ruff format --check .
-    cd frontend && npx biome format ./
+check: lint
 
 # ============== Security Scanning ==============
 
