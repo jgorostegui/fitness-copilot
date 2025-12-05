@@ -19,7 +19,10 @@ describe("mockAiService", () => {
   })
 
   it("returns exercise logging action for leg press", async () => {
-    const result = await sendMessageToAI([], "I did 3 sets of leg press at 100kg")
+    const result = await sendMessageToAI(
+      [],
+      "I did 3 sets of leg press at 100kg",
+    )
 
     expect(result.action?.type).toBe("log_exercise")
     expect(result.action?.data?.name).toBe("Leg Press")

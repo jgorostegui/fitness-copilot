@@ -1,9 +1,23 @@
-import { Box, Button, Flex, IconButton, Input, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Flex,
+  IconButton,
+  Input,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useEffect, useRef, useState } from "react"
 import { FiCamera, FiMic, FiSend, FiX } from "react-icons/fi"
 import { sendMessageToAI } from "@/services/mockAiService"
 import { TODAY_ROUTINE } from "@/constants/fitness"
-import type { DailyStats, ExerciseLog, MealLog, Message, UserProfile } from "@/types/fitness"
+import type {
+  DailyStats,
+  ExerciseLog,
+  MealLog,
+  Message,
+  UserProfile,
+} from "@/types/fitness"
 
 interface ChatInterfaceProps {
   history: Message[]
@@ -34,11 +48,25 @@ const ActionCard = ({
   if (type === "log_food") {
     const itemCalories = (data?.calories as number) || 0
     const previousTotal = Math.max(0, stats.caloriesConsumed - itemCalories)
-    const prevPercent = Math.min(100, (previousTotal / stats.caloriesTarget) * 100)
-    const currentPercent = Math.min(100, (stats.caloriesConsumed / stats.caloriesTarget) * 100)
+    const prevPercent = Math.min(
+      100,
+      (previousTotal / stats.caloriesTarget) * 100,
+    )
+    const currentPercent = Math.min(
+      100,
+      (stats.caloriesConsumed / stats.caloriesTarget) * 100,
+    )
 
     return (
-      <Box mt={2} bg="white" border="1px" borderColor="gray.200" borderRadius="xl" p={3} maxW="280px">
+      <Box
+        mt={2}
+        bg="white"
+        border="1px"
+        borderColor="gray.200"
+        borderRadius="xl"
+        p={3}
+        maxW="280px"
+      >
         <Flex justify="space-between" align="center" mb={2}>
           <Flex align="center" gap={2}>
             <Box bg="orange.50" p={1.5} borderRadius="lg" color="orange.500">
@@ -69,7 +97,13 @@ const ActionCard = ({
               {stats.caloriesConsumed} / {stats.caloriesTarget}
             </Text>
           </Flex>
-          <Box h={2} bg="gray.100" borderRadius="full" overflow="hidden" position="relative">
+          <Box
+            h={2}
+            bg="gray.100"
+            borderRadius="full"
+            overflow="hidden"
+            position="relative"
+          >
             <Box
               position="absolute"
               top={0}
@@ -115,7 +149,15 @@ const ActionCard = ({
 
   if (type === "log_exercise") {
     return (
-      <Box mt={2} bg="white" border="1px" borderColor="gray.200" borderRadius="xl" p={3} maxW="280px">
+      <Box
+        mt={2}
+        bg="white"
+        border="1px"
+        borderColor="gray.200"
+        borderRadius="xl"
+        p={3}
+        maxW="280px"
+      >
         <Flex justify="space-between" align="center" mb={2}>
           <Flex align="center" gap={2}>
             <Box bg="purple.50" p={1.5} borderRadius="lg" color="purple.500">
@@ -188,8 +230,12 @@ const ContextWidget = ({
   }
 
   if (mode === "gym") {
-    const completedNames = new Set(exerciseLogs.map((l) => l.name.toLowerCase()))
-    const nextIndex = TODAY_ROUTINE.findIndex((r) => !completedNames.has(r.exercise.toLowerCase()))
+    const completedNames = new Set(
+      exerciseLogs.map((l) => l.name.toLowerCase()),
+    )
+    const nextIndex = TODAY_ROUTINE.findIndex(
+      (r) => !completedNames.has(r.exercise.toLowerCase()),
+    )
     const currentTarget = nextIndex !== -1 ? TODAY_ROUTINE[nextIndex] : null
     const allDone = nextIndex === -1 && TODAY_ROUTINE.length > 0
 
@@ -206,18 +252,42 @@ const ContextWidget = ({
       >
         <Flex justify="space-between" align="start">
           <Box>
-            <Text fontSize="xs" fontWeight="bold" color="blue.600" bg="blue.50" px={2} py={0.5} borderRadius="sm" w="fit-content" mb={1}>
+            <Text
+              fontSize="xs"
+              fontWeight="bold"
+              color="blue.600"
+              bg="blue.50"
+              px={2}
+              py={0.5}
+              borderRadius="sm"
+              w="fit-content"
+              mb={1}
+            >
               🏋️ GYM MODE
             </Text>
             <Text fontSize="lg" fontWeight="bold">
-              {allDone ? "Session Complete ✓" : currentTarget?.exercise || "Rest Day"}
+              {allDone
+                ? "Session Complete ✓"
+                : currentTarget?.exercise || "Rest Day"}
             </Text>
             {!allDone && currentTarget && (
               <Flex gap={2} mt={1}>
-                <Text fontSize="xs" bg="gray.100" px={1.5} py={0.5} borderRadius="sm">
+                <Text
+                  fontSize="xs"
+                  bg="gray.100"
+                  px={1.5}
+                  py={0.5}
+                  borderRadius="sm"
+                >
                   {currentTarget.sets} Sets
                 </Text>
-                <Text fontSize="xs" bg="gray.100" px={1.5} py={0.5} borderRadius="sm">
+                <Text
+                  fontSize="xs"
+                  bg="gray.100"
+                  px={1.5}
+                  py={0.5}
+                  borderRadius="sm"
+                >
                   {currentTarget.reps} Reps
                 </Text>
                 <Text fontSize="xs" color="blue.600">
@@ -242,14 +312,33 @@ const ContextWidget = ({
     )
   }
 
-  const caloriesLeft = Math.max(0, stats.caloriesTarget - stats.caloriesConsumed)
+  const caloriesLeft = Math.max(
+    0,
+    stats.caloriesTarget - stats.caloriesConsumed,
+  )
   const recentLogs = mealLogs.slice(-3).reverse()
 
   return (
     <Box bg="white" borderBottom="1px" borderColor="gray.200" px={4} py={3}>
-      <Flex justify="space-between" align="start" cursor="pointer" onClick={toggleMode} _active={{ opacity: 0.8 }}>
+      <Flex
+        justify="space-between"
+        align="start"
+        cursor="pointer"
+        onClick={toggleMode}
+        _active={{ opacity: 0.8 }}
+      >
         <Box>
-          <Text fontSize="xs" fontWeight="bold" color="green.600" bg="green.50" px={2} py={0.5} borderRadius="sm" w="fit-content" mb={1}>
+          <Text
+            fontSize="xs"
+            fontWeight="bold"
+            color="green.600"
+            bg="green.50"
+            px={2}
+            py={0.5}
+            borderRadius="sm"
+            w="fit-content"
+            mb={1}
+          >
             🍽️ KITCHEN MODE
           </Text>
           <Flex align="baseline" gap={1}>
@@ -266,7 +355,11 @@ const ContextWidget = ({
             Protein Left
           </Text>
           <Text fontSize="xl" fontWeight="bold" fontFamily="mono">
-            {Math.max(0, Math.round(stats.proteinTarget - stats.proteinConsumed))}g
+            {Math.max(
+              0,
+              Math.round(stats.proteinTarget - stats.proteinConsumed),
+            )}
+            g
           </Text>
         </Box>
       </Flex>
@@ -381,7 +474,11 @@ export const ChatInterface = ({
     setSelectedImage(null)
     setIsTyping(true)
 
-    const response = await sendMessageToAI(history, userMsg.text || (userMsg.image ? "Analyze this image" : ""), userMsg.image)
+    const response = await sendMessageToAI(
+      history,
+      userMsg.text || (userMsg.image ? "Analyze this image" : ""),
+      userMsg.image,
+    )
 
     const aiMsg: Message = {
       id: (Date.now() + 1).toString(),
@@ -415,7 +512,9 @@ export const ChatInterface = ({
     <Flex direction="column" h="full" bg="gray.50" position="relative">
       <ContextWidget
         mode={widgetMode}
-        toggleMode={() => setWidgetMode((m) => (m === "gym" ? "kitchen" : "gym"))}
+        toggleMode={() =>
+          setWidgetMode((m) => (m === "gym" ? "kitchen" : "gym"))
+        }
         stats={stats}
         exerciseLogs={exerciseLogs}
         mealLogs={mealLogs}
@@ -425,7 +524,11 @@ export const ChatInterface = ({
       <Box flex={1} overflowY="auto" p={4} pb={32}>
         <VStack gap={3} align="stretch">
           {history.map((msg) => (
-            <Flex key={msg.id} direction="column" align={msg.sender === "user" ? "flex-end" : "flex-start"}>
+            <Flex
+              key={msg.id}
+              direction="column"
+              align={msg.sender === "user" ? "flex-end" : "flex-start"}
+            >
               <Box
                 maxW="85%"
                 bg={msg.sender === "user" ? "blue.500" : "white"}
@@ -439,7 +542,11 @@ export const ChatInterface = ({
               >
                 {msg.image && (
                   <Box mb={2} borderRadius="lg" overflow="hidden">
-                    <img src={msg.image} alt="Upload" style={{ maxHeight: "150px", objectFit: "cover" }} />
+                    <img
+                      src={msg.image}
+                      alt="Upload"
+                      style={{ maxHeight: "150px", objectFit: "cover" }}
+                    />
                   </Box>
                 )}
                 <Text fontSize="sm" whiteSpace="pre-wrap">
@@ -447,23 +554,57 @@ export const ChatInterface = ({
                 </Text>
               </Box>
 
-              {msg.actionType && msg.actionType !== "none" && msg.actionData && (
-                <ActionCard type={msg.actionType} data={msg.actionData} stats={stats} />
-              )}
+              {msg.actionType &&
+                msg.actionType !== "none" &&
+                msg.actionData && (
+                  <ActionCard
+                    type={msg.actionType}
+                    data={msg.actionData}
+                    stats={stats}
+                  />
+                )}
 
               <Text fontSize="xs" color="gray.400" mt={1} px={1}>
-                {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                {msg.timestamp.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </Text>
             </Flex>
           ))}
 
           {isTyping && (
             <Flex align="flex-start">
-              <Box bg="white" borderRadius="2xl" borderTopLeftRadius="sm" p={3} border="1px" borderColor="gray.200">
+              <Box
+                bg="white"
+                borderRadius="2xl"
+                borderTopLeftRadius="sm"
+                p={3}
+                border="1px"
+                borderColor="gray.200"
+              >
                 <Flex gap={1}>
-                  <Box w={2} h={2} bg="gray.400" borderRadius="full" animation="bounce 1s infinite" />
-                  <Box w={2} h={2} bg="gray.400" borderRadius="full" animation="bounce 1s infinite 0.1s" />
-                  <Box w={2} h={2} bg="gray.400" borderRadius="full" animation="bounce 1s infinite 0.2s" />
+                  <Box
+                    w={2}
+                    h={2}
+                    bg="gray.400"
+                    borderRadius="full"
+                    animation="bounce 1s infinite"
+                  />
+                  <Box
+                    w={2}
+                    h={2}
+                    bg="gray.400"
+                    borderRadius="full"
+                    animation="bounce 1s infinite 0.1s"
+                  />
+                  <Box
+                    w={2}
+                    h={2}
+                    bg="gray.400"
+                    borderRadius="full"
+                    animation="bounce 1s infinite 0.2s"
+                  />
                 </Flex>
               </Box>
             </Flex>
@@ -472,23 +613,63 @@ export const ChatInterface = ({
         </VStack>
       </Box>
 
-      <Box position="absolute" bottom={16} left={0} right={0} bg="white" borderTop="1px" borderColor="gray.200" p={3}>
+      <Box
+        position="absolute"
+        bottom={16}
+        left={0}
+        right={0}
+        bg="white"
+        borderTop="1px"
+        borderColor="gray.200"
+        p={3}
+      >
         {selectedImage && (
-          <Flex mb={2} bg="gray.50" p={2} borderRadius="lg" align="center" gap={2}>
-            <img src={selectedImage} alt="Preview" style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "8px" }} />
+          <Flex
+            mb={2}
+            bg="gray.50"
+            p={2}
+            borderRadius="lg"
+            align="center"
+            gap={2}
+          >
+            <img
+              src={selectedImage}
+              alt="Preview"
+              style={{
+                width: "40px",
+                height: "40px",
+                objectFit: "cover",
+                borderRadius: "8px",
+              }}
+            />
             <Text fontSize="xs" color="gray.500">
               Image attached
             </Text>
-            <IconButton aria-label="Remove image" size="xs" variant="ghost" onClick={() => setSelectedImage(null)}>
+            <IconButton
+              aria-label="Remove image"
+              size="xs"
+              variant="ghost"
+              onClick={() => setSelectedImage(null)}
+            >
               <FiX />
             </IconButton>
           </Flex>
         )}
 
         <Flex gap={2} align="center">
-          <input type="file" accept="image/*" ref={fileInputRef} style={{ display: "none" }} onChange={handleImageSelect} />
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            onChange={handleImageSelect}
+          />
 
-          <IconButton aria-label="Attach photo" variant="ghost" onClick={() => fileInputRef.current?.click()}>
+          <IconButton
+            aria-label="Attach photo"
+            variant="ghost"
+            onClick={() => fileInputRef.current?.click()}
+          >
             <FiCamera />
           </IconButton>
 
@@ -503,11 +684,22 @@ export const ChatInterface = ({
             borderRadius="full"
           />
 
-          <IconButton aria-label="Voice input" variant="ghost" color={isRecording ? "red.500" : "gray.500"} onClick={toggleRecording}>
+          <IconButton
+            aria-label="Voice input"
+            variant="ghost"
+            color={isRecording ? "red.500" : "gray.500"}
+            onClick={toggleRecording}
+          >
             <FiMic />
           </IconButton>
 
-          <IconButton aria-label="Send" colorPalette="blue" borderRadius="full" disabled={!inputText && !selectedImage} onClick={() => handleSend()}>
+          <IconButton
+            aria-label="Send"
+            colorPalette="blue"
+            borderRadius="full"
+            disabled={!inputText && !selectedImage}
+            onClick={() => handleSend()}
+          >
             <FiSend />
           </IconButton>
         </Flex>

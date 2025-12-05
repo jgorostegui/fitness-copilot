@@ -22,7 +22,7 @@ def get_todays_summary(
 ) -> DailySummary:
     """
     Get today's daily summary.
-    
+
     Returns calculated metrics including:
     - Total calories consumed
     - Total protein consumed
@@ -33,33 +33,33 @@ def get_todays_summary(
     # Get today's logs
     meal_logs = get_meal_logs_for_today(session, current_user.id)
     exercise_logs = get_exercise_logs_for_today(session, current_user.id)
-    
+
     # Calculate consumed totals
     calories_consumed = sum(m.calories for m in meal_logs)
     protein_consumed = sum(m.protein_g for m in meal_logs)
-    
+
     # Count unique exercises as workouts
     workouts_completed = len(exercise_logs)
-    
+
     # Calculate targets from user profile
     energy_metrics = CalculationService.calculate_energy_metrics(current_user)
-    
+
     if energy_metrics is not None:
         calories_target = energy_metrics.estimated_daily_calories
     else:
         # Default target if profile incomplete
         calories_target = 2000
-    
+
     # Calculate protein target (protein_g_per_kg * weight)
     if current_user.weight_kg is not None:
         protein_target = current_user.protein_g_per_kg * current_user.weight_kg
     else:
         protein_target = 150.0  # Default
-    
+
     # Calculate remaining
     calories_remaining = calories_target - calories_consumed
     protein_remaining = protein_target - protein_consumed
-    
+
     return DailySummary(
         calories_consumed=calories_consumed,
         calories_target=calories_target,

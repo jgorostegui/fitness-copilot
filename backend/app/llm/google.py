@@ -55,7 +55,7 @@ class GoogleLLMProvider:
                 timeout=timeout_s,
             )
             return self._extract_text(response)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning("LLM generation timed out after %.1fs", timeout_s)
             return None
         except Exception as e:

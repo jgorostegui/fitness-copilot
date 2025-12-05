@@ -6,7 +6,8 @@ These are Small (Unit) tests - no DB, no network, pure logic.
 """
 
 import pytest
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from app.models import (
@@ -16,7 +17,6 @@ from app.models import (
 )
 from app.services.calculations import CalculationService
 
-
 # ============================================================================
 # Strategies
 # ============================================================================
@@ -24,7 +24,9 @@ from app.services.calculations import CalculationService
 valid_weight_strategy = st.floats(min_value=30.0, max_value=300.0, allow_nan=False)
 valid_height_strategy = st.integers(min_value=100, max_value=250)
 invalid_weight_low_strategy = st.floats(min_value=0.0, max_value=29.9, allow_nan=False)
-invalid_weight_high_strategy = st.floats(min_value=300.1, max_value=1000.0, allow_nan=False)
+invalid_weight_high_strategy = st.floats(
+    min_value=300.1, max_value=1000.0, allow_nan=False
+)
 invalid_height_low_strategy = st.integers(min_value=0, max_value=99)
 invalid_height_high_strategy = st.integers(min_value=251, max_value=500)
 
@@ -140,7 +142,9 @@ class TestGoalMethodEnumeration:
 
     @given(activity_level=st.sampled_from(list(ActivityLevel)))
     @settings(max_examples=100)
-    def test_valid_activity_levels_accepted(self, activity_level: ActivityLevel) -> None:
+    def test_valid_activity_levels_accepted(
+        self, activity_level: ActivityLevel
+    ) -> None:
         """All valid ActivityLevel enum values should be accepted."""
         profile = UserProfileUpdate(activity_level=activity_level)
         assert profile.activity_level == activity_level

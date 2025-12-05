@@ -27,12 +27,12 @@ def get_todays_logs(
 ) -> DailyLogsResponse:
     """
     Get today's meal and exercise logs.
-    
+
     Returns all logs created on the current date for the authenticated user.
     """
     meal_logs = get_meal_logs_for_today(session, current_user.id)
     exercise_logs = get_exercise_logs_for_today(session, current_user.id)
-    
+
     return DailyLogsResponse(
         meal_logs=[
             MealLogPublic(
@@ -69,11 +69,11 @@ def log_meal(
 ) -> MealLogPublic:
     """
     Log a meal.
-    
+
     Creates a new meal log entry for the authenticated user.
     """
     meal_log = create_meal_log(session, current_user.id, meal_log_in)
-    
+
     return MealLogPublic(
         id=meal_log.id,
         meal_name=meal_log.meal_name,
@@ -94,11 +94,11 @@ def log_exercise(
 ) -> ExerciseLogPublic:
     """
     Log an exercise.
-    
+
     Creates a new exercise log entry for the authenticated user.
     """
     exercise_log = create_exercise_log(session, current_user.id, exercise_log_in)
-    
+
     return ExerciseLogPublic(
         id=exercise_log.id,
         exercise_name=exercise_log.exercise_name,

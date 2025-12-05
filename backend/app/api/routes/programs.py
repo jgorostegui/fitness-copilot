@@ -30,7 +30,7 @@ router = APIRouter(prefix="/programs", tags=["programs"])
 def list_training_programs(session: SessionDep) -> TrainingProgramsPublic:
     """
     List all available training programs.
-    
+
     Returns predefined training programs (4, 5, 6 days/week options).
     """
     programs = get_training_programs(session)
@@ -57,13 +57,13 @@ def select_program(
 ) -> UserProfilePublic:
     """
     Select a training program for the current user.
-    
+
     Associates the specified program with the user's profile.
     """
     user = select_training_program(session, current_user, program_id)
     if user is None:
         raise HTTPException(status_code=404, detail="Training program not found")
-    
+
     return UserProfilePublic(
         id=user.id,
         email=user.email,
@@ -91,13 +91,13 @@ def get_program_routines(
 ) -> TrainingRoutinesPublic:
     """
     Get routines for a specific training program.
-    
+
     Optionally filter by day of week (0=Monday, 6=Sunday).
     """
     program = get_training_program(session, program_id)
     if program is None:
         raise HTTPException(status_code=404, detail="Training program not found")
-    
+
     routines = get_training_routines_for_program(session, program_id, day_of_week)
     return TrainingRoutinesPublic(
         data=[

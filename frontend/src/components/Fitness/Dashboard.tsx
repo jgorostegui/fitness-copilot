@@ -1,5 +1,10 @@
 import { Box, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
-import type { DailyStats, ExerciseLog, MealLog, UserProfile } from "@/types/fitness"
+import type {
+  DailyStats,
+  ExerciseLog,
+  MealLog,
+  UserProfile,
+} from "@/types/fitness"
 
 interface DashboardProps {
   stats: DailyStats
@@ -56,8 +61,12 @@ const CircularProgress = ({
           transform="translate(-50%, -50%)"
           textAlign="center"
         >
-          <Text fontWeight="bold" fontSize="lg">{value}</Text>
-          <Text fontSize="xs" color="gray.500">/ {max}</Text>
+          <Text fontWeight="bold" fontSize="lg">
+            {value}
+          </Text>
+          <Text fontSize="xs" color="gray.500">
+            / {max}
+          </Text>
         </Box>
       </Box>
       <Text fontSize="sm" fontWeight="medium" mt={2} color="gray.600">
@@ -67,14 +76,28 @@ const CircularProgress = ({
   )
 }
 
-export const Dashboard = ({ stats, mealLogs, exerciseLogs, profile }: DashboardProps) => {
+export const Dashboard = ({
+  stats,
+  mealLogs,
+  exerciseLogs,
+  profile,
+}: DashboardProps) => {
   const allLogs = [...mealLogs, ...exerciseLogs].sort(
     (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime(),
   )
 
   return (
     <Box h="full" overflowY="auto" pb={24}>
-      <Box bg="white" borderBottom="1px" borderColor="gray.200" px={4} py={4} position="sticky" top={0} zIndex={10}>
+      <Box
+        bg="white"
+        borderBottom="1px"
+        borderColor="gray.200"
+        px={4}
+        py={4}
+        position="sticky"
+        top={0}
+        zIndex={10}
+      >
         <Heading size="md">Monitor</Heading>
         <Flex justify="space-between" align="center" mt={1}>
           <Text fontSize="xs" color="gray.500">
@@ -116,25 +139,62 @@ export const Dashboard = ({ stats, mealLogs, exerciseLogs, profile }: DashboardP
           </Flex>
 
           <Flex gap={4}>
-            <Box flex={1} bg="white" p={3} borderRadius="xl" border="1px" borderColor="gray.200">
+            <Box
+              flex={1}
+              bg="white"
+              p={3}
+              borderRadius="xl"
+              border="1px"
+              borderColor="gray.200"
+            >
               <Flex align="center" gap={2}>
-                <Box bg="orange.50" p={2} borderRadius="lg" fontWeight="bold" color="orange.500">
+                <Box
+                  bg="orange.50"
+                  p={2}
+                  borderRadius="lg"
+                  fontWeight="bold"
+                  color="orange.500"
+                >
                   {stats.workoutsCompleted}
                 </Box>
                 <Box>
-                  <Text fontSize="xs" color="gray.500">EXERCISES</Text>
-                  <Text fontSize="sm" fontWeight="semibold">Completed</Text>
+                  <Text fontSize="xs" color="gray.500">
+                    EXERCISES
+                  </Text>
+                  <Text fontSize="sm" fontWeight="semibold">
+                    Completed
+                  </Text>
                 </Box>
               </Flex>
             </Box>
-            <Box flex={1} bg="white" p={3} borderRadius="xl" border="1px" borderColor="gray.200">
+            <Box
+              flex={1}
+              bg="white"
+              p={3}
+              borderRadius="xl"
+              border="1px"
+              borderColor="gray.200"
+            >
               <Flex align="center" gap={2}>
-                <Box bg="purple.50" p={2} borderRadius="lg" fontWeight="bold" color="purple.500">
-                  {Math.round((stats.caloriesConsumed / stats.caloriesTarget) * 100)}%
+                <Box
+                  bg="purple.50"
+                  p={2}
+                  borderRadius="lg"
+                  fontWeight="bold"
+                  color="purple.500"
+                >
+                  {Math.round(
+                    (stats.caloriesConsumed / stats.caloriesTarget) * 100,
+                  )}
+                  %
                 </Box>
                 <Box>
-                  <Text fontSize="xs" color="gray.500">DAILY GOAL</Text>
-                  <Text fontSize="sm" fontWeight="semibold">Progress</Text>
+                  <Text fontSize="xs" color="gray.500">
+                    DAILY GOAL
+                  </Text>
+                  <Text fontSize="sm" fontWeight="semibold">
+                    Progress
+                  </Text>
                 </Box>
               </Flex>
             </Box>
@@ -177,7 +237,9 @@ export const Dashboard = ({ stats, mealLogs, exerciseLogs, profile }: DashboardP
                           bg={"calories" in log ? "green.400" : "blue.400"}
                         />
                         <Box>
-                          <Text fontWeight="semibold" fontSize="sm">{log.name}</Text>
+                          <Text fontWeight="semibold" fontSize="sm">
+                            {log.name}
+                          </Text>
                           <Text fontSize="xs" color="gray.400">
                             {new Date(log.time).toLocaleTimeString([], {
                               hour: "2-digit",
@@ -189,13 +251,21 @@ export const Dashboard = ({ stats, mealLogs, exerciseLogs, profile }: DashboardP
                       <Box textAlign="right">
                         {"calories" in log ? (
                           <>
-                            <Text fontWeight="bold" fontSize="sm">{log.calories}</Text>
-                            <Text fontSize="xs" color="gray.400">kcal</Text>
+                            <Text fontWeight="bold" fontSize="sm">
+                              {log.calories}
+                            </Text>
+                            <Text fontSize="xs" color="gray.400">
+                              kcal
+                            </Text>
                           </>
                         ) : (
                           <>
-                            <Text fontWeight="bold" fontSize="sm">{(log as ExerciseLog).weight}kg</Text>
-                            <Text fontSize="xs" color="gray.400">{(log as ExerciseLog).sets} sets</Text>
+                            <Text fontWeight="bold" fontSize="sm">
+                              {(log as ExerciseLog).weight}kg
+                            </Text>
+                            <Text fontSize="xs" color="gray.400">
+                              {(log as ExerciseLog).sets} sets
+                            </Text>
                           </>
                         )}
                       </Box>

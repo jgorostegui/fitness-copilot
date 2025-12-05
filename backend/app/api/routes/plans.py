@@ -28,18 +28,18 @@ def get_todays_training(
 ) -> TrainingRoutinesPublic:
     """
     Get today's training routine.
-    
+
     Returns exercises from the user's selected program for today's day of week.
     Returns empty list if no program is selected.
     """
     if current_user.selected_program_id is None:
         return TrainingRoutinesPublic(data=[], count=0)
-    
+
     today = datetime.utcnow().weekday()  # 0=Monday, 6=Sunday
     routines = get_training_routines_for_program(
         session, current_user.selected_program_id, day_of_week=today
     )
-    
+
     return TrainingRoutinesPublic(
         data=[
             TrainingRoutinePublic(
@@ -65,11 +65,11 @@ def get_todays_meal_plan(
 ) -> MealPlansPublic:
     """
     Get today's meal plan.
-    
+
     Returns meal plan items for today's day of week.
     """
     meals = get_meal_plans_for_today(session, current_user.id)
-    
+
     return MealPlansPublic(
         data=[
             MealPlanPublic(

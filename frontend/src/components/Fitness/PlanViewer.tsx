@@ -1,4 +1,12 @@
-import { Box, Button, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  Heading,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { FiCheck, FiPlus } from "react-icons/fi"
 import { TODAY_MEAL_PLAN, TODAY_ROUTINE } from "@/constants/fitness"
 import type { ExerciseLog, MealLog } from "@/types/fitness"
@@ -23,7 +31,10 @@ export const PlanViewer = ({
 
   const totalCalories = mealLogs.reduce((acc, log) => acc + log.calories, 0)
   const totalProtein = mealLogs.reduce((acc, log) => acc + log.protein, 0)
-  const targetCalories = TODAY_MEAL_PLAN.reduce((acc, item) => acc + item.calories, 0)
+  const targetCalories = TODAY_MEAL_PLAN.reduce(
+    (acc, item) => acc + item.calories,
+    0,
+  )
 
   const totalSetsLogged = exerciseLogs.length
   const targetSets = TODAY_ROUTINE.reduce((acc, item) => acc + item.sets, 0)
@@ -71,7 +82,13 @@ export const PlanViewer = ({
         <VStack gap={6} align="stretch">
           {isWorkout ? (
             <>
-              <Box bg="white" borderRadius="xl" p={4} border="1px" borderColor="gray.200">
+              <Box
+                bg="white"
+                borderRadius="xl"
+                p={4}
+                border="1px"
+                borderColor="gray.200"
+              >
                 <Flex justify="space-between" align="center">
                   <Box>
                     <Text fontSize="xs" fontWeight="bold" color="gray.400">
@@ -96,7 +113,10 @@ export const PlanViewer = ({
                     justifyContent="center"
                   >
                     <Text fontSize="xs" fontWeight="bold" color="blue.600">
-                      {targetSets > 0 ? Math.round((totalSetsLogged / targetSets) * 100) : 0}%
+                      {targetSets > 0
+                        ? Math.round((totalSetsLogged / targetSets) * 100)
+                        : 0}
+                      %
                     </Text>
                   </Box>
                 </Flex>
@@ -109,7 +129,8 @@ export const PlanViewer = ({
                 <VStack gap={3} align="stretch">
                   {TODAY_ROUTINE.map((item, idx) => {
                     const loggedForThis = exerciseLogs.filter(
-                      (l) => l.name.toLowerCase() === item.exercise.toLowerCase(),
+                      (l) =>
+                        l.name.toLowerCase() === item.exercise.toLowerCase(),
                     ).length
                     const isComplete = loggedForThis >= item.sets
 
@@ -121,7 +142,11 @@ export const PlanViewer = ({
                         borderRadius="xl"
                         border="1px"
                         borderColor={isComplete ? "blue.200" : "gray.200"}
-                        boxShadow={isComplete ? "0 0 0 1px var(--chakra-colors-blue-200)" : "sm"}
+                        boxShadow={
+                          isComplete
+                            ? "0 0 0 1px var(--chakra-colors-blue-200)"
+                            : "sm"
+                        }
                       >
                         <Flex justify="space-between" align="start" mb={3}>
                           <Box>
@@ -133,7 +158,9 @@ export const PlanViewer = ({
                               >
                                 {item.exercise}
                               </Text>
-                              {isComplete && <FiCheck color="var(--chakra-colors-blue-600)" />}
+                              {isComplete && (
+                                <FiCheck color="var(--chakra-colors-blue-600)" />
+                              )}
                             </Flex>
                             <Text fontSize="xs" color="gray.500" mt={1}>
                               Target: {item.sets} Sets × {item.reps} Reps
@@ -142,7 +169,9 @@ export const PlanViewer = ({
                           <Button
                             size="sm"
                             colorPalette="blue"
-                            onClick={() => handleLogSet(item.exercise, item.reps)}
+                            onClick={() =>
+                              handleLogSet(item.exercise, item.reps)
+                            }
                           >
                             <FiPlus />
                           </Button>
@@ -186,10 +215,18 @@ export const PlanViewer = ({
                           border="1px"
                           borderColor="gray.100"
                         >
-                          <Text fontSize="sm" fontWeight="medium" color="gray.700">
+                          <Text
+                            fontSize="sm"
+                            fontWeight="medium"
+                            color="gray.700"
+                          >
                             {log.name}
                           </Text>
-                          <Text fontSize="xs" color="gray.400" fontFamily="mono">
+                          <Text
+                            fontSize="xs"
+                            color="gray.400"
+                            fontFamily="mono"
+                          >
                             1 Set × {log.reps} Reps
                           </Text>
                         </Flex>
@@ -201,14 +238,26 @@ export const PlanViewer = ({
           ) : (
             <>
               <Flex gap={4}>
-                <Box flex={1} bg="white" p={4} borderRadius="xl" border="1px" borderColor="gray.200">
+                <Box
+                  flex={1}
+                  bg="white"
+                  p={4}
+                  borderRadius="xl"
+                  border="1px"
+                  borderColor="gray.200"
+                >
                   <Text fontSize="xs" fontWeight="bold" color="gray.400" mb={1}>
                     CALORIES
                   </Text>
                   <Text fontSize="2xl" fontWeight="bold" mb={2}>
                     {totalCalories}
                   </Text>
-                  <Box h={1.5} bg="gray.100" borderRadius="full" overflow="hidden">
+                  <Box
+                    h={1.5}
+                    bg="gray.100"
+                    borderRadius="full"
+                    overflow="hidden"
+                  >
                     <Box
                       h="full"
                       bg="blue.500"
@@ -218,14 +267,26 @@ export const PlanViewer = ({
                     />
                   </Box>
                 </Box>
-                <Box flex={1} bg="white" p={4} borderRadius="xl" border="1px" borderColor="gray.200">
+                <Box
+                  flex={1}
+                  bg="white"
+                  p={4}
+                  borderRadius="xl"
+                  border="1px"
+                  borderColor="gray.200"
+                >
                   <Text fontSize="xs" fontWeight="bold" color="gray.400" mb={1}>
                     PROTEIN
                   </Text>
                   <Text fontSize="2xl" fontWeight="bold" mb={2}>
                     {totalProtein}g
                   </Text>
-                  <Box h={1.5} bg="gray.100" borderRadius="full" overflow="hidden">
+                  <Box
+                    h={1.5}
+                    bg="gray.100"
+                    borderRadius="full"
+                    overflow="hidden"
+                  >
                     <Box
                       h="full"
                       bg="green.500"
@@ -255,7 +316,9 @@ export const PlanViewer = ({
                       py={3}
                       px={4}
                       flexDirection="column"
-                      onClick={() => handleQuickAddFood(item.name, item.cal, item.pro)}
+                      onClick={() =>
+                        handleQuickAddFood(item.name, item.cal, item.pro)
+                      }
                     >
                       <Text fontSize="2xl" mb={1}>
                         {item.emoji}
@@ -275,7 +338,9 @@ export const PlanViewer = ({
                 <VStack gap={3} align="stretch">
                   {TODAY_MEAL_PLAN.map((item, idx) => {
                     const isLogged = mealLogs.some(
-                      (l) => l.name.includes(item.meal) || l.calories === item.calories,
+                      (l) =>
+                        l.name.includes(item.meal) ||
+                        l.calories === item.calories,
                     )
 
                     return (
@@ -307,7 +372,13 @@ export const PlanViewer = ({
                           variant={isLogged ? "ghost" : "outline"}
                           colorPalette={isLogged ? "gray" : "green"}
                           disabled={isLogged}
-                          onClick={() => handleQuickAddFood(item.meal, item.calories, item.protein)}
+                          onClick={() =>
+                            handleQuickAddFood(
+                              item.meal,
+                              item.calories,
+                              item.protein,
+                            )
+                          }
                         >
                           {isLogged ? <FiCheck /> : <FiPlus />}
                         </Button>
@@ -338,10 +409,18 @@ export const PlanViewer = ({
                           border="1px"
                           borderColor="gray.100"
                         >
-                          <Text fontSize="xs" fontWeight="medium" color="gray.700">
+                          <Text
+                            fontSize="xs"
+                            fontWeight="medium"
+                            color="gray.700"
+                          >
                             {log.name}
                           </Text>
-                          <Text fontSize="xs" color="gray.400" fontFamily="mono">
+                          <Text
+                            fontSize="xs"
+                            color="gray.400"
+                            fontFamily="mono"
+                          >
                             {log.calories} kcal
                           </Text>
                         </Flex>

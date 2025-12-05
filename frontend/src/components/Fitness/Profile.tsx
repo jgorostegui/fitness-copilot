@@ -1,4 +1,13 @@
-import { Box, Button, Container, Flex, Heading, Input, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  Heading,
+  Input,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useState } from "react"
 import { FiLogOut, FiMoon, FiSun } from "react-icons/fi"
 import type { PlanType, UserProfile } from "@/types/fitness"
@@ -33,7 +42,12 @@ export const Profile = ({ profile, onUpdate, onReset }: ProfileProps) => {
       >
         <Flex justify="space-between" align="center">
           <Heading size="md">Settings</Heading>
-          <Button variant="ghost" colorPalette="blue" size="sm" onClick={handleSave}>
+          <Button
+            variant="ghost"
+            colorPalette="blue"
+            size="sm"
+            onClick={handleSave}
+          >
             Save
           </Button>
         </Flex>
@@ -56,14 +70,22 @@ export const Profile = ({ profile, onUpdate, onReset }: ProfileProps) => {
               🤖
             </Box>
             <Heading size="sm">Operator</Heading>
-            <Text fontSize="sm" color="gray.500">Fitness Copilot User</Text>
+            <Text fontSize="sm" color="gray.500">
+              Fitness Copilot User
+            </Text>
           </Flex>
 
           <Box>
             <Text fontSize="xs" fontWeight="semibold" color="gray.500" mb={2}>
               APPEARANCE
             </Text>
-            <Flex bg="white" borderRadius="xl" border="1px" borderColor="gray.200" p={1}>
+            <Flex
+              bg="white"
+              borderRadius="xl"
+              border="1px"
+              borderColor="gray.200"
+              p={1}
+            >
               <Button
                 flex={1}
                 variant={theme === "light" ? "solid" : "ghost"}
@@ -98,8 +120,12 @@ export const Profile = ({ profile, onUpdate, onReset }: ProfileProps) => {
             >
               <Flex w="full" justify="space-between" align="center" p={4}>
                 <Flex align="center" gap={3}>
-                  <Box bg="blue.50" p={1.5} borderRadius="md" color="blue.600">⚖️</Box>
-                  <Text fontSize="sm" fontWeight="medium">Weight</Text>
+                  <Box bg="blue.50" p={1.5} borderRadius="md" color="blue.600">
+                    ⚖️
+                  </Box>
+                  <Text fontSize="sm" fontWeight="medium">
+                    Weight
+                  </Text>
                 </Flex>
                 <Flex align="center" gap={2}>
                   <Input
@@ -111,14 +137,25 @@ export const Profile = ({ profile, onUpdate, onReset }: ProfileProps) => {
                     size="sm"
                     variant="flushed"
                   />
-                  <Text fontSize="sm" color="gray.400">kg</Text>
+                  <Text fontSize="sm" color="gray.400">
+                    kg
+                  </Text>
                 </Flex>
               </Flex>
 
               <Flex w="full" justify="space-between" align="center" p={4}>
                 <Flex align="center" gap={3}>
-                  <Box bg="indigo.50" p={1.5} borderRadius="md" color="indigo.600">📏</Box>
-                  <Text fontSize="sm" fontWeight="medium">Height</Text>
+                  <Box
+                    bg="indigo.50"
+                    p={1.5}
+                    borderRadius="md"
+                    color="indigo.600"
+                  >
+                    📏
+                  </Box>
+                  <Text fontSize="sm" fontWeight="medium">
+                    Height
+                  </Text>
                 </Flex>
                 <Flex align="center" gap={2}>
                   <Input
@@ -130,7 +167,9 @@ export const Profile = ({ profile, onUpdate, onReset }: ProfileProps) => {
                     size="sm"
                     variant="flushed"
                   />
-                  <Text fontSize="sm" color="gray.400">cm</Text>
+                  <Text fontSize="sm" color="gray.400">
+                    cm
+                  </Text>
                 </Flex>
               </Flex>
             </VStack>
@@ -140,11 +179,26 @@ export const Profile = ({ profile, onUpdate, onReset }: ProfileProps) => {
             <Text fontSize="xs" fontWeight="semibold" color="gray.500" mb={2}>
               STRATEGY
             </Text>
-            <Box bg="white" borderRadius="xl" border="1px" borderColor="gray.200" p={4}>
+            <Box
+              bg="white"
+              borderRadius="xl"
+              border="1px"
+              borderColor="gray.200"
+              p={4}
+            >
               <Flex justify="space-between" align="center">
                 <Flex align="center" gap={3}>
-                  <Box bg="green.50" p={1.5} borderRadius="md" color="green.600">🎯</Box>
-                  <Text fontSize="sm" fontWeight="medium">Current Phase</Text>
+                  <Box
+                    bg="green.50"
+                    p={1.5}
+                    borderRadius="md"
+                    color="green.600"
+                  >
+                    🎯
+                  </Box>
+                  <Text fontSize="sm" fontWeight="medium">
+                    Current Phase
+                  </Text>
                 </Flex>
                 <select
                   value={plan}

@@ -290,7 +290,9 @@ def test_update_password_me_same_password_error(
     )
     assert r.status_code == 400
     updated_user = r.json()
-    assert updated_user["detail"] == "New password cannot be the same as the current one"
+    assert (
+        updated_user["detail"] == "New password cannot be the same as the current one"
+    )
 
 
 @pytest.mark.acceptance
@@ -417,7 +419,9 @@ def test_delete_user_me(client: TestClient, db: Session) -> None:
 def test_delete_user_me_as_superuser(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
-    r = client.delete(f"{settings.API_V1_STR}/users/me", headers=superuser_token_headers)
+    r = client.delete(
+        f"{settings.API_V1_STR}/users/me", headers=superuser_token_headers
+    )
     assert r.status_code == 403
     response = r.json()
     assert response["detail"] == "Super users are not allowed to delete themselves"

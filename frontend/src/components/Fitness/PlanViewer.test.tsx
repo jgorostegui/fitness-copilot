@@ -67,9 +67,7 @@ describe("PlanViewer - Workout Mode", () => {
     )
 
     const addButtons = screen.getAllByRole("button")
-    const firstAddButton = addButtons.find((btn) =>
-      btn.querySelector("svg"),
-    )
+    const firstAddButton = addButtons.find((btn) => btn.querySelector("svg"))
     if (firstAddButton) {
       fireEvent.click(firstAddButton)
       expect(onAddExercise).toHaveBeenCalled()

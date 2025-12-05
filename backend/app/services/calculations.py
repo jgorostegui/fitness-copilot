@@ -15,7 +15,6 @@ from app.models import (
     WeeklySummary,
 )
 
-
 # Activity level multipliers for TDEE calculation
 ACTIVITY_MULTIPLIERS: dict[ActivityLevel, float] = {
     ActivityLevel.SEDENTARY: 1.20,
@@ -49,12 +48,11 @@ class CalculationService:
     def calculate_bmi(weight_kg: float, height_cm: int) -> float:
         """
         Calculate Body Mass Index.
-        
+
         BMI = weight (kg) / height (m)^2
         """
         height_m = height_cm / 100
-        return round(weight_kg / (height_m ** 2), 1)
-
+        return round(weight_kg / (height_m**2), 1)
 
     @staticmethod
     def get_bmi_status(bmi: float) -> str:
@@ -85,7 +83,7 @@ class CalculationService:
     ) -> int:
         """
         Calculate BMR using Mifflin-St Jeor equation.
-        
+
         Men: BMR = (10 × weight) + (6.25 × height) - (5 × age) + 5
         Women: BMR = (10 × weight) + (6.25 × height) - (5 × age) - 161
         """
@@ -96,12 +94,14 @@ class CalculationService:
             return int(base - 161)
 
     @staticmethod
-    def calculate_bmr_katch_mcardle(weight_kg: float, body_fat_percentage: float) -> int:
+    def calculate_bmr_katch_mcardle(
+        weight_kg: float, body_fat_percentage: float
+    ) -> int:
         """
         Calculate BMR using Katch-McArdle equation.
-        
+
         BMR = 370 + (21.6 × FFM)
-        
+
         More accurate when body fat percentage is known.
         """
         ffm = weight_kg * (1 - body_fat_percentage / 100)
@@ -125,7 +125,7 @@ class CalculationService:
     def calculate_neat(bmr: int, activity_multiplier: float) -> int:
         """
         Calculate Non-Exercise Activity Thermogenesis.
-        
+
         NEAT = TDEE - BMR (simplified approximation)
         """
         tdee = int(bmr * activity_multiplier)
@@ -146,7 +146,7 @@ class CalculationService:
     def calculate_daily_deficit(weekly_weight_change_kg: float) -> int:
         """
         Calculate daily caloric deficit/surplus.
-        
+
         1 kg of body weight ≈ 7700 kcal
         """
         weekly_kcal = weekly_weight_change_kg * KCAL_PER_KG
@@ -158,9 +158,9 @@ class CalculationService:
     ) -> tuple[float | None, str]:
         """
         Calculate Energy Availability (EA).
-        
+
         EA = (Energy Intake - Exercise Energy Expenditure) / FFM
-        
+
         Thresholds:
         - >= 45 kcal/kg FFM: Optimal
         - 30-45 kcal/kg FFM: Functional
@@ -168,18 +168,17 @@ class CalculationService:
         """
         if ffm_kg is None or ffm_kg <= 0:
             return None, "need_bf"
-        
+
         ea = daily_calories / ffm_kg
-        
+
         if ea >= 45:
             status = "optimal"
         elif ea >= 30:
             status = "functional"
         else:
             status = "low_ea"
-        
-        return round(ea, 1), status
 
+        return round(ea, 1), status
 
     @classmethod
     def calculate_body_metrics(cls, user: User) -> BodyMetrics | None:
@@ -194,7 +193,9 @@ class CalculationService:
         fat_mass_kg = None
         if user.body_fat_percentage is not None:
             ffm_kg = cls.calculate_ffm(user.weight_kg, user.body_fat_percentage)
-            fat_mass_kg = cls.calculate_fat_mass(user.weight_kg, user.body_fat_percentage)
+            fat_mass_kg = cls.calculate_fat_mass(
+                user.weight_kg, user.body_fat_percentage
+            )
 
         return BodyMetrics(
             weight_kg=user.weight_kg,
@@ -218,7 +219,9 @@ class CalculationService:
 
         # Choose BMR equation based on available data
         if user.body_fat_percentage is not None:
-            bmr = cls.calculate_bmr_katch_mcardle(user.weight_kg, user.body_fat_percentage)
+            bmr = cls.calculate_bmr_katch_mcardle(
+                user.weight_kg, user.body_fat_percentage
+            )
             bmr_equation = "katch_mcardle"
         else:
             bmr = cls.calculate_bmr_mifflin_st_jeor(
@@ -241,7 +244,9 @@ class CalculationService:
             estimated_daily_calories = user.custom_kcal_per_day
             daily_deficit = base_tdee - estimated_daily_calories
         else:
-            estimated_daily_calories = base_tdee + daily_deficit  # deficit is negative for cuts
+            estimated_daily_calories = (
+                base_tdee + daily_deficit
+            )  # deficit is negative for cuts
 
         return EnergyMetrics(
             bmr=bmr,
@@ -310,7 +315,9 @@ class CalculationService:
         if energy_metrics is None:
             return None
 
-        energy_availability = cls.calculate_energy_availability_metrics(user, energy_metrics)
+        energy_availability = cls.calculate_energy_availability_metrics(
+            user, energy_metrics
+        )
         weekly_summary = cls.calculate_weekly_summary(user, energy_metrics)
 
         return ProfileMetrics(

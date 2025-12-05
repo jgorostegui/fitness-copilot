@@ -17,7 +17,7 @@ router = APIRouter(prefix="/profile", tags=["profile"])
 def get_current_user_profile(current_user: CurrentUser) -> UserProfilePublic:
     """
     Get current user's profile.
-    
+
     Returns the authenticated user's profile information.
     """
     return UserProfilePublic(
@@ -47,19 +47,19 @@ def update_current_user_profile(
 ) -> UserProfilePublic:
     """
     Update current user's profile.
-    
+
     Updates the authenticated user's profile with the provided data.
     Only fields that are explicitly set will be updated.
     """
     update_data = profile_update.model_dump(exclude_unset=True)
-    
+
     for field, value in update_data.items():
         setattr(current_user, field, value)
-    
+
     session.add(current_user)
     session.commit()
     session.refresh(current_user)
-    
+
     return UserProfilePublic(
         id=current_user.id,
         email=current_user.email,
@@ -83,18 +83,18 @@ def update_current_user_profile(
 def get_current_user_metrics(current_user: CurrentUser) -> ProfileMetrics:
     """
     Get current user's calculated metrics.
-    
+
     Returns calculated body metrics, energy metrics, energy availability,
     and weekly projections based on the user's profile data.
-    
+
     Requires weight, height, age, and sex to be set in the profile.
     """
     metrics = CalculationService.calculate_profile_metrics(current_user)
-    
+
     if metrics is None:
         raise HTTPException(
             status_code=400,
             detail="Profile incomplete. Please set weight, height, age, and sex.",
         )
-    
+
     return metrics

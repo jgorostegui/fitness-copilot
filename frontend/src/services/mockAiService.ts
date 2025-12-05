@@ -4,7 +4,10 @@ export const sendMessageToAI = async (
   _history: Message[],
   newMessage: string,
   image?: string,
-): Promise<{ text: string; action?: { type: string; data?: Record<string, unknown> } }> => {
+): Promise<{
+  text: string
+  action?: { type: string; data?: Record<string, unknown> }
+}> => {
   await new Promise((resolve) => setTimeout(resolve, 1200))
 
   const lowerMsg = newMessage.toLowerCase()
@@ -29,7 +32,10 @@ export const sendMessageToAI = async (
     lowerMsg.includes("rice") ||
     lowerMsg.includes("apple")
   ) {
-    const foodMap: Record<string, { name: string; calories: number; protein: number }> = {
+    const foodMap: Record<
+      string,
+      { name: string; calories: number; protein: number }
+    > = {
       banana: { name: "Banana", calories: 105, protein: 1 },
       shake: { name: "Protein Shake", calories: 130, protein: 24 },
       coffee: { name: "Coffee", calories: 5, protein: 0 },
@@ -99,7 +105,7 @@ export const sendMessageToAI = async (
   }
 
   return {
-    text: "I'm your fitness copilot.\n\nTry:\n- \"I ate a banana\"\n- \"I did 3 sets of leg press at 100kg\"\n- Or upload a photo of gym equipment.",
+    text: 'I\'m your fitness copilot.\n\nTry:\n- "I ate a banana"\n- "I did 3 sets of leg press at 100kg"\n- Or upload a photo of gym equipment.',
     action: { type: "none" },
   }
 }

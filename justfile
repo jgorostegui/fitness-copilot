@@ -154,6 +154,9 @@ lint: lint-backend lint-frontend
 lint-backend:
     cd backend && uv run ruff check .
 
+lint-fix:
+    cd backend && uv run ruff check --fix .
+
 lint-frontend:
     cd frontend && npm run lint
 

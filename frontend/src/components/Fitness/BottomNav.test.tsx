@@ -9,9 +9,7 @@ const renderWithChakra = (ui: React.ReactElement) => {
 
 describe("BottomNav", () => {
   it("renders all navigation tabs", () => {
-    renderWithChakra(
-      <BottomNav activeTab="monitor" onTabChange={vi.fn()} />,
-    )
+    renderWithChakra(<BottomNav activeTab="monitor" onTabChange={vi.fn()} />)
 
     expect(screen.getByText("Monitor")).toBeInTheDocument()
     expect(screen.getByText("Workout")).toBeInTheDocument()
@@ -22,9 +20,7 @@ describe("BottomNav", () => {
 
   it("calls onTabChange when monitor tab is clicked", () => {
     const onTabChange = vi.fn()
-    renderWithChakra(
-      <BottomNav activeTab="chat" onTabChange={onTabChange} />,
-    )
+    renderWithChakra(<BottomNav activeTab="chat" onTabChange={onTabChange} />)
 
     fireEvent.click(screen.getByText("Monitor"))
     expect(onTabChange).toHaveBeenCalledWith("monitor")
@@ -47,7 +43,9 @@ describe("BottomNav", () => {
     )
 
     // Chat is the center button, find it by its container
-    const chatButton = screen.getByText("Chat").closest("button") || screen.getByText("Chat").parentElement?.querySelector("button")
+    const chatButton =
+      screen.getByText("Chat").closest("button") ||
+      screen.getByText("Chat").parentElement?.querySelector("button")
     if (chatButton) {
       fireEvent.click(chatButton)
     } else {

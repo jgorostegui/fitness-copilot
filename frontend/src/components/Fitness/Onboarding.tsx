@@ -1,4 +1,12 @@
-import { Box, Button, Container, Heading, Input, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Container,
+  Heading,
+  Input,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useState } from "react"
 import type { PlanType, UserProfile } from "@/types/fitness"
 
@@ -23,13 +31,23 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
   }
 
   return (
-    <Container maxW="sm" h="100vh" display="flex" alignItems="center" justifyContent="center">
+    <Container
+      maxW="sm"
+      h="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+    >
       <Box as="form" onSubmit={handleSubmit} w="full">
         <VStack gap={6} align="stretch">
           <Box textAlign="center">
-            <Text fontSize="4xl" mb={2}>🏋️</Text>
+            <Text fontSize="4xl" mb={2}>
+              🏋️
+            </Text>
             <Heading size="lg">Setup Profile</Heading>
-            <Text color="gray.500" fontSize="sm">Let's calculate your baseline metrics</Text>
+            <Text color="gray.500" fontSize="sm">
+              Let's calculate your baseline metrics
+            </Text>
           </Box>
 
           <Box>

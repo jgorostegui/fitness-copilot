@@ -17,7 +17,6 @@ from app.models import (
     User,
 )
 
-
 # ============================================================================
 # Training Programs (shared across all users)
 # ============================================================================
@@ -29,7 +28,9 @@ def get_training_programs(session: Session) -> list[TrainingProgram]:
     return list(session.exec(statement).all())
 
 
-def get_training_program(session: Session, program_id: uuid.UUID) -> TrainingProgram | None:
+def get_training_program(
+    session: Session, program_id: uuid.UUID
+) -> TrainingProgram | None:
     """Get a training program by ID."""
     return session.get(TrainingProgram, program_id)
 
@@ -98,7 +99,9 @@ def get_exercise_logs_for_user(
     return list(session.exec(statement).all())
 
 
-def get_exercise_logs_for_today(session: Session, user_id: uuid.UUID) -> list[ExerciseLog]:
+def get_exercise_logs_for_today(
+    session: Session, user_id: uuid.UUID
+) -> list[ExerciseLog]:
     """Get exercise logs for today (UTC)."""
     today = datetime.utcnow().date()
     start = datetime.combine(today, time.min)

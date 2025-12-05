@@ -20,14 +20,16 @@ class CSVImportService:
     def __init__(self, data_dir: Path | str = "data"):
         self.data_dir = Path(data_dir)
 
-    def load_training_programs(self, session: Session, csv_path: str | None = None) -> int:
+    def load_training_programs(
+        self, session: Session, csv_path: str | None = None
+    ) -> int:
         """
         Load training programs and routines from CSV.
-        
+
         CSV format:
         program_id,program_name,description,days_per_week,difficulty,day_of_week,
         exercise_name,machine_hint,sets,reps,target_load_kg
-        
+
         Returns the number of programs loaded.
         """
         if csv_path is None:
@@ -69,10 +71,9 @@ class CSVImportService:
                         session.flush()  # Get the ID
                         programs[program_key] = program
 
-
                 # Create routine for this row
                 program = programs[program_key]
-                
+
                 # Validate numeric fields
                 sets = int(row["sets"])
                 reps = int(row["reps"])
@@ -107,10 +108,10 @@ class CSVImportService:
     ) -> int:
         """
         Load meal plans from CSV for a specific user.
-        
+
         CSV format:
         day_of_week,meal_type,item_name,calories,protein_g,carbs_g,fat_g
-        
+
         Returns the number of meal plan items loaded.
         """
         if csv_path is None:
@@ -156,7 +157,7 @@ class CSVImportService:
     def load_default_training_programs(self, session: Session) -> int:
         """
         Load default training programs if none exist.
-        
+
         Returns the number of programs loaded.
         """
         # Check if programs already exist

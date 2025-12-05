@@ -72,17 +72,14 @@ export const useFitnessStore = () => {
     }
   }, [profile, mealLogs, exerciseLogs])
 
-  const addMealLog = useCallback(
-    (meal: Omit<MealLog, "id" | "time">) => {
-      const newMeal: MealLog = {
-        ...meal,
-        id: Date.now().toString(),
-        time: new Date().toISOString(),
-      }
-      setMealLogs((prev) => [...prev, newMeal])
-    },
-    [],
-  )
+  const addMealLog = useCallback((meal: Omit<MealLog, "id" | "time">) => {
+    const newMeal: MealLog = {
+      ...meal,
+      id: Date.now().toString(),
+      time: new Date().toISOString(),
+    }
+    setMealLogs((prev) => [...prev, newMeal])
+  }, [])
 
   const addExerciseLog = useCallback(
     (exercise: Omit<ExerciseLog, "id" | "time">) => {

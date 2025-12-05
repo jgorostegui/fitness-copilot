@@ -81,7 +81,11 @@ export const FitnessApp = () => {
           />
         )}
         {activeTab === "profile" && (
-          <Profile profile={profile} onUpdate={setProfile} onReset={resetProfile} />
+          <Profile
+            profile={profile}
+            onUpdate={setProfile}
+            onReset={resetProfile}
+          />
         )}
       </Box>
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
