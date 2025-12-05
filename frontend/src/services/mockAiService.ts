@@ -96,9 +96,9 @@ export const sendMessageToAI = async (
         type: "log_exercise",
         data: {
           name: exerciseName,
-          sets: setsMatch ? Number.parseInt(setsMatch[1]) : 3,
-          reps: repsMatch ? Number.parseInt(repsMatch[1]) : 10,
-          weight: weightMatch ? Number.parseInt(weightMatch[1]) : 0,
+          sets: setsMatch ? Number.parseInt(setsMatch[1], 10) : 3,
+          reps: repsMatch ? Number.parseInt(repsMatch[1], 10) : 10,
+          weight: weightMatch ? Number.parseInt(weightMatch[1], 10) : 0,
         },
       },
     }

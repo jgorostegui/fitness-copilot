@@ -9,8 +9,8 @@ import {
 } from "@chakra-ui/react"
 import { useEffect, useRef, useState } from "react"
 import { FiCamera, FiMic, FiSend, FiX } from "react-icons/fi"
-import { sendMessageToAI } from "@/services/mockAiService"
 import { TODAY_ROUTINE } from "@/constants/fitness"
+import { sendMessageToAI } from "@/services/mockAiService"
 import type {
   DailyStats,
   ExerciseLog,
@@ -438,7 +438,7 @@ export const ChatInterface = ({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [history, isTyping])
+  }, [])
 
   useEffect(() => {
     const lastMsg = history[history.length - 1]

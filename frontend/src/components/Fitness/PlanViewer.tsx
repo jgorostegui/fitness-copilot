@@ -44,7 +44,7 @@ export const PlanViewer = ({
   }
 
   const handleLogSet = (exerciseName: string, reps: string) => {
-    const repsParsed = Number.parseInt(reps.split("-")[0]) || 10
+    const repsParsed = Number.parseInt(reps.split("-")[0], 10) || 10
     onAddExercise({ name: exerciseName, sets: 1, reps: repsParsed, weight: 0 })
   }
 

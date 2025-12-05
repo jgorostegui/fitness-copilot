@@ -31,7 +31,13 @@ const CircularProgress = ({
   return (
     <Box textAlign="center">
       <Box position="relative" w="100px" h="100px" mx="auto">
-        <svg width="100" height="100" viewBox="0 0 100 100">
+        <svg
+          width="100"
+          height="100"
+          viewBox="0 0 100 100"
+          role="img"
+          aria-label={`${label} progress: ${percentage}%`}
+        >
           <circle
             cx="50"
             cy="50"

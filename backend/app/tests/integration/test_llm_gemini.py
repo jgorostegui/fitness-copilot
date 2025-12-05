@@ -56,7 +56,7 @@ async def test_gemini_extract_json(llm_provider):
     prompt = """
     Return a JSON object with the following structure:
     {"name": "test", "value": 42}
-    
+
     Return ONLY the JSON, no other text.
     """
     result = await llm_provider.extract_json(prompt, timeout_s=30.0)

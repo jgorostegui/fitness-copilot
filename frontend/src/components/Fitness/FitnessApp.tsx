@@ -1,12 +1,12 @@
 import { Box } from "@chakra-ui/react"
 import { useState } from "react"
 import { useFitnessStore } from "@/hooks/useFitnessStore"
-import { Onboarding } from "./Onboarding"
-import { Dashboard } from "./Dashboard"
-import { ChatInterface } from "./ChatInterface"
-import { Profile } from "./Profile"
-import { PlanViewer } from "./PlanViewer"
 import { BottomNav } from "./BottomNav"
+import { ChatInterface } from "./ChatInterface"
+import { Dashboard } from "./Dashboard"
+import { Onboarding } from "./Onboarding"
+import { PlanViewer } from "./PlanViewer"
+import { Profile } from "./Profile"
 
 type Tab = "monitor" | "workout" | "chat" | "nutrition" | "profile"
 

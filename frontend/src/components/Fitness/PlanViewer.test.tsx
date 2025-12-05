@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from "@testing-library/react"
-import { describe, it, expect, vi } from "vitest"
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react"
+import { fireEvent, render, screen } from "@testing-library/react"
+import { describe, expect, it, vi } from "vitest"
 import { PlanViewer } from "./PlanViewer"
 
 const renderWithChakra = (ui: React.ReactElement) => {

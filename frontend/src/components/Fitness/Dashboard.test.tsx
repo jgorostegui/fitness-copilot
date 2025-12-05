@@ -1,13 +1,13 @@
-import { render, screen } from "@testing-library/react"
-import { describe, it, expect } from "vitest"
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react"
-import { Dashboard } from "./Dashboard"
+import { render, screen } from "@testing-library/react"
+import { describe, expect, it } from "vitest"
 import type {
   DailyStats,
-  MealLog,
   ExerciseLog,
+  MealLog,
   UserProfile,
 } from "@/types/fitness"
+import { Dashboard } from "./Dashboard"
 
 const renderWithChakra = (ui: React.ReactElement) => {
   return render(<ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>)

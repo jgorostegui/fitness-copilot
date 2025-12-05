@@ -5,9 +5,12 @@
     "includes": [
       "**",
       "!**/node_modules",
+      "!**/dist",
       "!**/src/routeTree.gen.ts",
+      "!**/src/client",
       "!**/playwright.config.ts",
-      "!**/playwright-report"
+      "!**/playwright-report",
+      "!**/.kiro"
     ]
   },
   "linter": {
