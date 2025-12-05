@@ -6,7 +6,12 @@ import { useFitnessStore } from "@/hooks/useFitnessStore"
 import { useLogs } from "@/hooks/useLogs"
 import { useProfile } from "@/hooks/useProfile"
 import { useSummary } from "@/hooks/useSummary"
-import type { DailyStats, ExerciseLog, MealLog, UserProfile } from "@/types/fitness"
+import type {
+  DailyStats,
+  ExerciseLog,
+  MealLog,
+  UserProfile,
+} from "@/types/fitness"
 import { BottomNav } from "./BottomNav"
 import { ChatInterface } from "./ChatInterface"
 import { Dashboard } from "./Dashboard"
@@ -28,21 +33,23 @@ const FullScreenLoader = () => (
 
 export const FitnessApp = () => {
   const [activeTab, setActiveTab] = useState<Tab>("monitor")
-  const { isAuthenticated, isLoading: authLoading, loginDemo, logout } = useAuth()
+  const {
+    isAuthenticated,
+    isLoading: authLoading,
+    loginDemo,
+    logout,
+  } = useAuth()
   const {
     profile: apiProfile,
     isLoading: profileLoading,
     updateProfileAsync,
   } = useProfile(isAuthenticated)
-  const {
-    profile,
-    setProfile,
-    resetProfile,
-  } = useFitnessStore()
+  const { profile, setProfile, resetProfile } = useFitnessStore()
 
   // Use API hooks for real data
   const { summary } = useSummary(isAuthenticated)
-  const { mealLogs: apiMealLogs, exerciseLogs: apiExerciseLogs } = useLogs(isAuthenticated)
+  const { mealLogs: apiMealLogs, exerciseLogs: apiExerciseLogs } =
+    useLogs(isAuthenticated)
   const { sendMessage, clearMessages } = useChat(isAuthenticated)
 
   // Quick-add handlers that use chat API
@@ -123,15 +130,21 @@ export const FitnessApp = () => {
 
   // Build current profile from API or local state
   // If API profile has completed onboarding but local profile is missing, build from API
-  const currentProfile: UserProfile | null = profile ?? (apiProfile?.onboardingComplete ? {
-    weight: apiProfile.weightKg ?? 80,
-    height: apiProfile.heightCm ?? 180,
-    plan: apiProfile.goalMethod?.includes("cut") ? "cut" 
-        : apiProfile.goalMethod?.includes("gain") ? "bulk" 
-        : "maintain",
-    theme: "light",
-    onboardingComplete: true,
-  } : null)
+  const currentProfile: UserProfile | null =
+    profile ??
+    (apiProfile?.onboardingComplete
+      ? {
+          weight: apiProfile.weightKg ?? 80,
+          height: apiProfile.heightCm ?? 180,
+          plan: apiProfile.goalMethod?.includes("cut")
+            ? "cut"
+            : apiProfile.goalMethod?.includes("gain")
+              ? "bulk"
+              : "maintain",
+          theme: "light",
+          onboardingComplete: true,
+        }
+      : null)
 
   // Fallback to onboarding if no profile available
   if (!currentProfile) {

@@ -19,7 +19,12 @@ interface ProfileProps {
   onLogout?: () => void
 }
 
-export const Profile = ({ profile, onUpdate, onReset, onLogout }: ProfileProps) => {
+export const Profile = ({
+  profile,
+  onUpdate,
+  onReset,
+  onLogout,
+}: ProfileProps) => {
   const [weight, setWeight] = useState(profile.weight)
   const [height, setHeight] = useState(profile.height)
   const [plan, setPlan] = useState<PlanType>(profile.plan)

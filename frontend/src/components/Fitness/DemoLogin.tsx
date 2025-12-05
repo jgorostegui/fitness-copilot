@@ -84,7 +84,9 @@ export function DemoLogin({ onLogin, isLoading }: DemoLoginProps) {
             p={6}
             border="2px"
             borderColor={
-              selectedPersona === persona.id ? `${persona.color}.400` : "gray.200"
+              selectedPersona === persona.id
+                ? `${persona.color}.400`
+                : "gray.200"
             }
             cursor="pointer"
             transition="all 0.2s"

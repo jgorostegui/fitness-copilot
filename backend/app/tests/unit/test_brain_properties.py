@@ -8,30 +8,67 @@ Feature: slices-0-3
 """
 
 import pytest
-from hypothesis import given, settings, assume
+from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
-from app.models import ChatActionType, ChatAttachmentType
+from app.models import ChatActionType
 from app.services.brain import BrainService
-
 
 # ============================================================================
 # Strategies
 # ============================================================================
 
 # Food keywords from BrainService
-FOOD_KEYWORDS = {"ate", "eaten", "had", "breakfast", "lunch", "dinner", "snack", "eating", "eat"}
+FOOD_KEYWORDS = {
+    "ate",
+    "eaten",
+    "had",
+    "breakfast",
+    "lunch",
+    "dinner",
+    "snack",
+    "eating",
+    "eat",
+}
 
 # Known foods from BrainService.FOOD_DB
-KNOWN_FOODS = {"banana", "chicken", "rice", "eggs", "oats", "salmon", "broccoli", "apple", "bread", "milk"}
+KNOWN_FOODS = {
+    "banana",
+    "chicken",
+    "rice",
+    "eggs",
+    "oats",
+    "salmon",
+    "broccoli",
+    "apple",
+    "bread",
+    "milk",
+}
 
 # Exercise keywords
-EXERCISE_KEYWORDS = {"bench", "squat", "deadlift", "press", "row", "curl", "sets", "reps", "kg", "lbs", "pullup", "dip"}
+EXERCISE_KEYWORDS = {
+    "bench",
+    "squat",
+    "deadlift",
+    "press",
+    "row",
+    "curl",
+    "sets",
+    "reps",
+    "kg",
+    "lbs",
+    "pullup",
+    "dip",
+}
 
 # Strategy for messages with food keywords
 food_keyword_strategy = st.sampled_from(list(FOOD_KEYWORDS))
 known_food_strategy = st.sampled_from(list(KNOWN_FOODS))
-random_text_strategy = st.text(min_size=0, max_size=100, alphabet=st.characters(whitelist_categories=("L", "N", "P", "Z")))
+random_text_strategy = st.text(
+    min_size=0,
+    max_size=100,
+    alphabet=st.characters(whitelist_categories=("L", "N", "P", "Z")),
+)
 
 
 def message_with_food_keyword(keyword: str, prefix: str = "", suffix: str = "") -> str:
@@ -83,7 +120,11 @@ class TestFoodKeywordDetection:
         assert brain._has_food_keywords(message) is True
 
     @given(
-        text=st.text(min_size=1, max_size=200, alphabet=st.characters(whitelist_categories=("L", "N", "Z"))),
+        text=st.text(
+            min_size=1,
+            max_size=200,
+            alphabet=st.characters(whitelist_categories=("L", "N", "Z")),
+        ),
     )
     @settings(max_examples=100)
     def test_non_food_keywords_not_detected(
@@ -191,7 +232,9 @@ class TestUnknownFoodFallback:
     """Property 7: Unknown food falls back gracefully."""
 
     @given(
-        unknown_food=st.text(min_size=3, max_size=20, alphabet=st.characters(whitelist_categories=("L",))),
+        unknown_food=st.text(
+            min_size=3, max_size=20, alphabet=st.characters(whitelist_categories=("L",))
+        ),
         keyword=food_keyword_strategy,
     )
     @settings(max_examples=100)
@@ -238,7 +281,11 @@ class TestGeneralResponse:
     """Property 11: Non-matching messages get helpful response."""
 
     @given(
-        text=st.text(min_size=1, max_size=200, alphabet=st.characters(whitelist_categories=("L", "N", "Z"))),
+        text=st.text(
+            min_size=1,
+            max_size=200,
+            alphabet=st.characters(whitelist_categories=("L", "N", "Z")),
+        ),
     )
     @settings(max_examples=100)
     def test_non_matching_returns_none_action(
@@ -267,7 +314,11 @@ class TestGeneralResponse:
         assert response.action_type == ChatActionType.NONE
 
         # Response should contain helpful suggestions
-        assert "log" in response.content.lower() or "help" in response.content.lower() or "try" in response.content.lower()
+        assert (
+            "log" in response.content.lower()
+            or "help" in response.content.lower()
+            or "try" in response.content.lower()
+        )
 
     def test_general_response_contains_examples(self) -> None:
         """
@@ -281,9 +332,13 @@ class TestGeneralResponse:
         response = brain._general_response()
 
         # Should contain example commands
-        assert "banana" in response.content.lower() or "food" in response.content.lower()
-        assert "bench" in response.content.lower() or "exercise" in response.content.lower()
-
+        assert (
+            "banana" in response.content.lower() or "food" in response.content.lower()
+        )
+        assert (
+            "bench" in response.content.lower()
+            or "exercise" in response.content.lower()
+        )
 
 
 # ============================================================================
@@ -332,7 +387,17 @@ class TestExerciseKeywordDetection:
 
 
 # Known exercises from BrainService.EXERCISE_MAP
-KNOWN_EXERCISES = {"bench", "squat", "deadlift", "press", "row", "curl", "pullup", "pull-up", "dip"}
+KNOWN_EXERCISES = {
+    "bench",
+    "squat",
+    "deadlift",
+    "press",
+    "row",
+    "curl",
+    "pullup",
+    "pull-up",
+    "dip",
+}
 
 
 @pytest.mark.unit
@@ -343,7 +408,9 @@ class TestExerciseParsing:
         exercise=st.sampled_from(list(KNOWN_EXERCISES)),
         sets=st.integers(min_value=1, max_value=10),
         reps=st.integers(min_value=1, max_value=30),
-        weight=st.integers(min_value=1, max_value=300),  # Use integers for cleaner parsing
+        weight=st.integers(
+            min_value=1, max_value=300
+        ),  # Use integers for cleaner parsing
     )
     @settings(max_examples=100)
     def test_exercise_with_values_extracts_correctly(
@@ -426,7 +493,6 @@ class TestExerciseParsing:
         assert response.action_data is not None
         exercise_name = response.action_data["exercise_name"]
         assert exercise_name in response.content
-
 
 
 # ============================================================================

@@ -6,7 +6,6 @@ These are Medium (Acceptance) tests - require DB.
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session
 
 from app.core.config import settings
 
@@ -31,7 +30,7 @@ def test_get_demo_users(client: TestClient) -> None:
 
 
 @pytest.mark.acceptance
-def test_demo_login_cut_creates_user(client: TestClient, db: Session) -> None:
+def test_demo_login_cut_creates_user(client: TestClient) -> None:
     """Test POST /demo/login/cut creates user with onboarding_complete=False."""
     r = client.post(f"{settings.API_V1_STR}/demo/login/cut")
     assert r.status_code == 200

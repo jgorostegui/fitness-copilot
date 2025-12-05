@@ -306,7 +306,10 @@ def test_reset_updates_summary_to_zero(client: TestClient) -> None:
     pre_reset_summary = client.get(
         f"{settings.API_V1_STR}/summary/today", headers=headers
     ).json()
-    assert pre_reset_summary["caloriesConsumed"] > 0 or pre_reset_summary["workoutsCompleted"] > 0
+    assert (
+        pre_reset_summary["caloriesConsumed"] > 0
+        or pre_reset_summary["workoutsCompleted"] > 0
+    )
 
     # Send reset command
     r = client.post(

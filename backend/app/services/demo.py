@@ -91,7 +91,9 @@ def get_or_create_demo_user(session: Session, persona: str) -> User:
         ValueError: If persona is not valid
     """
     if persona not in PERSONAS:
-        raise ValueError(f"Invalid persona: {persona}. Must be one of: {list(PERSONAS.keys())}")
+        raise ValueError(
+            f"Invalid persona: {persona}. Must be one of: {list(PERSONAS.keys())}"
+        )
 
     config = PERSONAS[persona]
 

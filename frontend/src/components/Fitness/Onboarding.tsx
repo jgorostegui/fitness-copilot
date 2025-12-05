@@ -28,10 +28,16 @@ const mapGoalToPlan = (goalMethod?: string | null): PlanType => {
   return "maintain"
 }
 
-export const Onboarding = ({ onComplete, initialProfile, onBack }: OnboardingProps) => {
+export const Onboarding = ({
+  onComplete,
+  initialProfile,
+  onBack,
+}: OnboardingProps) => {
   const [weight, setWeight] = useState(initialProfile?.weightKg ?? 80)
   const [height, setHeight] = useState(initialProfile?.heightCm ?? 180)
-  const [plan, setPlan] = useState<PlanType>(mapGoalToPlan(initialProfile?.goalMethod))
+  const [plan, setPlan] = useState<PlanType>(
+    mapGoalToPlan(initialProfile?.goalMethod),
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {

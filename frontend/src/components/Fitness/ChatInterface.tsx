@@ -519,13 +519,13 @@ export const ChatInterface = () => {
   const stopRecording = () => {
     if (!isRecording) return
     setIsRecording(false)
-    
+
     // Clear any pending timeout
     if (recordingTimeoutRef.current) {
       clearTimeout(recordingTimeoutRef.current)
       recordingTimeoutRef.current = null
     }
-    
+
     // Send the voice message
     sendMessage({
       content: "I just did 3 sets of leg press at 100kg",
@@ -586,15 +586,13 @@ export const ChatInterface = () => {
           </Text>
         </Box>
 
-        {msg.actionType &&
-          msg.actionType !== "none" &&
-          msg.actionData && (
-            <ActionCard
-              type={msg.actionType}
-              data={msg.actionData as Record<string, unknown>}
-              stats={stats}
-            />
-          )}
+        {msg.actionType && msg.actionType !== "none" && msg.actionData && (
+          <ActionCard
+            type={msg.actionType}
+            data={msg.actionData as Record<string, unknown>}
+            stats={stats}
+          />
+        )}
 
         <Text fontSize="xs" color="gray.400" mt={1} px={1}>
           {timestamp.toLocaleTimeString([], {
@@ -631,7 +629,9 @@ export const ChatInterface = () => {
         <VStack gap={3} align="stretch">
           {messages.length === 0 && (
             <Flex direction="column" align="center" justify="center" py={8}>
-              <Text fontSize="4xl" mb={2}>🤖</Text>
+              <Text fontSize="4xl" mb={2}>
+                🤖
+              </Text>
               <Text color="gray.500" textAlign="center">
                 Hi! I'm your fitness copilot.
                 <br />

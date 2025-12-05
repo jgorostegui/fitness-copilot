@@ -95,7 +95,10 @@ def send_message(
     )
 
     # Create logs based on action type
-    if brain_response.action_type == ChatActionType.LOG_FOOD and brain_response.action_data:
+    if (
+        brain_response.action_type == ChatActionType.LOG_FOOD
+        and brain_response.action_data
+    ):
         meal_log_in = MealLogCreate(
             meal_name=brain_response.action_data.get("meal_name", "Unknown"),
             meal_type=brain_response.action_data.get("meal_type", "snack"),
@@ -106,7 +109,10 @@ def send_message(
         )
         create_meal_log(session, current_user.id, meal_log_in)
 
-    elif brain_response.action_type == ChatActionType.LOG_EXERCISE and brain_response.action_data:
+    elif (
+        brain_response.action_type == ChatActionType.LOG_EXERCISE
+        and brain_response.action_data
+    ):
         exercise_log_in = ExerciseLogCreate(
             exercise_name=brain_response.action_data.get("exercise_name", "Unknown"),
             sets=brain_response.action_data.get("sets", 0),
@@ -142,7 +148,6 @@ def send_message(
         attachment_url=assistant_message.attachment_url,
         created_at=assistant_message.created_at,
     )
-
 
 
 @router.delete("/messages", response_model=Message)

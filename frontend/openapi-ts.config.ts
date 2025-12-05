@@ -15,7 +15,8 @@ export default defineConfig({
         // operationId format: "login-login_access_token" -> "loginAccessToken"
         // Split by hyphen, take last part, convert snake_case to camelCase
         const parts = operationId.split("-")
-        const methodPart = parts.length > 1 ? parts.slice(1).join("-") : parts[0]
+        const methodPart =
+          parts.length > 1 ? parts.slice(1).join("-") : parts[0]
 
         // Convert snake_case to camelCase
         const camelCase = methodPart.replace(/_([a-z])/g, (_, letter) =>
