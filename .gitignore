@@ -5,6 +5,10 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 
+# Double underscore files (except __init__.py)
+__*
+!__init__.py
+
 # Environment
 .env
 .envrc

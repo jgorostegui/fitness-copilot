@@ -49,35 +49,68 @@ just build         # Rebuild images
 
 ## Shell Access (Inside Docker)
 ```bash
-just sh            # Backend shell
-just db-shell      # PostgreSQL shell
-just frontend-shell # Frontend shell
+just docker-shell  # Backend shell (run --rm, works even if not running)
+just sh            # Backend shell (exec into running container)
+just db-sh         # PostgreSQL shell
 ```
+
+## Testing Philosophy
+
+This project uses **three test tiers** based on Google's Small/Medium/Large sizing:
+
+| Type            | Scope                    | Network   | Database | CI Behavior      |
+|-----------------|--------------------------|-----------|----------|------------------|
+| **Unit**        | Pure logic, mocked deps  | No        | No       | Must pass        |
+| **Integration** | API + DB, mocked external| Localhost | Yes      | Must pass        |
+| **E2E**         | Full browser flows       | Yes       | Yes      | Non-blocking     |
 
 ## Testing (Host Machine)
 ```bash
-just test          # All tests
-just tb            # Backend tests (alias)
-just tf            # Frontend tests (alias)
-just te            # E2E tests (alias)
-just test-e2e-ui   # E2E with UI
+just test              # All tests (backend + frontend)
+just test-backend      # Backend tests only
+just test-frontend     # Frontend tests only
+just test-e2e          # E2E tests (Playwright)
+just test-e2e-ui       # E2E with UI
+
+# Aliases
+just tb                # Backend tests (alias)
+just tf                # Frontend tests (alias)
+just te                # E2E tests (alias)
+
+# Direct uv commands (from backend directory)
+cd backend
+uv run pytest                    # Run all tests
+uv run pytest -x                 # Stop on first failure
+uv run pytest -k "test_name"     # Run specific test
+uv run pytest -m unit            # Run only unit tests
+uv run pytest -m integration     # Run only integration tests
+uv run pytest --cov=app          # Run with coverage
 ```
 
-## Testing (Inside Docker)
+## Docker Commands (Atomic)
 ```bash
-just docker-test                    # All tests in Docker
-just docker-test-backend            # Backend tests in Docker
-just docker-test-backend-args "-x"  # Backend tests with args
+just docker-run "cmd"       # Run any command (run --rm: creates new container, always works)
+just docker-exec "cmd"      # Run any command (exec: faster, requires running container)
+```
+
+## Testing (Inside Docker) - requires: just dev or just up
+```bash
+just docker-test                    # All backend tests
+just docker-test-args "-x -v"       # Backend tests with args
+just docker-test-unit               # Unit tests only
+just docker-test-integration        # Integration tests only
+just docker-test-coverage           # Tests with coverage report
+just docker-e2e                     # E2E tests (playwright container)
 ```
 
 ## E2E Testing
 ```bash
-just e2e-up           # Start full stack
-just e2e-run          # Run E2E tests (from host)
-just e2e-run-docker   # Run E2E tests (inside Docker)
-just e2e-run-headed   # Run E2E with visible browser
+just e2e-up           # Start full stack for E2E
+just test-e2e         # Run E2E tests (from host)
+just docker-e2e       # Run E2E tests (inside Docker)
 just e2e-down         # Stop stack
 just e2e              # Full cycle: up, test, down
+just docker-e2e-full  # Full cycle in Docker: up, docker-e2e, down
 ```
 
 ## Database (Inside Docker)
@@ -85,14 +118,26 @@ just e2e              # Full cycle: up, test, down
 just migrate                    # Run migrations
 just migration "description"    # Create migration
 just migrate-rollback           # Rollback last
-just migrate-history            # Show history
+```
+
+## Database (Local - from backend directory)
+```bash
+cd backend
+uv run alembic upgrade head                           # Run migrations
+uv run alembic revision --autogenerate -m "desc"      # Create migration
+uv run alembic downgrade -1                           # Rollback last
+uv run alembic history                                # Show history
 ```
 
 ## Code Quality (Host Machine)
 ```bash
-just lint          # All linters
-just format        # Format all code
-just pre-commit    # Run pre-commit hooks
+just lint              # All linters (backend + frontend)
+just lint-backend      # Backend linting only
+just lint-frontend     # Frontend linting only
+just format            # Format all code
+just format-backend    # Format backend only
+just format-frontend   # Format frontend only
+just pre-commit        # Run pre-commit hooks
 ```
 
 ## Build & Utilities

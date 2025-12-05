@@ -43,7 +43,12 @@ build:
 
 # ============== Shell Access ==============
 
-# Backend shell
+# Backend shell (run --rm: works even if container not running)
+docker-shell:
+    @echo "Opening shell in backend container..."
+    docker compose run --rm backend bash
+
+# Backend shell (exec: faster, requires running container)
 sh:
     docker compose exec backend bash
 
@@ -51,19 +56,46 @@ sh:
 db-sh:
     docker compose exec db psql -U postgres -d app
 
-# ============== Docker Run (execute command inside container) ==============
+# ============== Docker Commands ==============
 
-# Run any command inside backend container
+# Run any command (run --rm: creates new container, always works)
 docker-run cmd:
+    docker compose run --rm backend bash -c "{{cmd}}"
+
+# Run any command (exec: faster, requires running container)
+docker-exec cmd:
     docker compose exec backend bash -c "{{cmd}}"
 
-# Run backend tests inside Docker
+# ============== Docker Testing (requires: just dev or just up) ==============
+
+# Run all backend tests in Docker
 docker-test:
+    @echo "Running backend tests in Docker..."
     docker compose exec backend bash scripts/tests-start.sh
 
-# Run backend tests with args
+# Run backend tests with args (e.g., just docker-test-args "-x -v")
 docker-test-args args:
     docker compose exec backend bash scripts/tests-start.sh {{args}}
+
+# Run unit tests only in Docker
+docker-test-unit:
+    @echo "Running unit tests in Docker..."
+    docker compose exec backend uv run pytest -m unit -v
+
+# Run acceptance tests only in Docker
+docker-test-acceptance:
+    @echo "Running acceptance tests in Docker..."
+    docker compose exec backend uv run pytest -m acceptance -v
+
+# Run integration tests in Docker (live external services, skipped by default)
+docker-test-integration:
+    @echo "Running integration tests in Docker (live external services)..."
+    docker compose exec backend bash -c "RUN_INTEGRATION_TESTS=1 uv run pytest -m integration -v"
+
+# Run tests with coverage in Docker
+docker-test-coverage:
+    @echo "Running tests with coverage in Docker..."
+    docker compose exec backend uv run pytest --cov=app --cov-report=html --cov-report=term-missing
 
 # Run E2E tests inside Docker (playwright container)
 docker-e2e:
@@ -75,6 +107,21 @@ test: test-backend test-frontend
 
 test-backend:
     cd backend && uv run pytest
+
+# Run unit tests only (Small - no DB required)
+test-unit:
+    @echo "Running unit tests (Small - no DB)..."
+    cd backend && uv run pytest -m unit -v
+
+# Run acceptance tests only (Medium - DB required, mocks external)
+test-acceptance:
+    @echo "Running acceptance tests (Medium - DB required)..."
+    cd backend && uv run pytest -m acceptance -v
+
+# Run integration tests (Large - live external services, skipped by default)
+test-integration:
+    @echo "Running integration tests (Large - live external services)..."
+    cd backend && RUN_INTEGRATION_TESTS=1 uv run pytest -m integration -v
 
 test-frontend:
     cd frontend && npm run test
@@ -121,6 +168,29 @@ format-frontend:
 pre-commit:
     uv run pre-commit run --all-files
 
+# Run all quality checks (lint + format check)
+check: lint format-check
+
+format-check:
+    @echo "Checking code formatting..."
+    cd backend && uv run ruff format --check .
+    cd frontend && npx biome format ./
+
+# ============== Security Scanning ==============
+
+# Run Bandit security scan
+security-bandit:
+    @echo "Running Bandit security scan..."
+    cd backend && uv run bandit -r app/ -f screen
+
+# Run Safety dependency scan
+security-safety:
+    @echo "Running Safety dependency scan..."
+    cd backend && uv run safety check
+
+# Run all security scans
+security: security-bandit security-safety
+
 # ============== Database ==============
 
 migrate:
@@ -163,5 +233,8 @@ sync-secrets:
 # ============== Aliases ==============
 
 tb: test-backend
+tu: test-unit
+ta: test-acceptance
+ti: test-integration
 tf: test-frontend
 te: test-e2e

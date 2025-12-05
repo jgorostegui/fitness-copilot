@@ -59,18 +59,40 @@
 
 ## Testing
 
+This project uses a **three-tier testing philosophy** based on Google's Small/Medium/Large sizing:
+[https://testing.googleblog.com/2010/12/test-sizes.html](https://testing.googleblog.com/2010/12/test-sizes.html)
+
+### Test Tiers
+
+| Type            | Size   | Network   | Database | External APIs | Typical Time |
+|-----------------|--------|-----------|----------|---------------|--------------|
+| **Unit**        | Small  | No        | No       | No            | ≤ 30s suite  |
+| **Integration** | Medium | Localhost | Yes      | Mocked        | ≤ 150s suite |
+| **E2E**         | Large  | Yes       | Yes      | Yes           | 300+ s       |
+
+- **Unit**: Pure logic in isolation; heavy mocking; deterministic; fastest feedback
+- **Integration**: End-to-end through our stack (API/DB) but mocks external HTTP
+- **E2E**: Full browser-based tests with Playwright; exercises real user flows
+
 ### Backend Tests
 - Use pytest for all tests
 - Test files in `backend/app/tests/`
-- Include unit tests for CRUD operations
+- Organize by tier: `tests/unit/`, `tests/integration/`
+- Use pytest markers: `@pytest.mark.unit`, `@pytest.mark.integration`
+- Include unit tests for CRUD operations and business logic
 - Include integration tests for API endpoints
-- Aim for high test coverage
+- Aim for high test coverage (≥ 50% gate in CI)
 
 ### Frontend Tests
 - Use Playwright for E2E tests
 - Test critical user flows
 - Test files in `frontend/tests/`
 - Run tests against Docker stack
+
+### What Runs in CI
+1. **Unit tests** → must pass (blocks merge)
+2. **Integration tests** → must pass (blocks merge)
+3. **E2E tests** → runs with `continue-on-error: true` (non-blocking due to flakiness)
 
 ## Git Workflow
 - Use descriptive commit messages

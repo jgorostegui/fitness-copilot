@@ -19,8 +19,7 @@ This starts all services with hot-reload enabled:
 ```bash
 cd backend
 uv sync                          # Install dependencies
-source .venv/bin/activate        # Activate virtual environment
-fastapi dev app/main.py          # Start dev server
+uv run fastapi dev app/main.py   # Start dev server
 ```
 
 **Frontend:**
@@ -36,13 +35,19 @@ npm run dev                      # Start dev server
 - **Models**: Modify SQLModel models in `backend/app/models.py`
 - **API Endpoints**: Add/modify endpoints in `backend/app/api/`
 - **CRUD Operations**: Update utils in `backend/app/crud.py`
-- **Tests**: Run with `bash ./scripts/test.sh`
+- **Tests**: Run with `uv run pytest` or `bash ./scripts/test.sh`
 
 ### Database Migrations
 ```bash
+# Inside Docker
 docker compose exec backend bash
 alembic revision --autogenerate -m "Description"
 alembic upgrade head
+
+# Local (from backend directory)
+cd backend
+uv run alembic revision --autogenerate -m "Description"
+uv run alembic upgrade head
 ```
 
 ### Frontend Development
