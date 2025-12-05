@@ -95,6 +95,11 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
+    # LLM Settings
+    LLM_ENABLED: bool = False
+    LLM_MODEL: str = "gemini-2.5-flash"
+    GOOGLE_API_KEY: str | None = None
+
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
             message = (

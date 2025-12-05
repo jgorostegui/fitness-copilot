@@ -1,0 +1,182 @@
+"""
+Google Gemini LLM Provider.
+
+Provides structured data extraction using Google's Generative AI API.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import logging
+import re
+from typing import Any
+
+import google.generativeai as genai
+from google.generativeai.types import HarmBlockThreshold, HarmCategory
+
+from app.core.config import settings
+
+logger = logging.getLogger(__name__)
+
+
+class GoogleLLMProvider:
+    """Google Gemini LLM provider for structured data extraction."""
+
+    def __init__(self, model: str = "gemini-2.5-flash"):
+        api_key = getattr(settings, "GOOGLE_API_KEY", None)
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY must be set for the Google LLM provider.")
+
+        genai.configure(api_key=api_key)
+        self.model_name = (model or "gemini-2.5-flash").strip()
+        self.model = genai.GenerativeModel(self.model_name)
+
+    async def is_healthy(self) -> bool:
+        """Check if the LLM provider is healthy."""
+        try:
+            _ = genai.list_models()
+            return True
+        except Exception as e:
+            logger.debug("Google LLM health check error: %s", e)
+            return bool(self.model)
+
+    async def generate(self, prompt: str, timeout_s: float = 30.0) -> str | None:
+        """Generate text from a prompt."""
+        try:
+            response = await asyncio.wait_for(
+                self.model.generate_content_async(
+                    prompt,
+                    generation_config=genai.types.GenerationConfig(
+                        temperature=0.7,
+                    ),
+                    safety_settings=self._get_safety_settings(),
+                ),
+                timeout=timeout_s,
+            )
+            return self._extract_text(response)
+        except asyncio.TimeoutError:
+            logger.warning("LLM generation timed out after %.1fs", timeout_s)
+            return None
+        except Exception as e:
+            logger.error("LLM generation error: %s", e)
+            return None
+
+    async def extract_json(
+        self, prompt: str, timeout_s: float = 30.0
+    ) -> list[dict[str, Any]]:
+        """Extract structured JSON data from a prompt."""
+        max_retries = 3
+
+        for attempt in range(max_retries):
+            try:
+                response = await asyncio.wait_for(
+                    self.model.generate_content_async(
+                        prompt,
+                        generation_config=genai.types.GenerationConfig(
+                            response_mime_type="application/json",
+                            temperature=0.2,
+                        ),
+                        safety_settings=self._get_safety_settings(),
+                    ),
+                    timeout=timeout_s,
+                )
+                raw = self._extract_text(response)
+                return self._parse_json(raw)
+
+            except Exception as e:
+                msg = str(e)
+                is_rate_limit = "429" in msg or "rate" in msg.lower()
+
+                if is_rate_limit and attempt < max_retries - 1:
+                    wait_time = 2 ** (attempt + 1)
+                    logger.warning(
+                        "LLM rate limited (attempt %d/%d). Waiting %ds...",
+                        attempt + 1,
+                        max_retries,
+                        wait_time,
+                    )
+                    await asyncio.sleep(wait_time)
+                    continue
+
+                logger.error("LLM JSON extraction failed: %s", msg)
+                return []
+
+        return []
+
+    def _get_safety_settings(self) -> dict:
+        """Get permissive safety settings."""
+        return {
+            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+        }
+
+    def _extract_text(self, response: Any) -> str | None:
+        """Extract text from Gemini response."""
+        try:
+            candidates = getattr(response, "candidates", None) or []
+            for candidate in candidates:
+                content = getattr(candidate, "content", None)
+                parts = getattr(content, "parts", None) or []
+                for part in parts:
+                    text = getattr(part, "text", None)
+                    if isinstance(text, str) and text.strip():
+                        return text
+        except Exception:
+            pass
+
+        try:
+            text = getattr(response, "text", None)
+            if isinstance(text, str) and text.strip():
+                return text
+        except Exception:
+            pass
+
+        return None
+
+    def _parse_json(self, raw: str | None) -> list[dict[str, Any]]:
+        """Parse JSON from raw LLM output."""
+        if not raw:
+            return []
+
+        raw = raw.strip()
+
+        # Try direct parse
+        try:
+            obj = json.loads(raw)
+            if isinstance(obj, dict):
+                return [obj]
+            if isinstance(obj, list):
+                return [d for d in obj if isinstance(d, dict)]
+        except json.JSONDecodeError:
+            pass
+
+        # Strip code fences
+        if raw.startswith("```"):
+            raw = raw.strip("`")
+            if raw.lower().startswith("json"):
+                raw = raw[4:].strip()
+
+        # Try to find JSON array
+        match = re.search(r"\[[\s\S]*\]", raw)
+        if match:
+            try:
+                obj = json.loads(match.group(0))
+                if isinstance(obj, list):
+                    return [d for d in obj if isinstance(d, dict)]
+            except json.JSONDecodeError:
+                pass
+
+        # Try to find JSON object
+        match = re.search(r"\{[\s\S]*\}", raw)
+        if match:
+            try:
+                obj = json.loads(match.group(0))
+                if isinstance(obj, dict):
+                    return [obj]
+            except json.JSONDecodeError:
+                pass
+
+        return []
