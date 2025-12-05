@@ -205,6 +205,13 @@ migration name:
 migrate-rollback:
     docker compose exec backend alembic downgrade -1
 
+# ============== Build ==============
+
+# Build all images via docker compose (mimics staging deploy exactly)
+build-staging:
+    @echo "Building images via docker compose (same as staging deploy)..."
+    docker compose -f docker-compose.yml build
+
 # ============== Utilities ==============
 
 generate-client:
