@@ -132,8 +132,11 @@ test-e2e:
 test-e2e-ui:
     cd frontend && npx playwright test --ui
 
-# ============== E2E Stack ==============
+# ============== E2E Testing ==============
+# Development: run "just dev" + "just frontend" in separate terminals, then "just test-e2e"
+# CI-like: run "just e2e" for full Docker-based cycle
 
+# Start Docker stack for E2E (CI-like, uses production builds)
 e2e-up:
     docker network create traefik-public || true
     docker compose up -d --wait backend frontend db mailcatcher proxy adminer
@@ -141,11 +144,8 @@ e2e-up:
 e2e-down:
     docker compose down -v --remove-orphans
 
-# Full E2E cycle
+# Full E2E cycle with Docker (CI-like)
 e2e: e2e-up test-e2e e2e-down
-
-# Full E2E cycle inside Docker
-docker-e2e-full: e2e-up docker-e2e e2e-down
 
 # ============== Code Quality (Host) ==============
 
