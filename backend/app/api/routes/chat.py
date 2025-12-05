@@ -261,9 +261,7 @@ def confirm_tracking(
         )
         create_meal_log(session, current_user.id, meal_log_in, simulated_day)
 
-    elif (
-        message.action_type == ChatActionType.PROPOSE_EXERCISE and message.action_data
-    ):
+    elif message.action_type == ChatActionType.PROPOSE_EXERCISE and message.action_data:
         exercise_log_in = ExerciseLogCreate(
             exercise_name=message.action_data.get("exercise_name", "Unknown"),
             sets=message.action_data.get("sets", 0),

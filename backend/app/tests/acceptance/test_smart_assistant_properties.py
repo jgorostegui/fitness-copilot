@@ -6,7 +6,8 @@ Uses Hypothesis for property-based testing.
 """
 
 import pytest
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 from sqlmodel import Session, select
 
 from app.models import MealPlan, TrainingProgram, TrainingRoutine
@@ -34,9 +35,9 @@ class TestDemoPersonaTrainingDays:
         user = get_or_create_demo_user(db, persona)
 
         # Verify user has a training program assigned
-        assert user.selected_program_id is not None, (
-            f"Persona {persona} should have a training program assigned"
-        )
+        assert (
+            user.selected_program_id is not None
+        ), f"Persona {persona} should have a training program assigned"
 
         # Get the training program
         program = db.get(TrainingProgram, user.selected_program_id)
@@ -50,12 +51,10 @@ class TestDemoPersonaTrainingDays:
 
         # Verify routines exist for the correct number of unique days
         routines = db.exec(
-            select(TrainingRoutine).where(
-                TrainingRoutine.program_id == program.id
-            )
+            select(TrainingRoutine).where(TrainingRoutine.program_id == program.id)
         ).all()
 
-        unique_days = set(r.day_of_week for r in routines)
+        unique_days = {r.day_of_week for r in routines}
         assert len(unique_days) == expected_days, (
             f"Persona {persona} should have routines for {expected_days} days, "
             f"but has routines for {len(unique_days)} days"
@@ -82,9 +81,7 @@ class TestWeeklyMealPlanCompleteness:
         user = get_or_create_demo_user(db, persona)
 
         # Get all meal plans for this user
-        meal_plans = db.exec(
-            select(MealPlan).where(MealPlan.user_id == user.id)
-        ).all()
+        meal_plans = db.exec(select(MealPlan).where(MealPlan.user_id == user.id)).all()
 
         # Group by day of week
         meals_by_day: dict[int, list[MealPlan]] = {}
@@ -95,9 +92,9 @@ class TestWeeklyMealPlanCompleteness:
 
         # Verify all 7 days have meal plans
         for day in range(7):
-            assert day in meals_by_day, (
-                f"Persona {persona} should have meal plans for day {day}"
-            )
+            assert (
+                day in meals_by_day
+            ), f"Persona {persona} should have meal plans for day {day}"
             assert len(meals_by_day[day]) >= 3, (
                 f"Persona {persona} should have at least 3 meals for day {day}, "
                 f"but has {len(meals_by_day[day])}"
@@ -149,33 +146,32 @@ class TestQuickAddMacroValidity:
         response = brain.process_message(meal["text"])
 
         # Should be a food log action
-        assert response.action_type.value == "log_food", (
-            f"Quick add '{meal['name']}' should trigger food logging"
-        )
+        assert (
+            response.action_type.value == "log_food"
+        ), f"Quick add '{meal['name']}' should trigger food logging"
 
         # Should have action data with macros
-        assert response.action_data is not None, (
-            f"Quick add '{meal['name']}' should have action data"
-        )
+        assert (
+            response.action_data is not None
+        ), f"Quick add '{meal['name']}' should have action data"
 
         # Validate macro values
         calories = response.action_data.get("calories", 0)
         protein = response.action_data.get("protein_g", 0)
 
-        assert calories > 200, (
-            f"Quick add '{meal['name']}' should have > 200 calories, got {calories}"
-        )
-        assert protein > 5, (
-            f"Quick add '{meal['name']}' should have > 5g protein, got {protein}"
-        )
+        assert (
+            calories > 200
+        ), f"Quick add '{meal['name']}' should have > 200 calories, got {calories}"
+        assert (
+            protein > 5
+        ), f"Quick add '{meal['name']}' should have > 5g protein, got {protein}"
 
         # Validate meal name has at least two words (complete dish)
         meal_name = response.action_data.get("meal_name", "")
         word_count = len(meal_name.split())
-        assert word_count >= 2, (
-            f"Quick add meal name '{meal_name}' should have at least 2 words"
-        )
-
+        assert (
+            word_count >= 2
+        ), f"Quick add meal name '{meal_name}' should have at least 2 words"
 
 
 @pytest.mark.acceptance
@@ -254,7 +250,6 @@ class TestSimulatedDayFiltering:
                 f"Training routine should be for day {simulated_day}, "
                 f"but got day {routine.day_of_week}"
             )
-
 
 
 @pytest.mark.acceptance
@@ -349,13 +344,22 @@ class TestContextCompletenessAndSafety:
         assert context.weight_kg > 0, "Weight should be positive"
         assert context.height_cm > 0, "Height should be positive"
         assert context.goal_method in [
-            "maintenance", "very_slow_cut", "slow_cut", "standard_cut",
-            "aggressive_cut", "very_aggressive_cut", "slow_gain",
-            "moderate_gain", "custom"
+            "maintenance",
+            "very_slow_cut",
+            "slow_cut",
+            "standard_cut",
+            "aggressive_cut",
+            "very_aggressive_cut",
+            "slow_gain",
+            "moderate_gain",
+            "custom",
         ], f"Invalid goal_method: {context.goal_method}"
         assert context.activity_level in [
-            "sedentary", "lightly_active", "moderately_active",
-            "very_active", "super_active"
+            "sedentary",
+            "lightly_active",
+            "moderately_active",
+            "very_active",
+            "super_active",
         ], f"Invalid activity_level: {context.activity_level}"
         assert context.sex in ["male", "female", "unknown"]
 
@@ -434,16 +438,16 @@ class TestContextCompletenessAndSafety:
         for msg in context.chat_history:
             assert "role" in msg, "Chat history should include role"
             assert "content" in msg, "Chat history should include content"
-            assert "attachment_url" not in msg, (
-                "Chat history should NOT include attachment_url"
-            )
-            assert "attachment_type" not in msg, (
-                "Chat history should NOT include attachment_type"
-            )
+            assert (
+                "attachment_url" not in msg
+            ), "Chat history should NOT include attachment_url"
+            assert (
+                "attachment_type" not in msg
+            ), "Chat history should NOT include attachment_type"
             # Verify no base64 data in content
-            assert "base64" not in msg.get("content", "").lower(), (
-                "Chat history content should not contain base64 data"
-            )
+            assert (
+                "base64" not in msg.get("content", "").lower()
+            ), "Chat history content should not contain base64 data"
 
 
 @pytest.mark.acceptance
@@ -491,9 +495,7 @@ class TestChatHistoryTokenSafety:
 
     @given(persona=st.sampled_from(["cut", "bulk", "maintain"]))
     @settings(max_examples=100, deadline=None)
-    def test_chat_history_total_chars_limited(
-        self, db: Session, persona: str
-    ) -> None:
+    def test_chat_history_total_chars_limited(self, db: Session, persona: str) -> None:
         """Chat history total characters should be limited."""
         from app.crud_chat import create_chat_message
         from app.models import ChatMessageRole
@@ -527,9 +529,7 @@ class TestChatHistoryTokenSafety:
 
     @given(persona=st.sampled_from(["cut", "bulk", "maintain"]))
     @settings(max_examples=100, deadline=None)
-    def test_chat_history_no_base64_data(
-        self, db: Session, persona: str
-    ) -> None:
+    def test_chat_history_no_base64_data(self, db: Session, persona: str) -> None:
         """Chat history should not contain base64 encoded data."""
         from app.crud_chat import create_chat_message
         from app.models import ChatAttachmentType, ChatMessageRole
@@ -557,12 +557,12 @@ class TestChatHistoryTokenSafety:
         for msg in context.chat_history:
             content = msg.get("content", "")
             # Check for common base64 patterns
-            assert "data:image" not in content, (
-                "Chat history should not contain data:image URLs"
-            )
-            assert "/9j/" not in content, (
-                "Chat history should not contain JPEG base64 signatures"
-            )
+            assert (
+                "data:image" not in content
+            ), "Chat history should not contain data:image URLs"
+            assert (
+                "/9j/" not in content
+            ), "Chat history should not contain JPEG base64 signatures"
 
 
 @pytest.mark.acceptance
@@ -650,9 +650,9 @@ class TestTenantIsolationInContextBuilding:
         context_a = builder.build_context(db, user_a.id)
 
         # Verify user A's context does not contain user B's data
-        assert context_a.user_id == str(user_a.id), (
-            "Context user_id should match user A"
-        )
+        assert context_a.user_id == str(
+            user_a.id
+        ), "Context user_id should match user A"
 
         # Check chat history doesn't contain user B's message
         for msg in context_a.chat_history:
@@ -719,14 +719,16 @@ class TestMealLoggingFeedback:
 
     @given(
         persona=st.sampled_from(["cut", "bulk", "maintain"]),
-        food_name=st.sampled_from([
-            "grilled chicken salad",
-            "oatmeal with berries",
-            "eggs and avocado toast",
-            "rice and grilled chicken",
-            "banana",
-            "protein shake",
-        ]),
+        food_name=st.sampled_from(
+            [
+                "grilled chicken salad",
+                "oatmeal with berries",
+                "eggs and avocado toast",
+                "rice and grilled chicken",
+                "banana",
+                "protein shake",
+            ]
+        ),
     )
     @settings(max_examples=100, deadline=None)
     def test_meal_logging_includes_progress_feedback(
@@ -748,19 +750,21 @@ class TestMealLoggingFeedback:
         )
 
         # Should be a food log action
-        assert response.action_type.value == "log_food", (
-            f"Expected log_food action, got {response.action_type.value}"
-        )
+        assert (
+            response.action_type.value == "log_food"
+        ), f"Expected log_food action, got {response.action_type.value}"
 
         # Response should include progress feedback
         content_lower = response.content.lower()
-        has_progress_feedback = any([
-            "%" in response.content,  # Percentage
-            "remaining" in content_lower,  # Calories remaining
-            "target" in content_lower,  # Reference to target
-            "consumed" in content_lower,  # Reference to consumed
-            "of your" in content_lower,  # "X% of your calorie target"
-        ])
+        has_progress_feedback = any(
+            [
+                "%" in response.content,  # Percentage
+                "remaining" in content_lower,  # Calories remaining
+                "target" in content_lower,  # Reference to target
+                "consumed" in content_lower,  # Reference to consumed
+                "of your" in content_lower,  # "X% of your calorie target"
+            ]
+        )
 
         assert has_progress_feedback, (
             f"Meal logging response should include progress feedback. "
@@ -780,12 +784,14 @@ class TestExerciseLoggingFeedback:
 
     @given(
         persona=st.sampled_from(["cut", "bulk", "maintain"]),
-        exercise_text=st.sampled_from([
-            "Did 3 sets of bench at 60kg",
-            "Squat 4x10 at 80kg",
-            "Deadlift 3x5 at 100kg",
-            "Leg press 3x12 at 120kg",
-        ]),
+        exercise_text=st.sampled_from(
+            [
+                "Did 3 sets of bench at 60kg",
+                "Squat 4x10 at 80kg",
+                "Deadlift 3x5 at 100kg",
+                "Leg press 3x12 at 120kg",
+            ]
+        ),
     )
     @settings(max_examples=100, deadline=None)
     def test_exercise_logging_includes_plan_feedback(
@@ -807,23 +813,25 @@ class TestExerciseLoggingFeedback:
         )
 
         # Should be an exercise log action
-        assert response.action_type.value == "log_exercise", (
-            f"Expected log_exercise action, got {response.action_type.value}"
-        )
+        assert (
+            response.action_type.value == "log_exercise"
+        ), f"Expected log_exercise action, got {response.action_type.value}"
 
         # Response should include plan feedback (if user has a training plan)
         if user.selected_program_id:
             content_lower = response.content.lower()
-            has_plan_feedback = any([
-                "plan" in content_lower,  # Reference to plan
-                "scheduled" in content_lower,  # Reference to scheduled
-                "remaining" in content_lower,  # Exercises remaining
-                "workout" in content_lower,  # Reference to workout
-                "today" in content_lower,  # Reference to today's plan
-                "extra" in content_lower,  # Extra work
-                "🎯" in response.content,  # Plan indicator emoji
-                "💡" in response.content,  # Tip indicator emoji
-            ])
+            has_plan_feedback = any(
+                [
+                    "plan" in content_lower,  # Reference to plan
+                    "scheduled" in content_lower,  # Reference to scheduled
+                    "remaining" in content_lower,  # Exercises remaining
+                    "workout" in content_lower,  # Reference to workout
+                    "today" in content_lower,  # Reference to today's plan
+                    "extra" in content_lower,  # Extra work
+                    "🎯" in response.content,  # Plan indicator emoji
+                    "💡" in response.content,  # Tip indicator emoji
+                ]
+            )
 
             assert has_plan_feedback, (
                 f"Exercise logging response should reference training plan. "
@@ -904,15 +912,15 @@ class TestVisionAnalysisPreviewMode:
         )
 
         # Verify PROPOSE_* action type (not LOG_*)
-        assert response.action_type == expected_action, (
-            f"Expected {expected_action.value}, got {response.action_type.value}"
-        )
+        assert (
+            response.action_type == expected_action
+        ), f"Expected {expected_action.value}, got {response.action_type.value}"
 
         # Verify isTracked is False (camelCase for frontend consistency)
         assert response.action_data is not None
-        assert response.action_data.get("isTracked") is False, (
-            "Vision analysis should return isTracked=False for preview mode"
-        )
+        assert (
+            response.action_data.get("isTracked") is False
+        ), "Vision analysis should return isTracked=False for preview mode"
 
         # For gym equipment, verify formCues are in hiddenContext (camelCase)
         if image_category == "gym_equipment":
@@ -987,28 +995,26 @@ class TestFormTipsStorage:
 
         # Verify action_data structure (camelCase for frontend consistency)
         assert response.action_data is not None
-        assert "hiddenContext" in response.action_data, (
-            "Gym analysis should include hiddenContext in action_data"
-        )
-        assert "formCues" in response.action_data["hiddenContext"], (
-            "hiddenContext should include formCues"
-        )
+        assert (
+            "hiddenContext" in response.action_data
+        ), "Gym analysis should include hiddenContext in action_data"
+        assert (
+            "formCues" in response.action_data["hiddenContext"]
+        ), "hiddenContext should include formCues"
 
         # Verify form cues are stored correctly
         stored_cues = response.action_data["hiddenContext"]["formCues"]
-        assert len(stored_cues) >= 1, (
-            "At least one form cue should be stored"
-        )
-        assert stored_cues == mock_gym.form_cues, (
-            "Stored form cues should match the analysis result"
-        )
+        assert len(stored_cues) >= 1, "At least one form cue should be stored"
+        assert (
+            stored_cues == mock_gym.form_cues
+        ), "Stored form cues should match the analysis result"
 
         # Verify form cues are NOT in the main response content
         # (they should be hidden initially)
         for cue in stored_cues:
-            assert cue not in response.content, (
-                f"Form cue '{cue}' should be hidden in initial response"
-            )
+            assert (
+                cue not in response.content
+            ), f"Form cue '{cue}' should be hidden in initial response"
 
 
 @pytest.mark.acceptance
@@ -1089,9 +1095,9 @@ class TestTrackingConfirmationCreatesLog:
 
         # Verify is_tracked is now True
         response_data = r.json()
-        assert response_data["actionData"]["isTracked"] is True, (
-            "is_tracked should be True after confirmation"
-        )
+        assert (
+            response_data["actionData"]["isTracked"] is True
+        ), "is_tracked should be True after confirmation"
 
         # Verify log was created
         final_logs = client.get(
@@ -1099,13 +1105,13 @@ class TestTrackingConfirmationCreatesLog:
         ).json()
 
         if action_type == "propose_food":
-            assert len(final_logs["mealLogs"]) == initial_meal_count + 1, (
-                "Exactly one meal log should be created"
-            )
+            assert (
+                len(final_logs["mealLogs"]) == initial_meal_count + 1
+            ), "Exactly one meal log should be created"
         else:
-            assert len(final_logs["exerciseLogs"]) == initial_exercise_count + 1, (
-                "Exactly one exercise log should be created"
-            )
+            assert (
+                len(final_logs["exerciseLogs"]) == initial_exercise_count + 1
+            ), "Exactly one exercise log should be created"
 
     @given(persona=st.sampled_from(["cut", "bulk", "maintain"]))
     @settings(max_examples=100, deadline=None)

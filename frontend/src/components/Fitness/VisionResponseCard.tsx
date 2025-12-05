@@ -8,10 +8,10 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { useState } from "react"
-import { FiCheck, FiPlus, FiInfo } from "react-icons/fi"
-import { Chat } from "@/client/sdk.gen"
 import { useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
+import { FiCheck, FiInfo, FiPlus } from "react-icons/fi"
+import { Chat } from "@/client/sdk.gen"
 
 interface GymAnalysis {
   exercise_name: string
@@ -59,7 +59,7 @@ export function VisionResponseCard({
 }: VisionResponseCardProps) {
   const queryClient = useQueryClient()
   const [isTracked, setIsTracked] = useState(
-    initialIsTracked ?? actionData.isTracked === true
+    initialIsTracked ?? actionData.isTracked === true,
   )
   const [isConfirming, setIsConfirming] = useState(false)
   const [showFormTips, setShowFormTips] = useState(false)
@@ -328,7 +328,7 @@ export function VisionResponseCard({
  */
 export function isVisionResponse(
   actionType: string,
-  actionData: Record<string, unknown> | null
+  actionData: Record<string, unknown> | null,
 ): boolean {
   if (!actionData) return false
 

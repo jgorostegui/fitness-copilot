@@ -17,7 +17,15 @@ from app.models import (
 from app.services.calculations import CalculationService
 
 # Day names for simulated day
-DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+DAY_NAMES = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+]
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 

@@ -14,9 +14,9 @@ import uuid
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-logger = logging.getLogger(__name__)
-
 from app.models import ChatActionType, ChatAttachmentType
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from sqlmodel import Session
@@ -59,9 +59,13 @@ class BrainService:
         "chicken salad": FoodMacros(calories=450, protein=42, carbs=18, fat=22),
         "oatmeal with berries": FoodMacros(calories=320, protein=12, carbs=52, fat=8),
         "oatmeal": FoodMacros(calories=320, protein=12, carbs=52, fat=8),
-        "eggs and avocado toast": FoodMacros(calories=480, protein=22, carbs=35, fat=28),
+        "eggs and avocado toast": FoodMacros(
+            calories=480, protein=22, carbs=35, fat=28
+        ),
         "avocado toast": FoodMacros(calories=480, protein=22, carbs=35, fat=28),
-        "rice and grilled chicken": FoodMacros(calories=550, protein=45, carbs=55, fat=12),
+        "rice and grilled chicken": FoodMacros(
+            calories=550, protein=45, carbs=55, fat=12
+        ),
         "rice and chicken": FoodMacros(calories=550, protein=45, carbs=55, fat=12),
         "protein shake": FoodMacros(calories=200, protein=30, carbs=10, fat=4),
         "shake": FoodMacros(calories=200, protein=30, carbs=10, fat=4),
@@ -240,7 +244,6 @@ class BrainService:
 
         # Calculate new totals (including the food being logged)
         new_cal_total = context.calories_consumed + new_calories
-        new_protein_total = context.protein_consumed + new_protein
 
         # Calculate percentages
         cal_pct = (
@@ -248,15 +251,9 @@ class BrainService:
             if context.calories_target > 0
             else 0
         )
-        protein_pct = (
-            int((new_protein_total / context.protein_target) * 100)
-            if context.protein_target > 0
-            else 0
-        )
 
         # Build encouraging message
         cal_remaining = context.calories_target - new_cal_total
-        protein_remaining = context.protein_target - new_protein_total
 
         if cal_remaining > 0:
             return f"\n\n📊 You're at {cal_pct}% of your calorie target ({cal_remaining} kcal remaining)"
@@ -574,18 +571,23 @@ class BrainService:
         if context.scheduled_exercises:
             exercises_list = []
             for e in context.scheduled_exercises:
-                exercise_name = e['name']
-                target_sets = e['sets']
-                target_reps = e['reps']
-                target_weight = e['target_weight']
+                exercise_name = e["name"]
+                target_sets = e["sets"]
+                target_reps = e["reps"]
+                target_weight = e["target_weight"]
 
                 # Find completed sets for this exercise
                 completed_sets = sum(
-                    c['sets'] for c in context.completed_exercises
-                    if c['name'].lower() == exercise_name.lower()
+                    c["sets"]
+                    for c in context.completed_exercises
+                    if c["name"].lower() == exercise_name.lower()
                 )
 
-                status = f"({completed_sets}/{target_sets} sets done)" if completed_sets > 0 else "(not started)"
+                status = (
+                    f"({completed_sets}/{target_sets} sets done)"
+                    if completed_sets > 0
+                    else "(not started)"
+                )
                 exercises_list.append(
                     f"  - {exercise_name}: {target_sets}x{target_reps} @ {target_weight}kg {status}"
                 )
@@ -669,10 +671,14 @@ You help users with nutrition, exercise, and fitness questions.
             system_prompt = self._build_system_prompt(context)
             full_prompt = f"{system_prompt}\n\nUser message: {content}\n\nAssistant:"
         else:
-            full_prompt = """You are a friendly fitness coach assistant. Help the user with their fitness questions.
+            full_prompt = (
+                """You are a friendly fitness coach assistant. Help the user with their fitness questions.
 Keep responses concise and helpful.
 
-User message: """ + content + "\n\nAssistant:"
+User message: """
+                + content
+                + "\n\nAssistant:"
+            )
 
         # Log the full prompt for debugging
         logger.info(f"LLM request for user {user_id}: '{content[:100]}...'")

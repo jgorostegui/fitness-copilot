@@ -106,11 +106,14 @@ export const Dashboard = ({
 
   // Count unique exercises completed (by name, case-insensitive)
   const uniqueExercisesCompleted = new Set(
-    exerciseLogs.map((log) => log.name.toLowerCase())
+    exerciseLogs.map((log) => log.name.toLowerCase()),
   ).size
 
   // Count total sets completed
-  const totalSetsCompleted = exerciseLogs.reduce((acc, log) => acc + log.sets, 0)
+  const totalSetsCompleted = exerciseLogs.reduce(
+    (acc, log) => acc + log.sets,
+    0,
+  )
 
   return (
     <Box h="full" overflowY="auto" pb={24}>
@@ -184,7 +187,9 @@ export const Dashboard = ({
                 </Box>
                 <Box>
                   <Text fontSize="sm" fontWeight="bold" color="gray.700">
-                    {isRestDay ? "Rest Day" : `${totalExercisesPlanned}-EXERCISE PLAN`}
+                    {isRestDay
+                      ? "Rest Day"
+                      : `${totalExercisesPlanned}-EXERCISE PLAN`}
                   </Text>
                   <Text fontSize="xs" color="gray.500">
                     {isRestDay

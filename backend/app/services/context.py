@@ -12,8 +12,6 @@ from dataclasses import dataclass, field
 
 from sqlmodel import Session
 
-logger = logging.getLogger(__name__)
-
 from app.crud_chat import get_chat_messages
 from app.crud_fitness import (
     get_exercise_logs_for_simulated_day,
@@ -26,6 +24,7 @@ from app.crud_nutrition import (
 from app.models import User
 from app.services.calculations import CalculationService
 
+logger = logging.getLogger(__name__)
 
 # Maximum number of chat messages to include in context
 MAX_CHAT_HISTORY = 10
@@ -85,7 +84,9 @@ class UserContext:
             "Saturday",
             "Sunday",
         ]
-        return day_names[self.simulated_day] if 0 <= self.simulated_day <= 6 else "Unknown"
+        return (
+            day_names[self.simulated_day] if 0 <= self.simulated_day <= 6 else "Unknown"
+        )
 
 
 class ContextBuilder:
@@ -192,7 +193,9 @@ class ContextBuilder:
             weight_kg=user.weight_kg or 70,
             height_cm=user.height_cm or 170,
             activity_level=(
-                user.activity_level.value if user.activity_level else "moderately_active"
+                user.activity_level.value
+                if user.activity_level
+                else "moderately_active"
             ),
             sex=user.sex or "unknown",
             calories_consumed=calories_consumed,
@@ -221,9 +224,7 @@ class ContextBuilder:
 
         return context
 
-    def _build_chat_history(
-        self, session: Session, user_id: uuid.UUID
-    ) -> list[dict]:
+    def _build_chat_history(self, session: Session, user_id: uuid.UUID) -> list[dict]:
         """
         Build chat history for LLM context.
 

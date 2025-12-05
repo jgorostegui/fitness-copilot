@@ -5,9 +5,10 @@ These are Small (Unit) tests - no DB, no network.
 Tests the CSV import logic in isolation.
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 @pytest.mark.unit
@@ -28,8 +29,9 @@ class TestCSVImportService:
 
     def test_load_meal_plans_returns_zero_when_file_not_exists(self) -> None:
         """Should return 0 when CSV file doesn't exist."""
-        from app.services.csv_import import CSVImportService
         import uuid
+
+        from app.services.csv_import import CSVImportService
 
         service = CSVImportService(data_dir="/nonexistent/path")
         session = MagicMock()
@@ -42,8 +44,9 @@ class TestCSVImportService:
 
     def test_load_meal_plans_for_persona_uses_correct_filename(self) -> None:
         """Should construct correct filename for persona."""
-        from app.services.csv_import import CSVImportService
         import uuid
+
+        from app.services.csv_import import CSVImportService
 
         service = CSVImportService(data_dir="data")
         user_id = uuid.uuid4()

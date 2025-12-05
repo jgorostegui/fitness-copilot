@@ -32,9 +32,7 @@ def get_todays_summary(
     """
     # Get logs for the user's current simulated day
     simulated_day = current_user.simulated_day
-    meal_logs = get_meal_logs_for_simulated_day(
-        session, current_user.id, simulated_day
-    )
+    meal_logs = get_meal_logs_for_simulated_day(session, current_user.id, simulated_day)
     exercise_logs = get_exercise_logs_for_simulated_day(
         session, current_user.id, simulated_day
     )

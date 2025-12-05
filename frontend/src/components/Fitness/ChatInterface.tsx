@@ -86,9 +86,15 @@ export function ChatInterface() {
   // Update widget mode based on last message action
   useEffect(() => {
     const lastMsg = messages[messages.length - 1]
-    if (lastMsg?.actionType === "log_food" || lastMsg?.actionType === "propose_food") {
+    if (
+      lastMsg?.actionType === "log_food" ||
+      lastMsg?.actionType === "propose_food"
+    ) {
       setWidgetMode("kitchen")
-    } else if (lastMsg?.actionType === "log_exercise" || lastMsg?.actionType === "propose_exercise") {
+    } else if (
+      lastMsg?.actionType === "log_exercise" ||
+      lastMsg?.actionType === "propose_exercise"
+    ) {
       setWidgetMode("gym")
     }
   }, [messages])
@@ -225,7 +231,9 @@ export function ChatInterface() {
                   | "propose_food"
               }
               actionData={msg.actionData as Record<string, unknown>}
-              isTracked={(msg.actionData as Record<string, unknown>).isTracked === true}
+              isTracked={
+                (msg.actionData as Record<string, unknown>).isTracked === true
+              }
             />
           ) : (
             <ActionCard
@@ -256,13 +264,7 @@ export function ChatInterface() {
   return (
     <Flex direction="column" h="full" bg="gray.50" position="relative">
       {/* Header with Day Selector */}
-      <Box
-        bg="white"
-        borderBottom="1px"
-        borderColor="gray.200"
-        px={4}
-        py={3}
-      >
+      <Box bg="white" borderBottom="1px" borderColor="gray.200" px={4} py={3}>
         <Flex justify="space-between" align="center">
           <Heading size="md">Chat</Heading>
           <DaySelector />
