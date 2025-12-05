@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Lint and Format Runner",
+  "description": "Runs the formatting and linting pipeline (just format → just lint-fix → just lint) and provides a summary of auto-fixes and remaining issues that need manual attention.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "You just ran the formatting and linting pipeline for the codebase.\n\n## Your Task\n1. Parse the output from all three commands\n2. Summarize what was auto-fixed:\n   - Formatting changes from `just format` (ruff format, biome format)\n   - Lint fixes from `just lint-fix` (ruff check --fix, biome check --fix)\n3. For any remaining lint errors from `just lint` that couldn't be auto-fixed:\n   - List each error with file and line\n   - Explain what the rule enforces and why it can't be auto-fixed\n   - Suggest the minimal code change to resolve it\n\n## Report format\n- ✅ **Auto-fixed:** Summary of formatting and lint fixes applied\n- ❌ **Needs manual fix:** [file:line] `RULE_CODE` description → suggested fix\n- 🟢 **All clean** (if no remaining issues)\n\nKeep it concise. Only elaborate on errors that require human judgment or refactoring."
+  }
+}

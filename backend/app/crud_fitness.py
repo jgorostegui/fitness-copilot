@@ -107,3 +107,29 @@ def get_exercise_logs_for_today(
     start = datetime.combine(today, time.min)
     end = datetime.combine(today, time.max)
     return get_exercise_logs_for_user(session, user_id, start_date=start, end_date=end)
+
+
+def delete_exercise_logs_for_today(session: Session, user_id: uuid.UUID) -> int:
+    """
+    Delete all exercise logs for today for a user.
+
+    Returns:
+        Number of logs deleted
+    """
+    from datetime import time
+
+    from sqlmodel import delete
+
+    today = datetime.utcnow().date()
+    start = datetime.combine(today, time.min)
+    end = datetime.combine(today, time.max)
+
+    statement = (
+        delete(ExerciseLog)
+        .where(ExerciseLog.user_id == user_id)
+        .where(ExerciseLog.logged_at >= start)
+        .where(ExerciseLog.logged_at < end)
+    )
+    result = session.exec(statement)  # type: ignore
+    session.commit()
+    return result.rowcount  # type: ignore

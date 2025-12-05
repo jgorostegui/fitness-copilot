@@ -4,24 +4,25 @@ export default defineConfig({
   client: "legacy/axios",
   input: "./openapi.json",
   output: "./src/client",
-  // exportSchemas: true,
   plugins: [
     {
       name: "@hey-api/sdk",
-      // NOTE: this doesn't allow tree-shaking
       asClass: true,
       operationId: true,
       methodNameBuilder: (operation) => {
-        // @ts-expect-error
-        let name: string = operation.name
-        // @ts-expect-error
-        const service: string = operation.service
+        // Get operation ID and convert to method name
+        const operationId = operation.id || ""
+        // operationId format: "login-login_access_token" -> "loginAccessToken"
+        // Split by hyphen, take last part, convert snake_case to camelCase
+        const parts = operationId.split("-")
+        const methodPart = parts.length > 1 ? parts.slice(1).join("-") : parts[0]
 
-        if (service && name.toLowerCase().startsWith(service.toLowerCase())) {
-          name = name.slice(service.length)
-        }
+        // Convert snake_case to camelCase
+        const camelCase = methodPart.replace(/_([a-z])/g, (_, letter) =>
+          letter.toUpperCase(),
+        )
 
-        return name.charAt(0).toLowerCase() + name.slice(1)
+        return camelCase.charAt(0).toLowerCase() + camelCase.slice(1)
       },
     },
   ],

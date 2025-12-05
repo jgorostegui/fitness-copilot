@@ -1,77 +1,82 @@
 # Development Workflow
 
+**IMPORTANT: Always use `just` commands. Never use raw `docker compose`, `uv run`, or `cd` commands.**
+
 ## Getting Started
 
 ### Start Development Environment
 ```bash
-docker compose watch
+just dev       # Full stack with hot-reload (backend + frontend + db)
 ```
 
-This starts all services with hot-reload enabled:
+This single command starts everything with hot-reload:
+- **Backend**: FastAPI with file sync hot-reload
+- **Frontend**: Vite dev server with HMR
+- **Database**: PostgreSQL
+
+Services available:
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:8000
 - API Docs: http://localhost:8000/docs
 - Adminer (DB): http://localhost:8080
 
-### Local Development (without Docker)
-
-**Backend:**
+### Alternative: Local Frontend (faster HMR)
 ```bash
-cd backend
-uv sync                          # Install dependencies
-uv run fastapi dev app/main.py   # Start dev server
+just dev       # Backend + db in Docker
+just frontend  # Frontend locally (separate terminal, slightly faster HMR)
 ```
 
-**Frontend:**
+### Local Backend (without Docker)
 ```bash
-cd frontend
-npm install                      # Install dependencies
-npm run dev                      # Start dev server
+just db        # Start only database
+just backend   # Start backend locally (separate terminal)
 ```
 
 ## Common Tasks
 
 ### Backend Development
 - **Models**: Modify SQLModel models in `backend/app/models.py`
-- **API Endpoints**: Add/modify endpoints in `backend/app/api/`
-- **CRUD Operations**: Update utils in `backend/app/crud.py`
-- **Tests**: Run with `uv run pytest` or `bash ./scripts/test.sh`
+- **API Endpoints**: Add/modify endpoints in `backend/app/api/routes/`
+- **CRUD Operations**: Update in `backend/app/crud*.py`
+- **Tests**: Run with `just test-backend` or `just tb`
 
 ### Database Migrations
 ```bash
-# Inside Docker
-docker compose exec backend bash
-alembic revision --autogenerate -m "Description"
-alembic upgrade head
-
-# Local (from backend directory)
-cd backend
-uv run alembic revision --autogenerate -m "Description"
-uv run alembic upgrade head
+just migrate                    # Run migrations
+just migration "Description"    # Create new migration
+just migrate-rollback           # Rollback last migration
 ```
 
 ### Frontend Development
 - **Routes/Pages**: Add in `frontend/src/routes/`
 - **Components**: Create in `frontend/src/components/`
-- **API Client**: Regenerate with `./scripts/generate-client.sh`
-- **Tests**: Run with `npx playwright test`
+- **Hooks**: Create in `frontend/src/hooks/`
+- **API Client**: Regenerate with `just generate-client` or `just generate-client-local`
+- **Tests**: Run with `just test-frontend` or `just tf`
+
+## Testing
+
+```bash
+just test              # All tests (backend + frontend)
+just test-backend      # Backend tests (alias: just tb)
+just test-unit         # Unit tests only (alias: just tu)
+just test-acceptance   # Acceptance tests (alias: just ta)
+just test-frontend     # Frontend tests (alias: just tf)
+just test-e2e          # E2E tests (alias: just te)
+```
 
 ## Code Quality
 
-### Pre-commit Hooks
 ```bash
-uv run pre-commit install        # Install hooks
-uv run pre-commit run --all-files  # Run manually
+just lint              # Run all linters
+just format            # Format all code
+just pre-commit        # Run pre-commit hooks
 ```
-
-### Linting
-- **Backend**: Uses Ruff (configured in pyproject.toml)
-- **Frontend**: Uses Biome (configured in biome.json)
 
 ## Environment Variables
 
 Configure in `.env` file:
-- `SECRET_KEY` - Generate with: `python -c "import secrets; print(secrets.token_urlsafe(32))"`
+- `SECRET_KEY` - Generate with: `just secret`
 - `FIRST_SUPERUSER` / `FIRST_SUPERUSER_PASSWORD` - Admin credentials
 - `POSTGRES_PASSWORD` - Database password
 - `DOMAIN` - Deployment domain (localhost for dev)

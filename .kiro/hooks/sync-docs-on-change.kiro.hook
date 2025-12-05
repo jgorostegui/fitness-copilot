@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "Sync Documentation",
+  "description": "Watches Python and TypeScript source files for changes and prompts the agent to update relevant documentation in README.md or the docs folder",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.py",
+      "**/*.ts",
+      "**/*.tsx",
+      "**/pyproject.toml",
+      "**/package.json"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A source file has been modified. Review the changes and determine if any documentation needs to be updated. Check the README.md file and any documentation in a /docs folder if it exists. Update documentation to reflect:\n- New or changed API endpoints\n- Modified function signatures or behaviors\n- New dependencies or configuration options\n- Changed project structure\n- Updated usage examples\n\nOnly make documentation changes if the code changes are significant enough to warrant it. Skip minor refactors or internal implementation details that don't affect the public API or user-facing behavior."
+  }
+}

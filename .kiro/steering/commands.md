@@ -4,9 +4,9 @@ All commands run from project root using `just`.
 
 ## Quick Start
 ```bash
-just dev           # Backend + db (hot-reload)
-just frontend      # Frontend (hot-reload)
-just backend       # Backend locally (no Docker)
+just dev           # Full stack with hot-reload (backend + frontend + db)
+just frontend      # Frontend locally (optional, slightly faster HMR)
+just backend       # Backend locally (no Docker, requires: just db)
 ```
 
 ## Development Workflows
@@ -39,13 +39,20 @@ Fastest reload, requires Python setup.
 
 ## Docker Management
 ```bash
-just up            # Start all services
+just up            # Start all services (dev mode with override)
+just up-prod       # Start production stack (ignores override)
 just down          # Stop all services
 just clean         # Stop and remove volumes
 just status        # Check service status
 just logs          # View all logs
 just build         # Rebuild images
 ```
+
+**How docker-compose files work:**
+- `docker-compose.yml` - Base production config
+- `docker-compose.override.yml` - Dev overrides (auto-merged by default)
+- `just up` / `just dev` - Uses both files (dev mode)
+- `just up-prod` - Uses only base file (production mode)
 
 ## Shell Access (Inside Docker)
 ```bash
@@ -67,33 +74,17 @@ See: [Test Sizes - Google Testing Blog](https://testing.googleblog.com/2010/12/t
 
 ## Testing (Host Machine)
 
+**IMPORTANT: Always use `just` commands for testing. Never use raw `uv run pytest` or `cd backend` commands.**
+
 ```bash
 just test              # All tests (backend + frontend)
-just test-backend      # Backend tests only
-just test-unit         # Unit tests only (Small - no DB required)
-just test-acceptance   # Acceptance tests only (Medium - DB required)
-just test-integration  # Integration tests (Large - live external services)
-just test-frontend     # Frontend tests only
-just test-e2e          # E2E tests (Playwright)
+just test-backend      # Backend tests only (alias: just tb)
+just test-unit         # Unit tests only (alias: just tu)
+just test-acceptance   # Acceptance tests only (alias: just ta)
+just test-integration  # Integration tests (alias: just ti)
+just test-frontend     # Frontend tests only (alias: just tf)
+just test-e2e          # E2E tests (alias: just te)
 just test-e2e-ui       # E2E with UI
-
-# Aliases
-just tb                # Backend tests (alias)
-just tu                # Unit tests (alias)
-just ta                # Acceptance tests (alias)
-just ti                # Integration tests (alias)
-just tf                # Frontend tests (alias)
-just te                # E2E tests (alias)
-
-# Direct uv commands (from backend directory)
-cd backend
-uv run pytest                    # Run all tests
-uv run pytest -x                 # Stop on first failure
-uv run pytest -k "test_name"     # Run specific test
-uv run pytest -m unit            # Run only unit tests (no DB)
-uv run pytest -m acceptance      # Run only acceptance tests (DB required)
-uv run pytest -m integration     # Run only integration tests (live external)
-uv run pytest --cov=app          # Run with coverage
 ```
 
 ## Docker Commands (Atomic)
@@ -115,41 +106,42 @@ just docker-e2e                     # E2E tests (playwright container)
 ```
 
 ## E2E Testing
+
+### Development (hot-reload)
 ```bash
-just e2e-up           # Start full stack for E2E
-just test-e2e         # Run E2E tests (from host)
-just docker-e2e       # Run E2E tests (inside Docker)
-just e2e-down         # Stop stack
+# Terminal 1: just dev
+# Terminal 2: just frontend
+# Terminal 3: just test-e2e
+```
+Tests run against dev servers with hot-reload.
+
+### CI-like (Docker builds)
+```bash
 just e2e              # Full cycle: up, test, down
-just docker-e2e-full  # Full cycle in Docker: up, docker-e2e, down
+just e2e-up           # Start Docker stack
+just test-e2e         # Run tests
+just e2e-down         # Stop stack
 ```
 
-## Database (Inside Docker)
+## Database
+
+**IMPORTANT: Always use `just` commands for database operations.**
+
 ```bash
 just migrate                    # Run migrations
 just migration "description"    # Create migration
 just migrate-rollback           # Rollback last
 ```
 
-## Database (Local - from backend directory)
-```bash
-cd backend
-uv run alembic upgrade head                           # Run migrations
-uv run alembic revision --autogenerate -m "desc"      # Create migration
-uv run alembic downgrade -1                           # Rollback last
-uv run alembic history                                # Show history
-```
-
 ## Code Quality (Host Machine)
 ```bash
 just lint              # All linters (backend + frontend)
-just lint-backend      # Backend linting only
-just lint-frontend     # Frontend linting only
+just lint-backend      # Backend: ruff check + format check
+just lint-frontend     # Frontend: biome check
 just format            # Format all code
-just format-backend    # Format backend only
-just format-frontend   # Format frontend only
-just format-check      # Check formatting without fixing
-just check             # All quality checks (lint + format check)
+just format-backend    # Backend: ruff check --fix + ruff format
+just format-frontend   # Frontend: biome format --write
+just check             # All quality checks (lint)
 just pre-commit        # Run pre-commit hooks
 ```
 
@@ -162,9 +154,11 @@ just security-safety   # Safety dependency vulnerability scan
 
 ## Build & Utilities
 ```bash
-just generate-client   # Regenerate OpenAPI client
-just secret            # Generate secret key
-just sync-secrets      # Sync .env to GitHub
+just build-staging         # Build all Docker images (mimics CI deploy)
+just generate-client       # Regenerate OpenAPI client (Docker, requires: just dev)
+just generate-client-local # Regenerate OpenAPI client (local, no Docker)
+just secret                # Generate secret key
+just sync-secrets          # Sync .env to GitHub
 ```
 
 ## GitHub Actions Runner

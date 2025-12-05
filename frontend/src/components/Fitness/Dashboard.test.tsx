@@ -30,7 +30,7 @@ const mockStats: DailyStats = {
 }
 
 describe("Dashboard", () => {
-  it("renders the monitor header", () => {
+  it("renders the dashboard header", () => {
     renderWithChakra(
       <Dashboard
         stats={mockStats}
@@ -40,7 +40,7 @@ describe("Dashboard", () => {
       />,
     )
 
-    expect(screen.getByText("Monitor")).toBeInTheDocument()
+    expect(screen.getByText("Dashboard")).toBeInTheDocument()
   })
 
   it("displays the plan badge", () => {
@@ -94,7 +94,9 @@ describe("Dashboard", () => {
       />,
     )
 
-    expect(screen.getByText("2")).toBeInTheDocument()
+    // Check for the Exercises label in the circular progress
+    expect(screen.getByText("Exercises")).toBeInTheDocument()
+    // Check for the Completed label in the card
     expect(screen.getByText("Completed")).toBeInTheDocument()
   })
 

@@ -11,18 +11,18 @@ describe("BottomNav", () => {
   it("renders all navigation tabs", () => {
     renderWithChakra(<BottomNav activeTab="monitor" onTabChange={vi.fn()} />)
 
-    expect(screen.getByText("Monitor")).toBeInTheDocument()
+    expect(screen.getByText("Dashboard")).toBeInTheDocument()
     expect(screen.getByText("Workout")).toBeInTheDocument()
     expect(screen.getByText("Chat")).toBeInTheDocument()
     expect(screen.getByText("Nutrition")).toBeInTheDocument()
     expect(screen.getByText("Profile")).toBeInTheDocument()
   })
 
-  it("calls onTabChange when monitor tab is clicked", () => {
+  it("calls onTabChange when dashboard tab is clicked", () => {
     const onTabChange = vi.fn()
     renderWithChakra(<BottomNav activeTab="chat" onTabChange={onTabChange} />)
 
-    fireEvent.click(screen.getByText("Monitor"))
+    fireEvent.click(screen.getByText("Dashboard"))
     expect(onTabChange).toHaveBeenCalledWith("monitor")
   })
 

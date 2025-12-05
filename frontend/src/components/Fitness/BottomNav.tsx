@@ -96,7 +96,7 @@ export const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
           active={activeTab === "monitor"}
           onClick={() => onTabChange("monitor")}
           icon={FiHome}
-          label="Monitor"
+          label="Dashboard"
         />
         <TabButton
           active={activeTab === "workout"}

@@ -1,6 +1,8 @@
 from fastapi import APIRouter
 
 from app.api.routes import (
+    chat,
+    demo,
     login,
     logs,
     plans,
@@ -22,6 +24,8 @@ api_router.include_router(programs.router)
 api_router.include_router(plans.router)
 api_router.include_router(logs.router)
 api_router.include_router(summary.router)
+api_router.include_router(chat.router)
 
 if settings.ENVIRONMENT == "local":
     api_router.include_router(private.router)
+    api_router.include_router(demo.router)

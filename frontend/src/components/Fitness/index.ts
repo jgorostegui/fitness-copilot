@@ -1,6 +1,7 @@
 export { BottomNav } from "./BottomNav"
 export { ChatInterface } from "./ChatInterface"
 export { Dashboard } from "./Dashboard"
+export { DemoLogin } from "./DemoLogin"
 export { FitnessApp } from "./FitnessApp"
 export { Onboarding } from "./Onboarding"
 export { PlanViewer } from "./PlanViewer"

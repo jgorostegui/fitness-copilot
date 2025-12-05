@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "API Contract Drift Detector",
+  "description": "Detects API contract drift between backend FastAPI/Pydantic models and frontend TypeScript types when API routes or models are saved.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "backend/app/api/routes/*.py",
+      "backend/app/models.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "You are detecting API contract drift between backend and frontend.\n\n## Context\n- Backend: FastAPI with Pydantic/SQLModel response models in `backend/app/models.py`\n- Frontend: Auto-generated TypeScript client in `frontend/src/client/types.gen.ts`\n- Client is generated from `openapi.json` via `./scripts/generate-client.sh`\n\n## Your Task\n1. Identify the endpoint(s) modified in the saved file\n2. Find the response_model used (e.g., `ChatMessagePublic`, `MealLogsPublic`)\n3. Check if corresponding TypeScript types exist in `frontend/src/client/types.gen.ts`\n4. If types exist, compare field names and types for mismatches\n5. Account for camelCase conversion (snake_case in Python → camelCase in TS)\n\n## Check for these drift patterns:\n- **Missing types**: Backend model exists, no TS equivalent\n- **Field additions**: New field in backend not in TS\n- **Field removals**: TS has field that backend removed\n- **Type changes**: int→string, optional→required, etc.\n- **Enum mismatches**: Backend enum values not in TS union type\n\n## Report format:\n- 🔴 BREAKING: [ModelName] field `x` removed - frontend will fail\n- 🟡 DRIFT: [ModelName] missing in frontend types - regenerate client\n- 🟡 DRIFT: [ModelName.field] type mismatch: backend=X, frontend=Y\n- 🟢 No drift detected (if clean)\n\nIf drift found, remind: \"Run `./scripts/generate-client.sh` to sync\""
+  }
+}

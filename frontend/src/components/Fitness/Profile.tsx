@@ -16,9 +16,10 @@ interface ProfileProps {
   profile: UserProfile
   onUpdate: (profile: UserProfile) => void
   onReset: () => void
+  onLogout?: () => void
 }
 
-export const Profile = ({ profile, onUpdate, onReset }: ProfileProps) => {
+export const Profile = ({ profile, onUpdate, onReset, onLogout }: ProfileProps) => {
   const [weight, setWeight] = useState(profile.weight)
   const [height, setHeight] = useState(profile.height)
   const [plan, setPlan] = useState<PlanType>(profile.plan)
@@ -220,16 +221,28 @@ export const Profile = ({ profile, onUpdate, onReset }: ProfileProps) => {
           </Box>
 
           <Box pt={8}>
-            <Button
-              w="full"
-              variant="outline"
-              colorPalette="red"
-              onClick={onReset}
-            >
-              <FiLogOut /> Reset Profile Data
-            </Button>
+            <VStack gap={3}>
+              <Button
+                w="full"
+                variant="outline"
+                colorPalette="gray"
+                onClick={onReset}
+              >
+                Reset Profile Data
+              </Button>
+              {onLogout && (
+                <Button
+                  w="full"
+                  variant="outline"
+                  colorPalette="red"
+                  onClick={onLogout}
+                >
+                  <FiLogOut /> Logout
+                </Button>
+              )}
+            </VStack>
             <Text textAlign="center" fontSize="xs" color="gray.400" mt={4}>
-              Fitness Copilot v1.0.0
+              Fitness Copilot v0.1.0
             </Text>
           </Box>
         </VStack>

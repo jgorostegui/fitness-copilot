@@ -95,12 +95,20 @@ services:
   frontend:
     restart: "no"
     ports:
-      - "5173:80"
+      - "5173:5173"
     build:
       context: ./frontend
+      dockerfile: Dockerfile.dev
       args:
         - VITE_API_URL=http://localhost:8000
-        - NODE_ENV=development
+    command: npm run dev -- --host 0.0.0.0
+    develop:
+      watch:
+        - path: ./frontend/src
+          action: sync
+          target: /app/src
+        - path: ./frontend/package.json
+          action: rebuild
 
   playwright:
     build:

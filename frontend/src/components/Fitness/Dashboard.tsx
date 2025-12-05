@@ -104,7 +104,7 @@ export const Dashboard = ({
         top={0}
         zIndex={10}
       >
-        <Heading size="md">Monitor</Heading>
+        <Heading size="md">Dashboard</Heading>
         <Flex justify="space-between" align="center" mt={1}>
           <Text fontSize="xs" color="gray.500">
             {new Date().toLocaleDateString(undefined, {
@@ -129,7 +129,7 @@ export const Dashboard = ({
 
       <Container maxW="full" p={4}>
         <VStack gap={6} align="stretch">
-          <Flex gap={4} justify="center">
+          <Flex gap={3} justify="center" flexWrap="wrap">
             <CircularProgress
               value={stats.caloriesConsumed}
               max={stats.caloriesTarget}
@@ -141,6 +141,12 @@ export const Dashboard = ({
               max={stats.proteinTarget}
               label="Protein (g)"
               color="var(--chakra-colors-green-500)"
+            />
+            <CircularProgress
+              value={stats.workoutsCompleted}
+              max={5}
+              label="Exercises"
+              color="var(--chakra-colors-orange-500)"
             />
           </Flex>
 

@@ -4,30 +4,43 @@ import {
   Flex,
   IconButton,
   Input,
+  Spinner,
   Text,
   VStack,
 } from "@chakra-ui/react"
 import { useEffect, useRef, useState } from "react"
 import { FiCamera, FiMic, FiSend, FiX } from "react-icons/fi"
 import { TODAY_ROUTINE } from "@/constants/fitness"
-import { sendMessageToAI } from "@/services/mockAiService"
+import { useChat } from "@/hooks/useChat"
+import { useLogs } from "@/hooks/useLogs"
+import { useSummary } from "@/hooks/useSummary"
 import type {
-  DailyStats,
-  ExerciseLog,
-  MealLog,
-  Message,
-  UserProfile,
-} from "@/types/fitness"
+  ChatAttachmentType,
+  ChatMessagePublic,
+  ExerciseLogPublic,
+  MealLogPublic,
+} from "@/client/types.gen"
+import type { DailyStats, ExerciseLog, MealLog } from "@/types/fitness"
 
-interface ChatInterfaceProps {
-  history: Message[]
-  setHistory: React.Dispatch<React.SetStateAction<Message[]>>
-  onAction: (action: { type: string; data?: Record<string, unknown> }) => void
-  stats: DailyStats
-  profile: UserProfile
-  mealLogs: MealLog[]
-  exerciseLogs: ExerciseLog[]
-}
+// Convert API exercise log to local type
+const mapExerciseLog = (log: ExerciseLogPublic): ExerciseLog => ({
+  id: log.id,
+  name: log.exerciseName,
+  sets: log.sets,
+  reps: log.reps,
+  weight: log.weightKg,
+  time: log.loggedAt,
+})
+
+// Convert API meal log to local type
+const mapMealLog = (log: MealLogPublic): MealLog => ({
+  id: log.id,
+  name: log.mealName,
+  calories: log.calories,
+  protein: log.proteinG,
+  time: log.loggedAt,
+  type: log.mealType as MealLog["type"],
+})
 
 const ActionCard = ({
   type,
@@ -74,7 +87,7 @@ const ActionCard = ({
             </Box>
             <Box>
               <Text fontSize="sm" fontWeight="bold">
-                {data.name as string}
+                {(data.food as string) || (data.name as string)}
               </Text>
               <Text fontSize="xs" color="gray.500">
                 Logged to Daily Intake
@@ -165,7 +178,7 @@ const ActionCard = ({
             </Box>
             <Box>
               <Text fontSize="sm" fontWeight="bold">
-                {data.name as string}
+                {(data.exercise as string) || (data.name as string)}
               </Text>
               <Text fontSize="xs" color="gray.500">
                 Workout Logged
@@ -173,7 +186,7 @@ const ActionCard = ({
             </Box>
           </Flex>
           <Text fontSize="sm" fontWeight="bold">
-            {data.weight as number}kg
+            {(data.weight_kg as number) || (data.weight as number) || 0}kg
           </Text>
         </Flex>
         <Flex gap={2}>
@@ -420,34 +433,46 @@ const ContextWidget = ({
   )
 }
 
-export const ChatInterface = ({
-  history,
-  setHistory,
-  onAction,
-  stats,
-  mealLogs,
-  exerciseLogs,
-}: ChatInterfaceProps) => {
+export const ChatInterface = () => {
   const [inputText, setInputText] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [isRecording, setIsRecording] = useState(false)
   const [widgetMode, setWidgetMode] = useState<"gym" | "kitchen">("gym")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  // Use API hooks
+  const { messages, isLoading, sendMessage, isSending } = useChat()
+  const { mealLogs: apiMealLogs, exerciseLogs: apiExerciseLogs } = useLogs()
+  const { summary } = useSummary()
+
+  // Map API logs to local types
+  const mealLogs = apiMealLogs.map(mapMealLog)
+  const exerciseLogs = apiExerciseLogs.map(mapExerciseLog)
+
+  // Build stats from summary
+  const stats: DailyStats = {
+    caloriesConsumed: summary?.caloriesConsumed ?? 0,
+    caloriesTarget: summary?.caloriesTarget ?? 2000,
+    proteinConsumed: summary?.proteinConsumed ?? 0,
+    proteinTarget: summary?.proteinTarget ?? 150,
+    workoutsCompleted: summary?.workoutsCompleted ?? 0,
+  }
+
+  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [])
+  }, [messages])
 
+  // Update widget mode based on last message action
   useEffect(() => {
-    const lastMsg = history[history.length - 1]
+    const lastMsg = messages[messages.length - 1]
     if (lastMsg?.actionType === "log_food") {
       setWidgetMode("kitchen")
     } else if (lastMsg?.actionType === "log_exercise") {
       setWidgetMode("gym")
     }
-  }, [history])
+  }, [messages])
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
@@ -459,53 +484,134 @@ export const ChatInterface = ({
 
   const handleSend = async (textOverride?: string) => {
     const textToSend = textOverride || inputText
-    if ((!textToSend.trim() && !selectedImage) || isTyping) return
+    if ((!textToSend.trim() && !selectedImage) || isSending) return
 
-    const userMsg: Message = {
-      id: Date.now().toString(),
-      text: textToSend,
-      sender: "user",
-      timestamp: new Date(),
-      image: selectedImage || undefined,
+    // Determine attachment type
+    let attachmentType: ChatAttachmentType = "none"
+    if (selectedImage) {
+      attachmentType = "image"
     }
 
-    setHistory((prev) => [...prev, userMsg])
+    // Send message via API
+    // Note: We send a placeholder URL for images since base64 is too large for DB
+    // In production, images would be uploaded to S3/storage first
+    sendMessage({
+      content: textToSend || "Analyze this image",
+      attachment_type: attachmentType,
+      attachment_url: selectedImage ? "mock://image-upload" : undefined,
+    })
+
     setInputText("")
     setSelectedImage(null)
-    setIsTyping(true)
-
-    const response = await sendMessageToAI(
-      history,
-      userMsg.text || (userMsg.image ? "Analyze this image" : ""),
-      userMsg.image,
-    )
-
-    const aiMsg: Message = {
-      id: (Date.now() + 1).toString(),
-      text: response.text,
-      sender: "ai",
-      timestamp: new Date(),
-      actionType: (response.action?.type as Message["actionType"]) || "none",
-      actionData: response.action?.data as Message["actionData"],
-    }
-
-    setHistory((prev) => [...prev, aiMsg])
-
-    if (response.action && response.action.type !== "none") {
-      onAction(response.action)
-    }
-
-    setIsTyping(false)
   }
 
-  const toggleRecording = () => {
-    if (!isRecording) {
-      setIsRecording(true)
-      setTimeout(() => {
-        setIsRecording(false)
-        setInputText("I just did 3 sets of leg press at 100kg")
-      }, 2000)
+  const recordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const startRecording = () => {
+    if (isSending) return
+    setIsRecording(true)
+    // Start a timeout - if held for 1.5s+, we'll send the voice message on release
+    recordingTimeoutRef.current = setTimeout(() => {
+      // Mark that we've held long enough
+    }, 500)
+  }
+
+  const stopRecording = () => {
+    if (!isRecording) return
+    setIsRecording(false)
+    
+    // Clear any pending timeout
+    if (recordingTimeoutRef.current) {
+      clearTimeout(recordingTimeoutRef.current)
+      recordingTimeoutRef.current = null
     }
+    
+    // Send the voice message
+    sendMessage({
+      content: "I just did 3 sets of leg press at 100kg",
+      attachment_type: "audio",
+      attachment_url: "mock://voice-recording",
+    })
+  }
+
+  // Render message from API
+  const renderMessage = (msg: ChatMessagePublic) => {
+    const isUser = msg.role === "user"
+    const timestamp = new Date(msg.createdAt)
+
+    return (
+      <Flex
+        key={msg.id}
+        direction="column"
+        align={isUser ? "flex-end" : "flex-start"}
+      >
+        <Box
+          maxW="85%"
+          bg={isUser ? "blue.500" : "white"}
+          color={isUser ? "white" : "gray.800"}
+          borderRadius="2xl"
+          borderTopRightRadius={isUser ? "sm" : "2xl"}
+          borderTopLeftRadius={isUser ? "2xl" : "sm"}
+          p={3}
+          border={!isUser ? "1px" : "none"}
+          borderColor="gray.200"
+        >
+          {msg.attachmentUrl && msg.attachmentType === "image" && (
+            <Box mb={2} borderRadius="lg" overflow="hidden">
+              {msg.attachmentUrl.startsWith("mock://") ? (
+                <Flex
+                  bg="gray.100"
+                  p={4}
+                  align="center"
+                  justify="center"
+                  borderRadius="lg"
+                  minH="80px"
+                >
+                  <Text fontSize="2xl">📷</Text>
+                  <Text fontSize="sm" color="gray.500" ml={2}>
+                    Image attached
+                  </Text>
+                </Flex>
+              ) : (
+                <img
+                  src={msg.attachmentUrl}
+                  alt="Upload"
+                  style={{ maxHeight: "150px", objectFit: "cover" }}
+                />
+              )}
+            </Box>
+          )}
+          <Text fontSize="sm" whiteSpace="pre-wrap">
+            {msg.content}
+          </Text>
+        </Box>
+
+        {msg.actionType &&
+          msg.actionType !== "none" &&
+          msg.actionData && (
+            <ActionCard
+              type={msg.actionType}
+              data={msg.actionData as Record<string, unknown>}
+              stats={stats}
+            />
+          )}
+
+        <Text fontSize="xs" color="gray.400" mt={1} px={1}>
+          {timestamp.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </Text>
+      </Flex>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <Flex h="full" align="center" justify="center" bg="gray.50">
+        <Spinner size="lg" color="blue.500" />
+      </Flex>
+    )
   }
 
   return (
@@ -521,59 +627,22 @@ export const ChatInterface = ({
         onQuickLog={(text) => handleSend(text)}
       />
 
-      <Box flex={1} overflowY="auto" p={4} pb={32}>
+      <Box flex={1} overflowY="auto" p={4} pb={20}>
         <VStack gap={3} align="stretch">
-          {history.map((msg) => (
-            <Flex
-              key={msg.id}
-              direction="column"
-              align={msg.sender === "user" ? "flex-end" : "flex-start"}
-            >
-              <Box
-                maxW="85%"
-                bg={msg.sender === "user" ? "blue.500" : "white"}
-                color={msg.sender === "user" ? "white" : "gray.800"}
-                borderRadius="2xl"
-                borderTopRightRadius={msg.sender === "user" ? "sm" : "2xl"}
-                borderTopLeftRadius={msg.sender === "user" ? "2xl" : "sm"}
-                p={3}
-                border={msg.sender === "ai" ? "1px" : "none"}
-                borderColor="gray.200"
-              >
-                {msg.image && (
-                  <Box mb={2} borderRadius="lg" overflow="hidden">
-                    <img
-                      src={msg.image}
-                      alt="Upload"
-                      style={{ maxHeight: "150px", objectFit: "cover" }}
-                    />
-                  </Box>
-                )}
-                <Text fontSize="sm" whiteSpace="pre-wrap">
-                  {msg.text}
-                </Text>
-              </Box>
-
-              {msg.actionType &&
-                msg.actionType !== "none" &&
-                msg.actionData && (
-                  <ActionCard
-                    type={msg.actionType}
-                    data={msg.actionData}
-                    stats={stats}
-                  />
-                )}
-
-              <Text fontSize="xs" color="gray.400" mt={1} px={1}>
-                {msg.timestamp.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+          {messages.length === 0 && (
+            <Flex direction="column" align="center" justify="center" py={8}>
+              <Text fontSize="4xl" mb={2}>🤖</Text>
+              <Text color="gray.500" textAlign="center">
+                Hi! I'm your fitness copilot.
+                <br />
+                Tell me what you ate or what exercise you did!
               </Text>
             </Flex>
-          ))}
+          )}
 
-          {isTyping && (
+          {messages.map(renderMessage)}
+
+          {isSending && (
             <Flex align="flex-start">
               <Box
                 bg="white"
@@ -615,13 +684,14 @@ export const ChatInterface = ({
 
       <Box
         position="absolute"
-        bottom={16}
+        bottom={0}
         left={0}
         right={0}
         bg="white"
         borderTop="1px"
         borderColor="gray.200"
         p={3}
+        pb={4}
       >
         {selectedImage && (
           <Flex
@@ -688,7 +758,12 @@ export const ChatInterface = ({
             aria-label="Voice input"
             variant="ghost"
             color={isRecording ? "red.500" : "gray.500"}
-            onClick={toggleRecording}
+            bg={isRecording ? "red.100" : undefined}
+            onMouseDown={startRecording}
+            onMouseUp={stopRecording}
+            onMouseLeave={() => isRecording && stopRecording()}
+            onTouchStart={startRecording}
+            onTouchEnd={stopRecording}
           >
             <FiMic />
           </IconButton>
@@ -697,7 +772,7 @@ export const ChatInterface = ({
             aria-label="Send"
             colorPalette="blue"
             borderRadius="full"
-            disabled={!inputText && !selectedImage}
+            disabled={(!inputText && !selectedImage) || isSending}
             onClick={() => handleSend()}
           >
             <FiSend />

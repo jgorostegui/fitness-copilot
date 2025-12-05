@@ -83,3 +83,27 @@ def get_meal_logs_for_today(session: Session, user_id: uuid.UUID) -> list[MealLo
     start = datetime.combine(today, time.min)
     end = datetime.combine(today, time.max)
     return get_meal_logs_for_user(session, user_id, start_date=start, end_date=end)
+
+
+def delete_meal_logs_for_today(session: Session, user_id: uuid.UUID) -> int:
+    """
+    Delete all meal logs for today for a user.
+
+    Returns:
+        Number of logs deleted
+    """
+    from sqlmodel import delete
+
+    today = datetime.utcnow().date()
+    start = datetime.combine(today, time.min)
+    end = datetime.combine(today, time.max)
+
+    statement = (
+        delete(MealLog)
+        .where(MealLog.user_id == user_id)
+        .where(MealLog.logged_at >= start)
+        .where(MealLog.logged_at < end)
+    )
+    result = session.exec(statement)  # type: ignore
+    session.commit()
+    return result.rowcount  # type: ignore

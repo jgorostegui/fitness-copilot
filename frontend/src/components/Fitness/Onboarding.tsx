@@ -2,32 +2,52 @@ import {
   Box,
   Button,
   Container,
+  Flex,
   Heading,
+  IconButton,
   Input,
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { FiArrowLeft } from "react-icons/fi"
 import { useState } from "react"
+import type { UserProfilePublic } from "../../client/types.gen"
 import type { PlanType, UserProfile } from "@/types/fitness"
 
 interface OnboardingProps {
-  onComplete: (profile: UserProfile) => void
+  onComplete: (profile: UserProfile) => void | Promise<void>
+  initialProfile?: UserProfilePublic
+  onBack?: () => void
 }
 
-export const Onboarding = ({ onComplete }: OnboardingProps) => {
-  const [weight, setWeight] = useState(80)
-  const [height, setHeight] = useState(180)
-  const [plan, setPlan] = useState<PlanType>("maintain")
+// Map API goal method to local plan type
+const mapGoalToPlan = (goalMethod?: string | null): PlanType => {
+  if (!goalMethod) return "maintain"
+  if (goalMethod.includes("cut")) return "cut"
+  if (goalMethod.includes("gain")) return "bulk"
+  return "maintain"
+}
 
-  const handleSubmit = (e: React.FormEvent) => {
+export const Onboarding = ({ onComplete, initialProfile, onBack }: OnboardingProps) => {
+  const [weight, setWeight] = useState(initialProfile?.weightKg ?? 80)
+  const [height, setHeight] = useState(initialProfile?.heightCm ?? 180)
+  const [plan, setPlan] = useState<PlanType>(mapGoalToPlan(initialProfile?.goalMethod))
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onComplete({
-      weight,
-      height,
-      plan,
-      theme: "light",
-      onboardingComplete: true,
-    })
+    setIsSubmitting(true)
+    try {
+      await onComplete({
+        weight,
+        height,
+        plan,
+        theme: "light",
+        onboardingComplete: true,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -37,7 +57,26 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
       display="flex"
       alignItems="center"
       justifyContent="center"
+      position="relative"
     >
+      {onBack && (
+        <Flex
+          position="absolute"
+          top={4}
+          left={4}
+          right={4}
+          justify="flex-start"
+        >
+          <IconButton
+            aria-label="Go back"
+            variant="ghost"
+            onClick={onBack}
+            size="lg"
+          >
+            <FiArrowLeft />
+          </IconButton>
+        </Flex>
+      )}
       <Box as="form" onSubmit={handleSubmit} w="full">
         <VStack gap={6} align="stretch">
           <Box textAlign="center">
@@ -94,7 +133,13 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
             </Box>
           </Box>
 
-          <Button type="submit" colorPalette="blue" size="lg">
+          <Button
+            type="submit"
+            colorPalette="blue"
+            size="lg"
+            loading={isSubmitting}
+            disabled={isSubmitting}
+          >
             Start Journey →
           </Button>
         </VStack>

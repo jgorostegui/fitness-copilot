@@ -7,6 +7,7 @@ from datetime import datetime
 from enum import Enum
 
 from pydantic import ConfigDict, EmailStr
+from sqlalchemy import JSON
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -48,6 +49,24 @@ class ActivityLevel(str, Enum):
     MODERATELY_ACTIVE = "moderately_active"
     VERY_ACTIVE = "very_active"
     SUPER_ACTIVE = "super_active"
+
+
+class ChatMessageRole(str, Enum):
+    USER = "user"
+    ASSISTANT = "assistant"
+
+
+class ChatActionType(str, Enum):
+    LOG_FOOD = "log_food"
+    LOG_EXERCISE = "log_exercise"
+    RESET = "reset"
+    NONE = "none"
+
+
+class ChatAttachmentType(str, Enum):
+    IMAGE = "image"
+    AUDIO = "audio"
+    NONE = "none"
 
 
 # ============================================================================
@@ -427,3 +446,57 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+
+# ============================================================================
+# Chat Message
+# ============================================================================
+
+
+class ChatMessageBase(SQLModel):
+    content: str = Field(max_length=2000)
+    attachment_type: ChatAttachmentType = Field(default=ChatAttachmentType.NONE)
+    attachment_url: str | None = Field(default=None, max_length=500)
+
+
+class ChatMessageCreate(ChatMessageBase):
+    """Schema for creating a chat message."""
+
+    pass
+
+
+class ChatMessage(SQLModel, table=True):
+    """Chat message model for storing conversation history."""
+
+    __tablename__ = "chat_message"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE", index=True
+    )
+    role: ChatMessageRole
+    content: str = Field(max_length=2000)
+    action_type: ChatActionType = Field(default=ChatActionType.NONE)
+    action_data: dict | None = Field(default=None, sa_type=JSON)
+    attachment_type: ChatAttachmentType = Field(default=ChatAttachmentType.NONE)
+    attachment_url: str | None = Field(default=None, max_length=500)
+    created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+
+
+class ChatMessagePublic(CamelModel):
+    """Public response model for chat message with camelCase serialization."""
+
+    id: uuid.UUID
+    role: ChatMessageRole
+    content: str
+    action_type: ChatActionType
+    action_data: dict | None = None
+    attachment_type: ChatAttachmentType
+    attachment_url: str | None = None
+    created_at: datetime
+
+
+class ChatMessagesPublic(CamelModel):
+    """List response for chat messages with camelCase serialization."""
+
+    data: list[ChatMessagePublic]
+    count: int

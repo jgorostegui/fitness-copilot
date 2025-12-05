@@ -26,6 +26,10 @@ db:
 up:
     docker compose up -d
 
+# Start production stack (ignores override, uses production builds)
+up-prod:
+    docker compose -f docker-compose.yml up -d
+
 down:
     docker compose down
 
@@ -173,6 +177,17 @@ format-backend:
 format-frontend:
     cd frontend && npx biome format --write ./
 
+# Auto-fix lint issues (ruff check --fix only, no formatting)
+lint-fix: lint-fix-backend lint-fix-frontend
+
+# Auto-fix backend lint issues
+lint-fix-backend:
+    cd backend && uv run ruff check app --fix
+
+# Auto-fix frontend lint issues
+lint-fix-frontend:
+    cd frontend && npx biome check --fix ./
+
 pre-commit:
     uv run pre-commit run --all-files
 
@@ -214,10 +229,13 @@ build-staging:
 
 # ============== Utilities ==============
 
+# Generate OpenAPI client (requires: just dev or just up)
 generate-client:
-    docker compose exec backend python -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > frontend/openapi.json
-    cd frontend && npm run generate-client
-    cd frontend && npx biome format --write ./src/client
+    ./scripts/generate-client.sh
+
+# Generate OpenAPI client locally (no Docker, requires backend venv)
+generate-client-local:
+    ./scripts/generate-client.sh --local
 
 secret:
     python -c "import secrets; print(secrets.token_urlsafe(32))"
