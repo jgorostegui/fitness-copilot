@@ -56,24 +56,32 @@ just db-sh         # PostgreSQL shell
 
 ## Testing Philosophy
 
-This project uses **three test tiers** based on Google's Small/Medium/Large sizing:
+This project uses Google's **Small/Medium/Large** test sizing.
+See: [Test Sizes - Google Testing Blog](https://testing.googleblog.com/2010/12/test-sizes.html)
 
-| Type            | Scope                    | Network   | Database | CI Behavior      |
-|-----------------|--------------------------|-----------|----------|------------------|
-| **Unit**        | Pure logic, mocked deps  | No        | No       | Must pass        |
-| **Integration** | API + DB, mocked external| Localhost | Yes      | Must pass        |
-| **E2E**         | Full browser flows       | Yes       | Yes      | Non-blocking     |
+| Size       | Marker       | Network        | Database | External Services | CI Behavior      |
+|------------|--------------|----------------|----------|-------------------|------------------|
+| **Small**  | `unit`       | No             | No       | No                | Must pass        |
+| **Medium** | `acceptance` | localhost only | Yes      | Mocked            | Must pass        |
+| **Large**  | `integration`| Yes            | Yes      | Live (Gemini)     | Skipped by default |
 
 ## Testing (Host Machine)
+
 ```bash
 just test              # All tests (backend + frontend)
 just test-backend      # Backend tests only
+just test-unit         # Unit tests only (Small - no DB required)
+just test-acceptance   # Acceptance tests only (Medium - DB required)
+just test-integration  # Integration tests (Large - live external services)
 just test-frontend     # Frontend tests only
 just test-e2e          # E2E tests (Playwright)
 just test-e2e-ui       # E2E with UI
 
 # Aliases
 just tb                # Backend tests (alias)
+just tu                # Unit tests (alias)
+just ta                # Acceptance tests (alias)
+just ti                # Integration tests (alias)
 just tf                # Frontend tests (alias)
 just te                # E2E tests (alias)
 
@@ -82,8 +90,9 @@ cd backend
 uv run pytest                    # Run all tests
 uv run pytest -x                 # Stop on first failure
 uv run pytest -k "test_name"     # Run specific test
-uv run pytest -m unit            # Run only unit tests
-uv run pytest -m integration     # Run only integration tests
+uv run pytest -m unit            # Run only unit tests (no DB)
+uv run pytest -m acceptance      # Run only acceptance tests (DB required)
+uv run pytest -m integration     # Run only integration tests (live external)
 uv run pytest --cov=app          # Run with coverage
 ```
 
@@ -94,11 +103,13 @@ just docker-exec "cmd"      # Run any command (exec: faster, requires running co
 ```
 
 ## Testing (Inside Docker) - requires: just dev or just up
+
 ```bash
 just docker-test                    # All backend tests
 just docker-test-args "-x -v"       # Backend tests with args
 just docker-test-unit               # Unit tests only
-just docker-test-integration        # Integration tests only
+just docker-test-acceptance         # Acceptance tests only
+just docker-test-integration        # Integration tests (live external)
 just docker-test-coverage           # Tests with coverage report
 just docker-e2e                     # E2E tests (playwright container)
 ```
@@ -137,7 +148,16 @@ just lint-frontend     # Frontend linting only
 just format            # Format all code
 just format-backend    # Format backend only
 just format-frontend   # Format frontend only
+just format-check      # Check formatting without fixing
+just check             # All quality checks (lint + format check)
 just pre-commit        # Run pre-commit hooks
+```
+
+## Security Scanning
+```bash
+just security          # Run all security scans
+just security-bandit   # Bandit code security scan
+just security-safety   # Safety dependency vulnerability scan
 ```
 
 ## Build & Utilities

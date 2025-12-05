@@ -12,7 +12,10 @@
 - **Models**: SQLModel classes in `backend/app/models.py`
 - **Schemas**: Pydantic models for request/response validation
 - **API Routes**: Organized by resource in `backend/app/api/routes/`
-- **CRUD**: Database operations in `backend/app/crud.py`
+- **CRUD**: Database operations split by concern:
+  - `crud.py` - User/auth operations
+  - `crud_fitness.py` - Training programs, exercise logs
+  - `crud_nutrition.py` - Meal plans, meal logs
 - **Dependencies**: Reusable dependencies in `backend/app/api/deps.py`
 
 ### Best Practices
@@ -59,28 +62,39 @@
 
 ## Testing
 
-This project uses a **three-tier testing philosophy** based on Google's Small/Medium/Large sizing:
-[https://testing.googleblog.com/2010/12/test-sizes.html](https://testing.googleblog.com/2010/12/test-sizes.html)
+This project uses Google's **Small/Medium/Large** test sizing philosophy.
 
-### Test Tiers
+Reference: [Test Sizes - Google Testing Blog](https://testing.googleblog.com/2010/12/test-sizes.html)
 
-| Type            | Size   | Network   | Database | External APIs | Typical Time |
-|-----------------|--------|-----------|----------|---------------|--------------|
-| **Unit**        | Small  | No        | No       | No            | ≤ 30s suite  |
-| **Integration** | Medium | Localhost | Yes      | Mocked        | ≤ 150s suite |
-| **E2E**         | Large  | Yes       | Yes      | Yes           | 300+ s       |
+### Test Sizes (Google's Definition)
 
-- **Unit**: Pure logic in isolation; heavy mocking; deterministic; fastest feedback
-- **Integration**: End-to-end through our stack (API/DB) but mocks external HTTP
-- **E2E**: Full browser-based tests with Playwright; exercises real user flows
+| Feature              | Small (Unit)     | Medium (Integration) | Large (E2E)      |
+|----------------------|------------------|----------------------|------------------|
+| Network access       | No               | localhost only       | Yes              |
+| Database             | No               | Yes                  | Yes              |
+| File system access   | No               | Yes                  | Yes              |
+| External systems     | No               | Discouraged          | Yes              |
+| Multiple threads     | No               | Yes                  | Yes              |
+| Sleep statements     | No               | Yes                  | Yes              |
+| Time limit (seconds) | 60               | 300                  | 900+             |
+
+### Our Test Tiers
+
+- **Unit** (`@pytest.mark.unit`): Pure logic in isolation; heavy mocking; deterministic; fastest feedback. No DB, no network.
+- **Acceptance** (`@pytest.mark.acceptance`): API + DB communication via TestClient. Mocks external HTTP. Localhost only.
+- **Integration** (`@pytest.mark.integration`): Live external services (Gemini API). Skipped by default, run with `RUN_INTEGRATION_TESTS=1`.
+
+Key principle: Tests must be **isolated** and runnable in **any order** (enables parallel execution).
 
 ### Backend Tests
+
 - Use pytest for all tests
 - Test files in `backend/app/tests/`
-- Organize by tier: `tests/unit/`, `tests/integration/`
-- Use pytest markers: `@pytest.mark.unit`, `@pytest.mark.integration`
-- Include unit tests for CRUD operations and business logic
-- Include integration tests for API endpoints
+- Organize by tier: `tests/unit/`, `tests/acceptance/`, `tests/integration/`
+- Use pytest markers: `@pytest.mark.unit`, `@pytest.mark.acceptance`, `@pytest.mark.integration`
+- Include unit tests for pure logic and business rules
+- Include acceptance tests for API endpoints with DB
+- Include integration tests for live external services (Gemini)
 - Aim for high test coverage (≥ 50% gate in CI)
 
 ### Frontend Tests
@@ -90,9 +104,11 @@ This project uses a **three-tier testing philosophy** based on Google's Small/Me
 - Run tests against Docker stack
 
 ### What Runs in CI
+
 1. **Unit tests** → must pass (blocks merge)
-2. **Integration tests** → must pass (blocks merge)
-3. **E2E tests** → runs with `continue-on-error: true` (non-blocking due to flakiness)
+2. **Acceptance tests** → must pass (blocks merge)
+3. **Integration tests** → skipped by default (live external services)
+4. **E2E tests** → runs with `continue-on-error: true` (non-blocking due to flakiness)
 
 ## Git Workflow
 - Use descriptive commit messages
