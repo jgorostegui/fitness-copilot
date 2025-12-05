@@ -96,19 +96,48 @@ class BrainService:
     }
 
     # Exercise mappings (keyword -> exercise name)
+    # IMPORTANT: More specific keywords should be listed - sorting by length handles priority
+    # Longer keywords are matched first, so "incline dumbbell press" matches before "press"
     EXERCISE_MAP: dict[str, str] = {
+        # Bench variations
+        "incline dumbbell press": "Incline Dumbbell Press",
+        "incline bench press": "Incline Bench Press",
+        "flat bench press": "Bench Press",
+        "bench press": "Bench Press",
+        "dumbbell press": "Dumbbell Press",
+        "incline press": "Incline Dumbbell Press",
         "bench": "Bench Press",
+        # Squats
+        "barbell squat": "Barbell Squat",
         "squat": "Barbell Squat",
+        # Deadlifts
+        "romanian deadlift": "Romanian Deadlift",
+        "rdl": "Romanian Deadlift",
         "deadlift": "Deadlift",
+        # Press variations (order matters - longer first)
         "overhead press": "Overhead Press",
-        "press": "Overhead Press",
+        "shoulder press": "Overhead Press",
+        "military press": "Overhead Press",
+        "leg press": "Leg Press",
+        "legpress": "Leg Press",
+        "press": "Overhead Press",  # Fallback for just "press"
+        # Rows
+        "barbell row": "Barbell Row",
         "row": "Barbell Row",
+        # Other
+        "bicep curl": "Bicep Curl",
         "curl": "Bicep Curl",
         "pullup": "Pull-up",
         "pull-up": "Pull-up",
+        "pull up": "Pull-up",
+        "lat pulldown": "Lat Pulldown",
+        "pulldown": "Lat Pulldown",
         "dip": "Dips",
-        "leg press": "Leg Press",
-        "legpress": "Leg Press",
+        "dips": "Dips",
+        "lunge": "Lunges",
+        "lunges": "Lunges",
+        "calf raise": "Calf Raises",
+        "calf": "Calf Raises",
     }
 
     # Exercise keywords that trigger exercise parsing
@@ -125,9 +154,23 @@ class BrainService:
         "lbs",
         "pullup",
         "pull-up",
+        "pull up",
+        "pulldown",
         "dip",
+        "dips",
         "leg press",
         "legpress",
+        "lunge",
+        "lunges",
+        "calf",
+        "rdl",
+        "romanian",
+        "incline",
+        "dumbbell",
+        "barbell",
+        "military",
+        "shoulder",
+        "overhead",
     }
 
     def __init__(self, session: Session | None = None) -> None:
@@ -317,29 +360,33 @@ class BrainService:
         self, content: str, user_id: uuid.UUID | None = None
     ) -> BrainResponse | None:
         """
-        Parse exercise from message content using simple keyword matching.
+        Parse exercise from message content using simple keyword matching (sync fallback).
 
-        Tier 1: Find exercise name via keyword matching
-        Tier 2: Extract sets/reps/weight (or use defaults)
+        This is only used for sync processing. For async, we use LLM extraction.
 
         Returns BrainResponse if exercise found, None otherwise.
         """
         lower = content.lower()
 
-        # Tier 1: Find exercise name
+        logger.info(f"[BRAIN] Parsing exercise (sync) from: '{content}'")
+
+        # Simple keyword matching as fallback for sync processing
+        sorted_keywords = sorted(self.EXERCISE_MAP.keys(), key=len, reverse=True)
+
         exercise_name = None
-        for keyword, name in self.EXERCISE_MAP.items():
+        for keyword in sorted_keywords:
             if keyword in lower:
-                exercise_name = name
+                exercise_name = self.EXERCISE_MAP[keyword]
+                logger.info(
+                    f"[BRAIN] Matched keyword '{keyword}' -> exercise '{exercise_name}'"
+                )
                 break
 
         if not exercise_name:
+            logger.info(f"[BRAIN] No exercise keyword matched in: '{content}'")
             return None
 
-        # Tier 2: Extract sets/reps/weight
         sets, reps, weight = self._extract_exercise_values(content)
-
-        # Build progress feedback if context available
         progress_msg = self._build_exercise_progress_message(user_id, exercise_name)
 
         weight_str = f" @ {weight}kg" if weight > 0 else ""
@@ -353,6 +400,101 @@ class BrainService:
                 "weight_kg": weight,
             },
         )
+
+    async def _parse_exercise_with_llm(
+        self, content: str, user_id: uuid.UUID | None = None
+    ) -> BrainResponse | None:
+        """
+        Parse exercise from message content using LLM extraction.
+
+        The LLM extracts the exact exercise name, sets, reps, and weight from
+        natural language input. This is more accurate than keyword matching.
+
+        Returns BrainResponse if exercise found, None otherwise.
+        """
+        logger.info(f"[BRAIN] Parsing exercise with LLM from: '{content}'")
+
+        if not self.llm:
+            logger.info("[BRAIN] No LLM available, falling back to keyword matching")
+            return self._parse_exercise(content, user_id)
+
+        # Build context for allowed exercises
+        context = self._build_context(user_id) if user_id else None
+        allowed_exercises = context.allowed_exercises if context else []
+
+        # Build the extraction prompt
+        exercises_hint = ""
+        if allowed_exercises:
+            exercises_hint = (
+                f"\nUser's training program includes: {', '.join(allowed_exercises)}"
+            )
+
+        extraction_prompt = f"""Extract exercise information from this message. Return ONLY a JSON object.
+
+Message: "{content}"
+{exercises_hint}
+
+Return JSON with these fields:
+- exercise_name: The exact exercise name (use proper form like "Incline Dumbbell Press", "Romanian Deadlift", etc.)
+- sets: Number of sets (integer, default 3 if not mentioned)
+- reps: Number of reps (integer, default 10 if not mentioned)
+- weight_kg: Weight in kg (number, default 0 if not mentioned, convert lbs to kg if needed)
+
+If this is NOT about logging an exercise, return: {{"exercise_name": null}}
+
+JSON:"""
+
+        logger.debug(f"[BRAIN] LLM extraction prompt:\n{extraction_prompt}")
+
+        try:
+            response = await self.llm.generate(extraction_prompt, timeout_s=10.0)
+            logger.info(f"[BRAIN] LLM extraction response: {response}")
+
+            if not response:
+                return self._parse_exercise(content, user_id)
+
+            # Parse JSON response
+            import json
+            import re
+
+            # Extract JSON from response (handle markdown code blocks)
+            json_match = re.search(r"\{[^}]+\}", response, re.DOTALL)
+            if not json_match:
+                logger.warning(f"[BRAIN] Could not extract JSON from: {response}")
+                return self._parse_exercise(content, user_id)
+
+            data = json.loads(json_match.group())
+            exercise_name = data.get("exercise_name")
+
+            if not exercise_name:
+                logger.info("[BRAIN] LLM determined this is not an exercise log")
+                return None
+
+            sets = int(data.get("sets", 3))
+            reps = int(data.get("reps", 10))
+            weight = float(data.get("weight_kg", 0))
+
+            logger.info(
+                f"[BRAIN] LLM extracted: {exercise_name}, {sets}x{reps} @ {weight}kg"
+            )
+
+            progress_msg = self._build_exercise_progress_message(user_id, exercise_name)
+            weight_str = f" @ {weight}kg" if weight > 0 else ""
+
+            return BrainResponse(
+                content=f"💪 Logged {exercise_name}: {sets}x{reps}{weight_str}{progress_msg}",
+                action_type=ChatActionType.LOG_EXERCISE,
+                action_data={
+                    "exercise_name": exercise_name,
+                    "sets": sets,
+                    "reps": reps,
+                    "weight_kg": weight,
+                },
+            )
+
+        except Exception as e:
+            logger.warning(f"[BRAIN] LLM exercise extraction failed: {e}")
+            return self._parse_exercise(content, user_id)
 
     def _build_exercise_progress_message(
         self,
@@ -721,6 +863,11 @@ User message: """
         Returns:
             BrainResponse with content, action_type, and optional action_data
         """
+        logger.info("=" * 60)
+        logger.info(f"[BRAIN] Processing message: '{content}'")
+        logger.info(f"[BRAIN] User ID: {user_id}")
+        logger.info(f"[BRAIN] Attachment type: {attachment_type}")
+
         # Handle audio attachments (placeholder response)
         if attachment_type == ChatAttachmentType.AUDIO:
             return self._handle_audio_attachment()
@@ -738,16 +885,31 @@ User message: """
             return self._handle_reset()
 
         # Try food parsing if food keywords present
-        if self._has_food_keywords(content):
+        has_food = self._has_food_keywords(content)
+        logger.info(f"[BRAIN] Has food keywords: {has_food}")
+        if has_food:
             food_response = self._parse_food(content, user_id)
             if food_response:
+                logger.info(
+                    f"[BRAIN] Food parsed -> action={food_response.action_type}, data={food_response.action_data}"
+                )
                 return food_response
 
-        # Try exercise parsing if exercise keywords present
-        if self._has_exercise_keywords(content):
-            exercise_response = self._parse_exercise(content, user_id)
+        # Try exercise parsing with LLM if exercise keywords present
+        has_exercise = self._has_exercise_keywords(content)
+        logger.info(f"[BRAIN] Has exercise keywords: {has_exercise}")
+        if has_exercise:
+            exercise_response = await self._parse_exercise_with_llm(content, user_id)
             if exercise_response:
+                logger.info(
+                    f"[BRAIN] Exercise parsed -> action={exercise_response.action_type}, data={exercise_response.action_data}"
+                )
                 return exercise_response
 
         # Use LLM for general conversation with context
-        return await self._llm_response(content, user_id)
+        logger.info("[BRAIN] Falling back to LLM response")
+        response = await self._llm_response(content, user_id)
+        logger.info(
+            f"[BRAIN] LLM response -> action={response.action_type}, content='{response.content[:100]}...'"
+        )
+        return response
