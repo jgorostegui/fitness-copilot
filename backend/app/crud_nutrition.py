@@ -42,9 +42,12 @@ def get_meal_plans_for_today(session: Session, user_id: uuid.UUID) -> list[MealP
 
 
 def create_meal_log(
-    session: Session, user_id: uuid.UUID, meal_log_in: MealLogCreate
+    session: Session,
+    user_id: uuid.UUID,
+    meal_log_in: MealLogCreate,
+    simulated_day: int = 0,
 ) -> MealLog:
-    """Create a meal log for a user."""
+    """Create a meal log for a user on a specific simulated day."""
     meal_log = MealLog(
         user_id=user_id,
         meal_name=meal_log_in.meal_name,
@@ -53,6 +56,7 @@ def create_meal_log(
         protein_g=meal_log_in.protein_g,
         carbs_g=meal_log_in.carbs_g,
         fat_g=meal_log_in.fat_g,
+        simulated_day=simulated_day,
         logged_at=datetime.utcnow(),
     )
     session.add(meal_log)
@@ -78,16 +82,29 @@ def get_meal_logs_for_user(
 
 
 def get_meal_logs_for_today(session: Session, user_id: uuid.UUID) -> list[MealLog]:
-    """Get meal logs for today (UTC)."""
+    """Get meal logs for today (UTC). Deprecated - use get_meal_logs_for_simulated_day."""
     today = datetime.utcnow().date()
     start = datetime.combine(today, time.min)
     end = datetime.combine(today, time.max)
     return get_meal_logs_for_user(session, user_id, start_date=start, end_date=end)
 
 
+def get_meal_logs_for_simulated_day(
+    session: Session, user_id: uuid.UUID, simulated_day: int
+) -> list[MealLog]:
+    """Get meal logs for a specific simulated day."""
+    statement = (
+        select(MealLog)
+        .where(MealLog.user_id == user_id)
+        .where(MealLog.simulated_day == simulated_day)
+        .order_by(MealLog.logged_at)
+    )
+    return list(session.exec(statement).all())
+
+
 def delete_meal_logs_for_today(session: Session, user_id: uuid.UUID) -> int:
     """
-    Delete all meal logs for today for a user.
+    Delete all meal logs for today for a user. Deprecated - use delete_meal_logs_for_simulated_day.
 
     Returns:
         Number of logs deleted
@@ -103,6 +120,27 @@ def delete_meal_logs_for_today(session: Session, user_id: uuid.UUID) -> int:
         .where(MealLog.user_id == user_id)
         .where(MealLog.logged_at >= start)
         .where(MealLog.logged_at < end)
+    )
+    result = session.exec(statement)  # type: ignore
+    session.commit()
+    return result.rowcount  # type: ignore
+
+
+def delete_meal_logs_for_simulated_day(
+    session: Session, user_id: uuid.UUID, simulated_day: int
+) -> int:
+    """
+    Delete all meal logs for a specific simulated day for a user.
+
+    Returns:
+        Number of logs deleted
+    """
+    from sqlmodel import delete
+
+    statement = (
+        delete(MealLog)
+        .where(MealLog.user_id == user_id)
+        .where(MealLog.simulated_day == simulated_day)
     )
     result = session.exec(statement)  # type: ignore
     session.commit()

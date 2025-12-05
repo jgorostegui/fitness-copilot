@@ -1,0 +1,16 @@
+program_id,program_name,description,days_per_week,difficulty,day_of_week,exercise_name,machine_hint,sets,reps,target_load_kg
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,0,Squats,Squat Rack,3,10,50
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,0,Bench Press,Barbell Bench,3,10,40
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,0,Barbell Rows,Barbell,3,10,35
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,0,Overhead Press,Barbell,3,10,25
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,0,Plank,Bodyweight,3,60,0
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,2,Deadlifts,Barbell,3,8,60
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,2,Incline Dumbbell Press,Incline Bench,3,10,15
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,2,Lat Pulldowns,Cable Machine,3,10,35
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,2,Dumbbell Lunges,Dumbbells,3,10,10
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,2,Bicep Curls,Dumbbells,3,12,8
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,4,Leg Press,Leg Press Machine,3,12,80
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,4,Dumbbell Chest Press,Dumbbells,3,10,15
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,4,Seated Cable Rows,Cable Machine,3,10,30
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,4,Lateral Raises,Dumbbells,3,12,5
+fb_maintain,Full Body (Maintenance),3-day full body program for maintenance,3,beginner,4,Tricep Pushdowns,Cable Machine,3,12,15

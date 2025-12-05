@@ -1,6 +1,7 @@
 import {
   Box,
   Flex,
+  Heading,
   IconButton,
   Input,
   Spinner,
@@ -17,6 +18,7 @@ import type {
 import { ActionCard } from "@/components/Fitness/ActionCard"
 import { AuthenticatedImage } from "@/components/Fitness/AuthenticatedImage"
 import { ContextWidget } from "@/components/Fitness/ContextWidget"
+import { DaySelector } from "@/components/Fitness/DaySelector"
 import {
   isVisionResponse,
   VisionResponseCard,
@@ -25,6 +27,7 @@ import { useChat } from "@/hooks/useChat"
 import { useImageUpload } from "@/hooks/useImageUpload"
 import { useLogs } from "@/hooks/useLogs"
 import { useSummary } from "@/hooks/useSummary"
+import { useTrainingRoutine } from "@/hooks/useTrainingRoutine"
 import type { DailyStats, ExerciseLog, MealLog } from "@/types/fitness"
 
 // Convert API exercise log to local type
@@ -60,6 +63,7 @@ export function ChatInterface() {
   const { uploadImage, isUploading } = useImageUpload()
   const { mealLogs: apiMealLogs, exerciseLogs: apiExerciseLogs } = useLogs()
   const { summary } = useSummary()
+  const { trainingRoutine } = useTrainingRoutine()
 
   // Map API logs to local types
   const mealLogs = apiMealLogs.map(mapMealLog)
@@ -82,9 +86,9 @@ export function ChatInterface() {
   // Update widget mode based on last message action
   useEffect(() => {
     const lastMsg = messages[messages.length - 1]
-    if (lastMsg?.actionType === "log_food") {
+    if (lastMsg?.actionType === "log_food" || lastMsg?.actionType === "propose_food") {
       setWidgetMode("kitchen")
-    } else if (lastMsg?.actionType === "log_exercise") {
+    } else if (lastMsg?.actionType === "log_exercise" || lastMsg?.actionType === "propose_exercise") {
       setWidgetMode("gym")
     }
   }, [messages])
@@ -212,8 +216,16 @@ export function ChatInterface() {
             msg.actionData as Record<string, unknown>,
           ) ? (
             <VisionResponseCard
-              actionType={msg.actionType as "log_exercise" | "log_food"}
+              messageId={msg.id}
+              actionType={
+                msg.actionType as
+                  | "log_exercise"
+                  | "log_food"
+                  | "propose_exercise"
+                  | "propose_food"
+              }
               actionData={msg.actionData as Record<string, unknown>}
+              isTracked={(msg.actionData as Record<string, unknown>).isTracked === true}
             />
           ) : (
             <ActionCard
@@ -243,6 +255,20 @@ export function ChatInterface() {
 
   return (
     <Flex direction="column" h="full" bg="gray.50" position="relative">
+      {/* Header with Day Selector */}
+      <Box
+        bg="white"
+        borderBottom="1px"
+        borderColor="gray.200"
+        px={4}
+        py={3}
+      >
+        <Flex justify="space-between" align="center">
+          <Heading size="md">Chat</Heading>
+          <DaySelector />
+        </Flex>
+      </Box>
+
       <ContextWidget
         mode={widgetMode}
         toggleMode={() =>
@@ -251,6 +277,7 @@ export function ChatInterface() {
         stats={stats}
         exerciseLogs={exerciseLogs}
         mealLogs={mealLogs}
+        trainingRoutine={trainingRoutine}
         onQuickLog={(text) => handleSend(text)}
       />
 

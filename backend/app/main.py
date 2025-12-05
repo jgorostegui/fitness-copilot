@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -12,6 +13,15 @@ from app.api.main import api_router
 from app.core.config import settings
 from app.core.db import engine
 from app.services.mock_data import mock_data_service
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+# Set DEBUG level for our services to see detailed context
+logging.getLogger("app.services.context").setLevel(logging.DEBUG)
+logging.getLogger("app.services.brain").setLevel(logging.DEBUG)
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:

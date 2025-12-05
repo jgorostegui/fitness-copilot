@@ -4,8 +4,10 @@ import { useAuth } from "@/hooks/useAuth"
 import { useChat } from "@/hooks/useChat"
 import { useFitnessStore } from "@/hooks/useFitnessStore"
 import { useLogs } from "@/hooks/useLogs"
+import { useMealPlan } from "@/hooks/useMealPlan"
 import { useProfile } from "@/hooks/useProfile"
 import { useSummary } from "@/hooks/useSummary"
+import { useTrainingRoutine } from "@/hooks/useTrainingRoutine"
 import type {
   DailyStats,
   ExerciseLog,
@@ -55,6 +57,9 @@ export const FitnessApp = () => {
     logExercise,
   } = useLogs(isAuthenticated)
   const { sendMessage, clearMessages } = useChat(isAuthenticated)
+  const { mealPlan, isLoading: mealPlanLoading } = useMealPlan(isAuthenticated)
+  const { trainingRoutine, isLoading: trainingLoading } =
+    useTrainingRoutine(isAuthenticated)
 
   // Quick-add handlers that use direct log API (not chat)
   const addMealLog = useCallback(
@@ -185,13 +190,17 @@ export const FitnessApp = () => {
             mealLogs={mealLogs}
             exerciseLogs={exerciseLogs}
             profile={currentProfile}
+            trainingRoutine={trainingRoutine}
           />
         )}
         {activeTab === "workout" && (
           <PlanViewer
             mode="workout"
+            mealPlan={mealPlan}
+            trainingRoutine={trainingRoutine}
             mealLogs={mealLogs}
             exerciseLogs={exerciseLogs}
+            isLoading={trainingLoading}
             onAddMeal={addMealLog}
             onAddExercise={addExerciseLog}
           />
@@ -200,8 +209,11 @@ export const FitnessApp = () => {
         {activeTab === "nutrition" && (
           <PlanViewer
             mode="nutrition"
+            mealPlan={mealPlan}
+            trainingRoutine={trainingRoutine}
             mealLogs={mealLogs}
             exerciseLogs={exerciseLogs}
+            isLoading={mealPlanLoading}
             onAddMeal={addMealLog}
             onAddExercise={addExerciseLog}
           />

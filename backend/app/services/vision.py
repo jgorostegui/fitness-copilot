@@ -91,7 +91,16 @@ class VisionService:
             or "No exercises scheduled today."
         )
 
-        # Format chat history
+        # Format scheduled meals
+        meals_formatted = (
+            "\n".join(
+                f"- {m['meal_type'].title()}: {m['item_name']} ({m['calories']} kcal)"
+                for m in context.scheduled_meals
+            )
+            or "No meals scheduled today."
+        )
+
+        # Format chat history (last 5 messages)
         history_formatted = (
             "\n".join(
                 f"{m['role'].upper()}: {m['content']}"
@@ -100,15 +109,32 @@ class VisionService:
             or "No recent messages."
         )
 
+        # Calculate progress percentages
+        cal_pct = (
+            int((context.calories_consumed / context.calories_target) * 100)
+            if context.calories_target > 0
+            else 0
+        )
+        protein_pct = (
+            int((context.protein_consumed / context.protein_target) * 100)
+            if context.protein_target > 0
+            else 0
+        )
+
         return f"""USER PROFILE:
 - Goal: {context.goal_method}
 - Weight: {context.weight_kg}kg
+- Height: {context.height_cm}cm
+- Activity Level: {context.activity_level}
 - Sex: {context.sex}
 
-TODAY'S PROGRESS:
-- Calories: {context.calories_consumed} / {context.calories_target} kcal
-- Protein: {context.protein_consumed}g / {context.protein_target}g
+TODAY'S PROGRESS ({context.simulated_day_name}):
+- Calories: {context.calories_consumed} / {context.calories_target} kcal ({cal_pct}%)
+- Protein: {context.protein_consumed}g / {context.protein_target}g ({protein_pct}%)
 - Workouts completed: {context.workouts_completed}
+
+TODAY'S MEAL PLAN:
+{meals_formatted}
 
 TODAY'S TRAINING PLAN:
 {exercises_formatted}

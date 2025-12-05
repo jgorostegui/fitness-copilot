@@ -32,7 +32,20 @@ FOOD_KEYWORDS = {
 }
 
 # Known foods from BrainService.FOOD_DB
+# Must include all foods in FOOD_DB to properly filter test inputs
 KNOWN_FOODS = {
+    # Complete dishes (realistic quick add options)
+    "grilled chicken salad",
+    "chicken salad",
+    "oatmeal with berries",
+    "oatmeal",
+    "eggs and avocado toast",
+    "avocado toast",
+    "rice and grilled chicken",
+    "rice and chicken",
+    "protein shake",
+    "shake",
+    # Simple ingredients
     "banana",
     "chicken",
     "rice",

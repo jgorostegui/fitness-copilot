@@ -213,7 +213,7 @@
     - Show loading indicator while waiting for vision response
     - _Requirements: 5.4, 5.5, 5.7_
 
-- [ ] 19. Review LLM_ENABLED=true working flow with live Gemini API
+- [x] 19. Review LLM_ENABLED=true working flow with live Gemini API
   - Start dev environment with `LLM_ENABLED=true` and valid `GOOGLE_API_KEY`
   - Manual test: Upload leg-press.jpg → verify Gemini classifies as gym_equipment
   - Manual test: Verify gym analysis returns real exercise name, form cues, and suggested values
@@ -223,7 +223,7 @@
   - Manual test: Test with unknown image → verify helpful guidance message
   - _Requirements: 4.2, 4.3, 7.2_
 
-- [ ] 20. Final Checkpoint - Test all flows
+- [x] 20. Final Checkpoint - Test all flows
   - Ensure all tests pass, ask the user if questions arise
   - Manual test: Click camera → select image → upload → verify gym/food analysis displayed
   - Manual test: Verify Monitor updates after vision logging

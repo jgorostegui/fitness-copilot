@@ -18,7 +18,7 @@ export function useSummary(enabled = true) {
       return response.data as DailySummary
     },
     enabled,
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: 0, // Always refetch when invalidated
   })
 
   return {

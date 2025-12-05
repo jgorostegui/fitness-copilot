@@ -4,25 +4,33 @@ import {
   Container,
   Flex,
   Heading,
+  Spinner,
   Text,
   VStack,
 } from "@chakra-ui/react"
 import { FiCheck, FiPlus } from "react-icons/fi"
-import { TODAY_MEAL_PLAN, TODAY_ROUTINE } from "@/constants/fitness"
+import type { MealPlanPublic, TrainingRoutinePublic } from "@/client/types.gen"
+import { DaySelector } from "@/components/Fitness/DaySelector"
 import type { ExerciseLog, MealLog } from "@/types/fitness"
 
 interface PlanViewerProps {
   mode: "workout" | "nutrition"
+  mealPlan: MealPlanPublic[]
+  trainingRoutine: TrainingRoutinePublic[]
   mealLogs: MealLog[]
   exerciseLogs: ExerciseLog[]
+  isLoading?: boolean
   onAddMeal: (meal: Omit<MealLog, "id" | "time">) => void
   onAddExercise: (exercise: Omit<ExerciseLog, "id" | "time">) => void
 }
 
 export const PlanViewer = ({
   mode,
+  mealPlan,
+  trainingRoutine,
   mealLogs,
   exerciseLogs,
+  isLoading = false,
   onAddMeal,
   onAddExercise,
 }: PlanViewerProps) => {
@@ -31,21 +39,37 @@ export const PlanViewer = ({
 
   const totalCalories = mealLogs.reduce((acc, log) => acc + log.calories, 0)
   const totalProtein = mealLogs.reduce((acc, log) => acc + log.protein, 0)
-  const targetCalories = TODAY_MEAL_PLAN.reduce(
-    (acc, item) => acc + item.calories,
-    0,
-  )
+  const targetCalories = mealPlan.reduce((acc, item) => acc + item.calories, 0)
+  const targetProtein = mealPlan.reduce((acc, item) => acc + item.protein_g, 0)
 
-  const totalSetsLogged = exerciseLogs.length
-  const targetSets = TODAY_ROUTINE.reduce((acc, item) => acc + item.sets, 0)
+  // Count total sets logged (each log entry represents sets done)
+  const totalSetsLogged = exerciseLogs.reduce((acc, log) => acc + log.sets, 0)
+  const targetSets = trainingRoutine.reduce((acc, item) => acc + item.sets, 0)
 
-  const handleQuickAddFood = (name: string, cal: number, pro: number) => {
-    onAddMeal({ name, calories: cal, protein: pro, type: "snack" })
+  const handleQuickAddFood = (
+    name: string,
+    cal: number,
+    pro: number,
+    type: string,
+  ) => {
+    onAddMeal({
+      name,
+      calories: cal,
+      protein: pro,
+      type: type as MealLog["type"],
+    })
   }
 
-  const handleLogSet = (exerciseName: string, reps: string) => {
-    const repsParsed = Number.parseInt(reps.split("-")[0], 10) || 10
-    onAddExercise({ name: exerciseName, sets: 1, reps: repsParsed, weight: 0 })
+  const handleLogSet = (exerciseName: string, reps: number) => {
+    onAddExercise({ name: exerciseName, sets: 1, reps, weight: 0 })
+  }
+
+  if (isLoading) {
+    return (
+      <Flex h="full" align="center" justify="center" bg="gray.50">
+        <Spinner size="lg" color="blue.500" />
+      </Flex>
+    )
   }
 
   return (
@@ -64,17 +88,24 @@ export const PlanViewer = ({
           <Box>
             <Heading size="md">{title}</Heading>
             <Text fontSize="xs" color="gray.500">
-              {isWorkout ? "Leg Day Assignment" : "Daily Fuel Architecture"}
+              {isWorkout
+                ? trainingRoutine.length > 0
+                  ? `${trainingRoutine.length} exercises planned`
+                  : "Rest Day"
+                : `${mealPlan.length} meals planned`}
             </Text>
           </Box>
-          <Box
-            p={2}
-            bg={isWorkout ? "blue.50" : "green.50"}
-            borderRadius="full"
-            fontSize="lg"
-          >
-            {isWorkout ? "🏋️" : "🍽️"}
-          </Box>
+          <Flex align="center" gap={2}>
+            <DaySelector />
+            <Box
+              p={2}
+              bg={isWorkout ? "blue.50" : "green.50"}
+              borderRadius="full"
+              fontSize="lg"
+            >
+              {isWorkout ? "🏋️" : "🍽️"}
+            </Box>
+          </Flex>
         </Flex>
       </Box>
 
@@ -122,78 +153,109 @@ export const PlanViewer = ({
                 </Flex>
               </Box>
 
-              <Box>
-                <Text fontSize="xs" fontWeight="bold" color="gray.500" mb={3}>
-                  THE PROTOCOL
-                </Text>
-                <VStack gap={3} align="stretch">
-                  {TODAY_ROUTINE.map((item, idx) => {
-                    const loggedForThis = exerciseLogs.filter(
-                      (l) =>
-                        l.name.toLowerCase() === item.exercise.toLowerCase(),
-                    ).length
-                    const isComplete = loggedForThis >= item.sets
+              {trainingRoutine.length === 0 ? (
+                <Box
+                  textAlign="center"
+                  py={8}
+                  bg="white"
+                  borderRadius="xl"
+                  border="1px dashed"
+                  borderColor="gray.300"
+                >
+                  <Text fontSize="4xl" mb={2}>
+                    🧘
+                  </Text>
+                  <Text color="gray.500" fontWeight="medium">
+                    Rest Day
+                  </Text>
+                  <Text color="gray.400" fontSize="sm">
+                    No workout scheduled for today
+                  </Text>
+                </Box>
+              ) : (
+                <Box>
+                  <Text fontSize="xs" fontWeight="bold" color="gray.500" mb={3}>
+                    THE PROTOCOL
+                  </Text>
+                  <VStack gap={3} align="stretch">
+                    {trainingRoutine.map((item) => {
+                      // Sum total sets logged for this exercise
+                      const loggedForThis = exerciseLogs
+                        .filter(
+                          (l) =>
+                            l.name.toLowerCase() ===
+                            item.exercise_name.toLowerCase(),
+                        )
+                        .reduce((acc, log) => acc + log.sets, 0)
+                      const isComplete = loggedForThis >= item.sets
 
-                    return (
-                      <Box
-                        key={idx}
-                        bg="white"
-                        p={4}
-                        borderRadius="xl"
-                        border="1px"
-                        borderColor={isComplete ? "blue.200" : "gray.200"}
-                        boxShadow={
-                          isComplete
-                            ? "0 0 0 1px var(--chakra-colors-blue-200)"
-                            : "sm"
-                        }
-                      >
-                        <Flex justify="space-between" align="start" mb={3}>
-                          <Box>
-                            <Flex align="center" gap={2}>
-                              <Text
-                                fontWeight="bold"
-                                fontSize="sm"
-                                color={isComplete ? "blue.600" : "gray.900"}
-                              >
-                                {item.exercise}
+                      return (
+                        <Box
+                          key={item.id}
+                          bg="white"
+                          p={4}
+                          borderRadius="xl"
+                          border="1px"
+                          borderColor={isComplete ? "blue.200" : "gray.200"}
+                          boxShadow={
+                            isComplete
+                              ? "0 0 0 1px var(--chakra-colors-blue-200)"
+                              : "sm"
+                          }
+                        >
+                          <Flex justify="space-between" align="start" mb={3}>
+                            <Box>
+                              <Flex align="center" gap={2}>
+                                <Text
+                                  fontWeight="bold"
+                                  fontSize="sm"
+                                  color={isComplete ? "blue.600" : "gray.900"}
+                                >
+                                  {item.exercise_name}
+                                </Text>
+                                {isComplete && (
+                                  <FiCheck color="var(--chakra-colors-blue-600)" />
+                                )}
+                              </Flex>
+                              <Text fontSize="xs" color="gray.500" mt={1}>
+                                Target: {item.sets} Sets × {item.reps} Reps @{" "}
+                                {item.target_load_kg}kg
                               </Text>
-                              {isComplete && (
-                                <FiCheck color="var(--chakra-colors-blue-600)" />
+                              {item.machine_hint && (
+                                <Text fontSize="xs" color="gray.400" mt={0.5}>
+                                  💡 {item.machine_hint}
+                                </Text>
                               )}
-                            </Flex>
-                            <Text fontSize="xs" color="gray.500" mt={1}>
-                              Target: {item.sets} Sets × {item.reps} Reps
-                            </Text>
-                          </Box>
-                          <Button
-                            size="sm"
-                            colorPalette="blue"
-                            onClick={() =>
-                              handleLogSet(item.exercise, item.reps)
-                            }
-                          >
-                            <FiPlus />
-                          </Button>
-                        </Flex>
+                            </Box>
+                            <Button
+                              size="sm"
+                              colorPalette="blue"
+                              onClick={() =>
+                                handleLogSet(item.exercise_name, item.reps)
+                              }
+                            >
+                              <FiPlus />
+                            </Button>
+                          </Flex>
 
-                        <Flex gap={1.5}>
-                          {Array.from({ length: item.sets }).map((_, i) => (
-                            <Box
-                              key={i}
-                              h={1.5}
-                              flex={1}
-                              borderRadius="full"
-                              bg={i < loggedForThis ? "blue.500" : "gray.100"}
-                              transition="background 0.3s"
-                            />
-                          ))}
-                        </Flex>
-                      </Box>
-                    )
-                  })}
-                </VStack>
-              </Box>
+                          <Flex gap={1.5}>
+                            {Array.from({ length: item.sets }).map((_, i) => (
+                              <Box
+                                key={i}
+                                h={1.5}
+                                flex={1}
+                                borderRadius="full"
+                                bg={i < loggedForThis ? "blue.500" : "gray.100"}
+                                transition="background 0.3s"
+                              />
+                            ))}
+                          </Flex>
+                        </Box>
+                      )
+                    })}
+                  </VStack>
+                </Box>
+              )}
 
               {exerciseLogs.length > 0 && (
                 <Box>
@@ -266,6 +328,9 @@ export const PlanViewer = ({
                       transition="width 0.5s"
                     />
                   </Box>
+                  <Text fontSize="xs" color="gray.400" mt={1}>
+                    / {targetCalories} kcal
+                  </Text>
                 </Box>
                 <Box
                   flex={1}
@@ -291,102 +356,107 @@ export const PlanViewer = ({
                       h="full"
                       bg="green.500"
                       borderRadius="full"
-                      w={`${Math.min(100, (totalProtein / 160) * 100)}%`}
+                      w={`${Math.min(100, (totalProtein / (targetProtein || 160)) * 100)}%`}
                       transition="width 0.5s"
                     />
                   </Box>
+                  <Text fontSize="xs" color="gray.400" mt={1}>
+                    / {targetProtein}g
+                  </Text>
                 </Box>
               </Flex>
 
-              <Box>
-                <Text fontSize="xs" fontWeight="bold" color="gray.500" mb={3}>
-                  QUICK ADD
-                </Text>
-                <Flex gap={3} flexWrap="wrap">
-                  {[
-                    { emoji: "🍌", name: "Banana", cal: 105, pro: 1 },
-                    { emoji: "🥚", name: "Egg", cal: 70, pro: 6 },
-                    { emoji: "☕", name: "Coffee", cal: 5, pro: 0 },
-                    { emoji: "🥤", name: "Shake", cal: 130, pro: 24 },
-                  ].map((item, idx) => (
-                    <Button
-                      key={idx}
-                      variant="outline"
-                      h="auto"
-                      py={3}
-                      px={4}
-                      flexDirection="column"
-                      onClick={() =>
-                        handleQuickAddFood(item.name, item.cal, item.pro)
-                      }
-                    >
-                      <Text fontSize="2xl" mb={1}>
-                        {item.emoji}
-                      </Text>
-                      <Text fontSize="xs" fontWeight="bold">
-                        {item.name}
-                      </Text>
-                    </Button>
-                  ))}
-                </Flex>
-              </Box>
+              {mealPlan.length === 0 ? (
+                <Box
+                  textAlign="center"
+                  py={8}
+                  bg="white"
+                  borderRadius="xl"
+                  border="1px dashed"
+                  borderColor="gray.300"
+                >
+                  <Text fontSize="4xl" mb={2}>
+                    🍽️
+                  </Text>
+                  <Text color="gray.500" fontWeight="medium">
+                    No meal plan for today
+                  </Text>
+                  <Text color="gray.400" fontSize="sm">
+                    Use chat to log your meals
+                  </Text>
+                </Box>
+              ) : (
+                <Box>
+                  <Text fontSize="xs" fontWeight="bold" color="gray.500" mb={3}>
+                    THE PLAN
+                  </Text>
+                  <VStack gap={3} align="stretch">
+                    {mealPlan.map((item) => {
+                      const isLogged = mealLogs.some(
+                        (l) =>
+                          l.name.toLowerCase() ===
+                            item.item_name.toLowerCase() ||
+                          l.calories === item.calories,
+                      )
 
-              <Box>
-                <Text fontSize="xs" fontWeight="bold" color="gray.500" mb={3}>
-                  THE PLAN
-                </Text>
-                <VStack gap={3} align="stretch">
-                  {TODAY_MEAL_PLAN.map((item, idx) => {
-                    const isLogged = mealLogs.some(
-                      (l) =>
-                        l.name.includes(item.meal) ||
-                        l.calories === item.calories,
-                    )
-
-                    return (
-                      <Flex
-                        key={idx}
-                        justify="space-between"
-                        align="center"
-                        bg="white"
-                        p={4}
-                        borderRadius="xl"
-                        border="1px"
-                        borderColor="gray.200"
-                      >
-                        <Box>
-                          <Text
-                            fontWeight="bold"
-                            fontSize="sm"
-                            color={isLogged ? "gray.400" : "gray.900"}
-                            textDecoration={isLogged ? "line-through" : "none"}
-                          >
-                            {item.meal}
-                          </Text>
-                          <Text fontSize="xs" color="gray.500" mt={0.5}>
-                            {item.calories} kcal • {item.protein}g Protein
-                          </Text>
-                        </Box>
-                        <Button
-                          size="sm"
-                          variant={isLogged ? "ghost" : "outline"}
-                          colorPalette={isLogged ? "gray" : "green"}
-                          disabled={isLogged}
-                          onClick={() =>
-                            handleQuickAddFood(
-                              item.meal,
-                              item.calories,
-                              item.protein,
-                            )
-                          }
+                      return (
+                        <Flex
+                          key={item.id}
+                          justify="space-between"
+                          align="center"
+                          bg="white"
+                          p={4}
+                          borderRadius="xl"
+                          border="1px"
+                          borderColor="gray.200"
                         >
-                          {isLogged ? <FiCheck /> : <FiPlus />}
-                        </Button>
-                      </Flex>
-                    )
-                  })}
-                </VStack>
-              </Box>
+                          <Box>
+                            <Flex align="center" gap={2}>
+                              <Text
+                                fontSize="xs"
+                                fontWeight="bold"
+                                color="gray.400"
+                                textTransform="uppercase"
+                              >
+                                {item.meal_type}
+                              </Text>
+                            </Flex>
+                            <Text
+                              fontWeight="bold"
+                              fontSize="sm"
+                              color={isLogged ? "gray.400" : "gray.900"}
+                              textDecoration={
+                                isLogged ? "line-through" : "none"
+                              }
+                            >
+                              {item.item_name}
+                            </Text>
+                            <Text fontSize="xs" color="gray.500" mt={0.5}>
+                              {item.calories} kcal • {item.protein_g}g Protein
+                            </Text>
+                          </Box>
+                          <Button
+                            size="sm"
+                            variant={isLogged ? "ghost" : "outline"}
+                            colorPalette={isLogged ? "gray" : "green"}
+                            disabled={isLogged}
+                            onClick={() =>
+                              handleQuickAddFood(
+                                item.item_name,
+                                item.calories,
+                                item.protein_g,
+                                item.meal_type,
+                              )
+                            }
+                          >
+                            {isLogged ? <FiCheck /> : <FiPlus />}
+                          </Button>
+                        </Flex>
+                      )
+                    })}
+                  </VStack>
+                </Box>
+              )}
 
               {mealLogs.length > 0 && (
                 <Box pt={2} borderTop="1px" borderColor="gray.200">

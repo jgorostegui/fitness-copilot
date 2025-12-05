@@ -1,4 +1,5 @@
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import type {
@@ -9,8 +10,18 @@ import type {
 } from "@/types/fitness"
 import { Dashboard } from "./Dashboard"
 
-const renderWithChakra = (ui: React.ReactElement) => {
-  return render(<ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>)
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: false },
+  },
+})
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>
+    </QueryClientProvider>,
+  )
 }
 
 const mockProfile: UserProfile = {
@@ -31,7 +42,7 @@ const mockStats: DailyStats = {
 
 describe("Dashboard", () => {
   it("renders the dashboard header", () => {
-    renderWithChakra(
+    renderWithProviders(
       <Dashboard
         stats={mockStats}
         mealLogs={[]}
@@ -44,7 +55,7 @@ describe("Dashboard", () => {
   })
 
   it("displays the plan badge", () => {
-    renderWithChakra(
+    renderWithProviders(
       <Dashboard
         stats={mockStats}
         mealLogs={[]}
@@ -57,7 +68,7 @@ describe("Dashboard", () => {
   })
 
   it("shows calorie stats", () => {
-    renderWithChakra(
+    renderWithProviders(
       <Dashboard
         stats={mockStats}
         mealLogs={[]}
@@ -71,7 +82,7 @@ describe("Dashboard", () => {
   })
 
   it("shows protein stats", () => {
-    renderWithChakra(
+    renderWithProviders(
       <Dashboard
         stats={mockStats}
         mealLogs={[]}
@@ -85,7 +96,7 @@ describe("Dashboard", () => {
   })
 
   it("shows exercises completed count", () => {
-    renderWithChakra(
+    renderWithProviders(
       <Dashboard
         stats={mockStats}
         mealLogs={[]}
@@ -101,7 +112,7 @@ describe("Dashboard", () => {
   })
 
   it("shows empty state when no logs", () => {
-    renderWithChakra(
+    renderWithProviders(
       <Dashboard
         stats={mockStats}
         mealLogs={[]}
@@ -127,7 +138,7 @@ describe("Dashboard", () => {
       },
     ]
 
-    renderWithChakra(
+    renderWithProviders(
       <Dashboard
         stats={mockStats}
         mealLogs={mealLogs}
@@ -152,7 +163,7 @@ describe("Dashboard", () => {
       },
     ]
 
-    renderWithChakra(
+    renderWithProviders(
       <Dashboard
         stats={mockStats}
         mealLogs={[]}
@@ -163,5 +174,58 @@ describe("Dashboard", () => {
 
     expect(screen.getByText("Leg Press")).toBeInTheDocument()
     expect(screen.getByText("100kg")).toBeInTheDocument()
+  })
+
+  it("shows rest day when no training routine", () => {
+    renderWithProviders(
+      <Dashboard
+        stats={mockStats}
+        mealLogs={[]}
+        exerciseLogs={[]}
+        profile={mockProfile}
+        trainingRoutine={[]}
+      />,
+    )
+
+    expect(screen.getByText("Rest Day")).toBeInTheDocument()
+    expect(screen.getByText("No workout scheduled")).toBeInTheDocument()
+  })
+
+  it("shows training plan info when routine exists", () => {
+    const trainingRoutine = [
+      {
+        id: "1",
+        program_id: "prog-1",
+        day_of_week: 0,
+        exercise_name: "Squat",
+        sets: 3,
+        reps: 8,
+        target_load_kg: 100,
+        machine_hint: null,
+      },
+      {
+        id: "2",
+        program_id: "prog-1",
+        day_of_week: 0,
+        exercise_name: "Leg Press",
+        sets: 3,
+        reps: 12,
+        target_load_kg: 150,
+        machine_hint: null,
+      },
+    ]
+
+    renderWithProviders(
+      <Dashboard
+        stats={mockStats}
+        mealLogs={[]}
+        exerciseLogs={[]}
+        profile={mockProfile}
+        trainingRoutine={trainingRoutine}
+      />,
+    )
+
+    expect(screen.getByText("2-EXERCISE PLAN")).toBeInTheDocument()
+    expect(screen.getByText("6 sets total")).toBeInTheDocument()
   })
 })

@@ -1,4 +1,6 @@
 import { Box, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import type { TrainingRoutinePublic } from "@/client/types.gen"
+import { DaySelector } from "@/components/Fitness/DaySelector"
 import type {
   DailyStats,
   ExerciseLog,
@@ -11,6 +13,7 @@ interface DashboardProps {
   mealLogs: MealLog[]
   exerciseLogs: ExerciseLog[]
   profile: UserProfile
+  trainingRoutine?: TrainingRoutinePublic[]
 }
 
 const CircularProgress = ({
@@ -87,10 +90,27 @@ export const Dashboard = ({
   mealLogs,
   exerciseLogs,
   profile,
+  trainingRoutine = [],
 }: DashboardProps) => {
   const allLogs = [...mealLogs, ...exerciseLogs].sort(
     (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime(),
   )
+
+  // Calculate training plan info
+  const totalExercisesPlanned = trainingRoutine.length
+  const totalSetsPlanned = trainingRoutine.reduce(
+    (acc, item) => acc + item.sets,
+    0,
+  )
+  const isRestDay = totalExercisesPlanned === 0
+
+  // Count unique exercises completed (by name, case-insensitive)
+  const uniqueExercisesCompleted = new Set(
+    exerciseLogs.map((log) => log.name.toLowerCase())
+  ).size
+
+  // Count total sets completed
+  const totalSetsCompleted = exerciseLogs.reduce((acc, log) => acc + log.sets, 0)
 
   return (
     <Box h="full" overflowY="auto" pb={24}>
@@ -106,13 +126,7 @@ export const Dashboard = ({
       >
         <Heading size="md">Dashboard</Heading>
         <Flex justify="space-between" align="center" mt={1}>
-          <Text fontSize="xs" color="gray.500">
-            {new Date().toLocaleDateString(undefined, {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </Text>
+          <DaySelector />
           <Text
             fontSize="xs"
             fontWeight="bold"
@@ -143,12 +157,57 @@ export const Dashboard = ({
               color="var(--chakra-colors-green-500)"
             />
             <CircularProgress
-              value={stats.workoutsCompleted}
-              max={5}
-              label="Exercises"
+              value={totalSetsCompleted}
+              max={totalSetsPlanned || 1}
+              label="Sets"
               color="var(--chakra-colors-orange-500)"
             />
           </Flex>
+
+          {/* Training Plan Info */}
+          <Box
+            bg="white"
+            p={4}
+            borderRadius="xl"
+            border="1px"
+            borderColor="gray.200"
+          >
+            <Flex justify="space-between" align="center">
+              <Flex align="center" gap={3}>
+                <Box
+                  bg={isRestDay ? "gray.100" : "blue.50"}
+                  p={2}
+                  borderRadius="lg"
+                  fontSize="xl"
+                >
+                  {isRestDay ? "🧘" : "🏋️"}
+                </Box>
+                <Box>
+                  <Text fontSize="sm" fontWeight="bold" color="gray.700">
+                    {isRestDay ? "Rest Day" : `${totalExercisesPlanned}-EXERCISE PLAN`}
+                  </Text>
+                  <Text fontSize="xs" color="gray.500">
+                    {isRestDay
+                      ? "No workout scheduled"
+                      : `${totalSetsPlanned} sets total`}
+                  </Text>
+                </Box>
+              </Flex>
+              {!isRestDay && (
+                <Text
+                  fontSize="xs"
+                  fontWeight="bold"
+                  color="blue.600"
+                  bg="blue.50"
+                  px={2}
+                  py={1}
+                  borderRadius="full"
+                >
+                  {uniqueExercisesCompleted}/{totalExercisesPlanned} exercises
+                </Text>
+              )}
+            </Flex>
+          </Box>
 
           <Flex gap={4}>
             <Box
@@ -167,11 +226,11 @@ export const Dashboard = ({
                   fontWeight="bold"
                   color="orange.500"
                 >
-                  {stats.workoutsCompleted}
+                  {totalSetsCompleted}
                 </Box>
                 <Box>
                   <Text fontSize="xs" color="gray.500">
-                    EXERCISES
+                    SETS
                   </Text>
                   <Text fontSize="sm" fontWeight="semibold">
                     Completed

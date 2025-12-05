@@ -532,17 +532,17 @@ class TestLLMDisabledFallback:
 
 @pytest.mark.unit
 class TestGymActionType:
-    """Property 6: Gym analysis produces LOG_EXERCISE action."""
+    """Property 6: Gym analysis produces PROPOSE_EXERCISE action (preview mode)."""
 
     @pytest.mark.asyncio
-    async def test_gym_analysis_returns_log_exercise_action(self) -> None:
+    async def test_gym_analysis_returns_propose_exercise_action(self) -> None:
         """
-        Feature: vision, Property 6: Gym analysis produces LOG_EXERCISE action
+        Feature: vision, Property 3: Vision Analysis Preview Mode
 
         For any successful gym equipment analysis, the BrainService SHALL return
-        action_type=LOG_EXERCISE with action_data containing the analysis fields.
+        action_type=PROPOSE_EXERCISE with is_tracked=False and form_cues in hidden_context.
 
-        Validates: Requirements 2.4
+        Validates: Requirements 2.1, 2.2, 2.3, 2.5
         """
         from app.services.brain import BrainService
 
@@ -578,12 +578,20 @@ class TestGymActionType:
 
         response = await brain._handle_image_attachment(image_base64="dGVzdA==")
 
-        assert response.action_type == ChatActionType.LOG_EXERCISE
+        # Vision returns PROPOSE_* for preview mode (not LOG_*)
+        assert response.action_type == ChatActionType.PROPOSE_EXERCISE
         assert response.action_data is not None
+        assert response.action_data["isTracked"] is False
         assert response.action_data["exercise_name"] == "Leg Press"
         assert response.action_data["sets"] == 3
         assert response.action_data["reps"] == 10
         assert response.action_data["weight_kg"] == 80
+        # Form cues stored in hiddenContext for on-demand retrieval (camelCase)
+        assert "hiddenContext" in response.action_data
+        assert response.action_data["hiddenContext"]["formCues"] == [
+            "Keep back flat",
+            "Control descent",
+        ]
 
 
 # ============================================================================
@@ -595,17 +603,17 @@ class TestGymActionType:
 
 @pytest.mark.unit
 class TestFoodActionType:
-    """Property 8: Food analysis produces LOG_FOOD action."""
+    """Property 8: Food analysis produces PROPOSE_FOOD action (preview mode)."""
 
     @pytest.mark.asyncio
-    async def test_food_analysis_returns_log_food_action(self) -> None:
+    async def test_food_analysis_returns_propose_food_action(self) -> None:
         """
-        Feature: vision, Property 8: Food analysis produces LOG_FOOD action
+        Feature: vision, Property 3: Vision Analysis Preview Mode
 
         For any successful food analysis, the BrainService SHALL return
-        action_type=LOG_FOOD with action_data containing the analysis fields.
+        action_type=PROPOSE_FOOD with is_tracked=False.
 
-        Validates: Requirements 3.4
+        Validates: Requirements 2.1, 2.2, 2.3
         """
         from app.services.brain import BrainService
 
@@ -636,8 +644,10 @@ class TestFoodActionType:
 
         response = await brain._handle_image_attachment(image_base64="dGVzdA==")
 
-        assert response.action_type == ChatActionType.LOG_FOOD
+        # Vision returns PROPOSE_* for preview mode (not LOG_*)
+        assert response.action_type == ChatActionType.PROPOSE_FOOD
         assert response.action_data is not None
+        assert response.action_data["isTracked"] is False
         assert response.action_data["meal_name"] == "Chicken Salad"
         assert response.action_data["calories"] == 450
         assert response.action_data["protein_g"] == 35

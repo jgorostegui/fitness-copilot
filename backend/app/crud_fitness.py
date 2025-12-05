@@ -66,15 +66,19 @@ def select_training_program(
 
 
 def create_exercise_log(
-    session: Session, user_id: uuid.UUID, exercise_log_in: ExerciseLogCreate
+    session: Session,
+    user_id: uuid.UUID,
+    exercise_log_in: ExerciseLogCreate,
+    simulated_day: int = 0,
 ) -> ExerciseLog:
-    """Create an exercise log for a user."""
+    """Create an exercise log for a user on a specific simulated day."""
     exercise_log = ExerciseLog(
         user_id=user_id,
         exercise_name=exercise_log_in.exercise_name,
         sets=exercise_log_in.sets,
         reps=exercise_log_in.reps,
         weight_kg=exercise_log_in.weight_kg,
+        simulated_day=simulated_day,
         logged_at=datetime.utcnow(),
     )
     session.add(exercise_log)
@@ -102,16 +106,29 @@ def get_exercise_logs_for_user(
 def get_exercise_logs_for_today(
     session: Session, user_id: uuid.UUID
 ) -> list[ExerciseLog]:
-    """Get exercise logs for today (UTC)."""
+    """Get exercise logs for today (UTC). Deprecated - use get_exercise_logs_for_simulated_day."""
     today = datetime.utcnow().date()
     start = datetime.combine(today, time.min)
     end = datetime.combine(today, time.max)
     return get_exercise_logs_for_user(session, user_id, start_date=start, end_date=end)
 
 
+def get_exercise_logs_for_simulated_day(
+    session: Session, user_id: uuid.UUID, simulated_day: int
+) -> list[ExerciseLog]:
+    """Get exercise logs for a specific simulated day."""
+    statement = (
+        select(ExerciseLog)
+        .where(ExerciseLog.user_id == user_id)
+        .where(ExerciseLog.simulated_day == simulated_day)
+        .order_by(ExerciseLog.logged_at)
+    )
+    return list(session.exec(statement).all())
+
+
 def delete_exercise_logs_for_today(session: Session, user_id: uuid.UUID) -> int:
     """
-    Delete all exercise logs for today for a user.
+    Delete all exercise logs for today for a user. Deprecated - use delete_exercise_logs_for_simulated_day.
 
     Returns:
         Number of logs deleted
@@ -129,6 +146,27 @@ def delete_exercise_logs_for_today(session: Session, user_id: uuid.UUID) -> int:
         .where(ExerciseLog.user_id == user_id)
         .where(ExerciseLog.logged_at >= start)
         .where(ExerciseLog.logged_at < end)
+    )
+    result = session.exec(statement)  # type: ignore
+    session.commit()
+    return result.rowcount  # type: ignore
+
+
+def delete_exercise_logs_for_simulated_day(
+    session: Session, user_id: uuid.UUID, simulated_day: int
+) -> int:
+    """
+    Delete all exercise logs for a specific simulated day for a user.
+
+    Returns:
+        Number of logs deleted
+    """
+    from sqlmodel import delete
+
+    statement = (
+        delete(ExerciseLog)
+        .where(ExerciseLog.user_id == user_id)
+        .where(ExerciseLog.simulated_day == simulated_day)
     )
     result = session.exec(statement)  # type: ignore
     session.commit()

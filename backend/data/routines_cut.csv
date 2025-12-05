@@ -1,0 +1,31 @@
+program_id,program_name,description,days_per_week,difficulty,day_of_week,exercise_name,machine_hint,sets,reps,target_load_kg
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,0,Bench Press,Barbell Bench,4,8,70
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,0,Incline Dumbbell Press,Incline Bench,3,10,25
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,0,Cable Flyes,Cable Machine,3,12,15
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,0,Overhead Press,Barbell,3,8,40
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,0,Tricep Pushdowns,Cable Machine,3,12,25
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,1,Barbell Rows,Barbell,4,8,60
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,1,Lat Pulldowns,Cable Machine,3,10,50
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,1,Seated Cable Rows,Cable Machine,3,10,45
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,1,Face Pulls,Cable Machine,3,15,20
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,1,Barbell Curls,Barbell,3,10,25
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,2,Squats,Squat Rack,4,8,80
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,2,Romanian Deadlifts,Barbell,3,10,60
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,2,Leg Press,Leg Press Machine,3,12,120
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,2,Leg Curls,Leg Curl Machine,3,12,35
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,2,Calf Raises,Calf Raise Machine,4,15,60
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,3,Incline Bench Press,Barbell Incline,4,8,60
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,3,Dumbbell Shoulder Press,Dumbbells,3,10,20
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,3,Chest Dips,Dip Station,3,10,0
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,3,Lateral Raises,Dumbbells,3,12,10
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,3,Skull Crushers,EZ Bar,3,10,20
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,4,Deadlifts,Barbell,4,6,100
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,4,Pull Ups,Pull Up Bar,3,8,0
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,4,Dumbbell Rows,Dumbbells,3,10,30
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,4,Rear Delt Flyes,Dumbbells,3,12,8
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,4,Hammer Curls,Dumbbells,3,10,15
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,5,Front Squats,Barbell,4,8,60
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,5,Bulgarian Split Squats,Dumbbells,3,10,15
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,5,Leg Extensions,Leg Extension Machine,3,12,40
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,5,Glute Ham Raises,GHD Machine,3,10,0
+ppl_cut,Push Pull Legs (Cutting),6-day PPL split optimized for fat loss,6,intermediate,5,Standing Calf Raises,Smith Machine,4,15,80

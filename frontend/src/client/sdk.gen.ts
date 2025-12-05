@@ -2,7 +2,7 @@
 
 import { type Client, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { ChatClearMessagesData, ChatClearMessagesResponses, ChatGetMessagesData, ChatGetMessagesErrors, ChatGetMessagesResponses, ChatSendMessageData, ChatSendMessageErrors, ChatSendMessageResponses, DemoDemoLoginData, DemoDemoLoginErrors, DemoDemoLoginResponses, DemoGetDemoUsersData, DemoGetDemoUsersResponses, LoginLoginAccessTokenData, LoginLoginAccessTokenErrors, LoginLoginAccessTokenResponses, LoginRecoverPasswordData, LoginRecoverPasswordErrors, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentErrors, LoginRecoverPasswordHtmlContentResponses, LoginRecoverPasswordResponses, LoginResetPasswordData, LoginResetPasswordErrors, LoginResetPasswordResponses, LoginTestTokenData, LoginTestTokenResponses, LogsGetTodaysLogsData, LogsGetTodaysLogsResponses, LogsLogExerciseData, LogsLogExerciseErrors, LogsLogExerciseResponses, LogsLogMealData, LogsLogMealErrors, LogsLogMealResponses, PlansGetTodaysMealPlanData, PlansGetTodaysMealPlanResponses, PlansGetTodaysTrainingData, PlansGetTodaysTrainingResponses, PrivateCreateUserData, PrivateCreateUserErrors, PrivateCreateUserResponses, ProfileGetCurrentUserMetricsData, ProfileGetCurrentUserMetricsResponses, ProfileGetCurrentUserProfileData, ProfileGetCurrentUserProfileResponses, ProfileUpdateCurrentUserProfileData, ProfileUpdateCurrentUserProfileErrors, ProfileUpdateCurrentUserProfileResponses, ProgramsGetProgramRoutinesData, ProgramsGetProgramRoutinesErrors, ProgramsGetProgramRoutinesResponses, ProgramsListTrainingProgramsData, ProgramsListTrainingProgramsResponses, ProgramsSelectProgramData, ProgramsSelectProgramErrors, ProgramsSelectProgramResponses, SummaryGetTodaysSummaryData, SummaryGetTodaysSummaryResponses, UploadUploadImageData, UploadUploadImageErrors, UploadUploadImageResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersDeleteUserData, UsersDeleteUserErrors, UsersDeleteUserMeData, UsersDeleteUserMeResponses, UsersDeleteUserResponses, UsersReadUserByIdData, UsersReadUserByIdErrors, UsersReadUserByIdResponses, UsersReadUserMeData, UsersReadUserMeResponses, UsersReadUsersData, UsersReadUsersErrors, UsersReadUsersResponses, UsersRegisterUserData, UsersRegisterUserErrors, UsersRegisterUserResponses, UsersUpdatePasswordMeData, UsersUpdatePasswordMeErrors, UsersUpdatePasswordMeResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserMeData, UsersUpdateUserMeErrors, UsersUpdateUserMeResponses, UsersUpdateUserResponses, UtilsHealthCheckData, UtilsHealthCheckResponses, UtilsTestEmailData, UtilsTestEmailErrors, UtilsTestEmailResponses } from './types.gen';
+import type { ChatClearMessagesData, ChatClearMessagesResponses, ChatConfirmTrackingData, ChatConfirmTrackingErrors, ChatConfirmTrackingResponses, ChatGetMessagesData, ChatGetMessagesErrors, ChatGetMessagesResponses, ChatSendMessageData, ChatSendMessageErrors, ChatSendMessageResponses, DemoDemoLoginData, DemoDemoLoginErrors, DemoDemoLoginResponses, DemoGetDemoUsersData, DemoGetDemoUsersResponses, LoginLoginAccessTokenData, LoginLoginAccessTokenErrors, LoginLoginAccessTokenResponses, LoginRecoverPasswordData, LoginRecoverPasswordErrors, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentErrors, LoginRecoverPasswordHtmlContentResponses, LoginRecoverPasswordResponses, LoginResetPasswordData, LoginResetPasswordErrors, LoginResetPasswordResponses, LoginTestTokenData, LoginTestTokenResponses, LogsGetTodaysLogsData, LogsGetTodaysLogsResponses, LogsLogExerciseData, LogsLogExerciseErrors, LogsLogExerciseResponses, LogsLogMealData, LogsLogMealErrors, LogsLogMealResponses, PlansGetTodaysMealPlanData, PlansGetTodaysMealPlanResponses, PlansGetTodaysTrainingData, PlansGetTodaysTrainingResponses, PrivateCreateUserData, PrivateCreateUserErrors, PrivateCreateUserResponses, ProfileGetCurrentUserMetricsData, ProfileGetCurrentUserMetricsResponses, ProfileGetCurrentUserProfileData, ProfileGetCurrentUserProfileResponses, ProfileGetSimulatedDayData, ProfileGetSimulatedDayResponses, ProfileUpdateCurrentUserProfileData, ProfileUpdateCurrentUserProfileErrors, ProfileUpdateCurrentUserProfileResponses, ProfileUpdateSimulatedDayData, ProfileUpdateSimulatedDayErrors, ProfileUpdateSimulatedDayResponses, ProgramsGetProgramRoutinesData, ProgramsGetProgramRoutinesErrors, ProgramsGetProgramRoutinesResponses, ProgramsListTrainingProgramsData, ProgramsListTrainingProgramsResponses, ProgramsSelectProgramData, ProgramsSelectProgramErrors, ProgramsSelectProgramResponses, SummaryGetTodaysSummaryData, SummaryGetTodaysSummaryResponses, UploadGetImageData, UploadGetImageErrors, UploadGetImageResponses, UploadUploadImageData, UploadUploadImageErrors, UploadUploadImageResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersDeleteUserData, UsersDeleteUserErrors, UsersDeleteUserMeData, UsersDeleteUserMeResponses, UsersDeleteUserResponses, UsersReadUserByIdData, UsersReadUserByIdErrors, UsersReadUserByIdResponses, UsersReadUserMeData, UsersReadUserMeResponses, UsersReadUsersData, UsersReadUsersErrors, UsersReadUsersResponses, UsersRegisterUserData, UsersRegisterUserErrors, UsersRegisterUserResponses, UsersUpdatePasswordMeData, UsersUpdatePasswordMeErrors, UsersUpdatePasswordMeResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserMeData, UsersUpdateUserMeErrors, UsersUpdateUserMeResponses, UsersUpdateUserResponses, UtilsHealthCheckData, UtilsHealthCheckResponses, UtilsTestEmailData, UtilsTestEmailErrors, UtilsTestEmailResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -314,6 +314,42 @@ export class Profile {
             ...options
         });
     }
+    
+    /**
+     * Get Simulated Day
+     *
+     * Get current user's simulated day.
+     *
+     * Returns the simulated day number (0-6) and day name (Monday-Sunday).
+     * Used for demo purposes to test different days in the weekly plan.
+     */
+    public static profileGetSimulatedDay<ThrowOnError extends boolean = false>(options?: Options<ProfileGetSimulatedDayData, ThrowOnError>) {
+        return (options?.client ?? client).get<ProfileGetSimulatedDayResponses, unknown, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/profile/me/day',
+            ...options
+        });
+    }
+    
+    /**
+     * Update Simulated Day
+     *
+     * Update current user's simulated day.
+     *
+     * Sets the simulated day (0-6) for demo purposes.
+     * This affects which day's meal plan and training routine are shown.
+     */
+    public static profileUpdateSimulatedDay<ThrowOnError extends boolean = false>(options: Options<ProfileUpdateSimulatedDayData, ThrowOnError>) {
+        return (options.client ?? client).put<ProfileUpdateSimulatedDayResponses, ProfileUpdateSimulatedDayErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/profile/me/day',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
 }
 
 export class Programs {
@@ -361,7 +397,8 @@ export class Plans {
      *
      * Get today's training routine.
      *
-     * Returns exercises from the user's selected program for today's day of week.
+     * Returns exercises from the user's selected program for the simulated day.
+     * Uses simulated_day from user profile (for demo purposes).
      * Returns empty list if no program is selected.
      */
     public static plansGetTodaysTraining<ThrowOnError extends boolean = false>(options?: Options<PlansGetTodaysTrainingData, ThrowOnError>) {
@@ -377,7 +414,8 @@ export class Plans {
      *
      * Get today's meal plan.
      *
-     * Returns meal plan items for today's day of week.
+     * Returns meal plan items for the simulated day.
+     * Uses simulated_day from user profile (for demo purposes).
      */
     public static plansGetTodaysMealPlan<ThrowOnError extends boolean = false>(options?: Options<PlansGetTodaysMealPlanData, ThrowOnError>) {
         return (options?.client ?? client).get<PlansGetTodaysMealPlanResponses, unknown, ThrowOnError>({
@@ -394,7 +432,7 @@ export class Logs {
      *
      * Get today's meal and exercise logs.
      *
-     * Returns all logs created on the current date for the authenticated user.
+     * Returns all logs for the user's current simulated day.
      */
     public static logsGetTodaysLogs<ThrowOnError extends boolean = false>(options?: Options<LogsGetTodaysLogsData, ThrowOnError>) {
         return (options?.client ?? client).get<LogsGetTodaysLogsResponses, unknown, ThrowOnError>({
@@ -409,7 +447,7 @@ export class Logs {
      *
      * Log a meal.
      *
-     * Creates a new meal log entry for the authenticated user.
+     * Creates a new meal log entry for the authenticated user on their current simulated day.
      */
     public static logsLogMeal<ThrowOnError extends boolean = false>(options: Options<LogsLogMealData, ThrowOnError>) {
         return (options.client ?? client).post<LogsLogMealResponses, LogsLogMealErrors, ThrowOnError>({
@@ -428,7 +466,7 @@ export class Logs {
      *
      * Log an exercise.
      *
-     * Creates a new exercise log entry for the authenticated user.
+     * Creates a new exercise log entry for the authenticated user on their current simulated day.
      */
     public static logsLogExercise<ThrowOnError extends boolean = false>(options: Options<LogsLogExerciseData, ThrowOnError>) {
         return (options.client ?? client).post<LogsLogExerciseResponses, LogsLogExerciseErrors, ThrowOnError>({
@@ -519,6 +557,27 @@ export class Chat {
             }
         });
     }
+    
+    /**
+     * Confirm Tracking
+     *
+     * Confirm tracking for a vision analysis preview.
+     *
+     * This endpoint:
+     * 1. Validates the message exists and belongs to the user
+     * 2. Validates action_type is PROPOSE_FOOD or PROPOSE_EXERCISE
+     * 3. Validates is_tracked is False
+     * 4. Creates the corresponding log entry
+     * 5. Updates action_data.is_tracked to True
+     * 6. Returns the updated message
+     */
+    public static chatConfirmTracking<ThrowOnError extends boolean = false>(options: Options<ChatConfirmTrackingData, ThrowOnError>) {
+        return (options.client ?? client).post<ChatConfirmTrackingResponses, ChatConfirmTrackingErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/chat/messages/{message_id}/confirm',
+            ...options
+        });
+    }
 }
 
 export class Upload {
@@ -539,6 +598,22 @@ export class Upload {
                 'Content-Type': 'application/json',
                 ...options.headers
             }
+        });
+    }
+    
+    /**
+     * Get Image
+     *
+     * Get an uploaded image by its attachment ID.
+     *
+     * Returns the raw image bytes with appropriate content type.
+     * Only the owner of the image can access it.
+     */
+    public static uploadGetImage<ThrowOnError extends boolean = false>(options: Options<UploadGetImageData, ThrowOnError>) {
+        return (options.client ?? client).get<UploadGetImageResponses, UploadGetImageErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/upload/image/{attachment_id}',
+            ...options
         });
     }
 }

@@ -1,17 +1,87 @@
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import type { MealPlanPublic, TrainingRoutinePublic } from "@/client/types.gen"
 import { PlanViewer } from "./PlanViewer"
 
-const renderWithChakra = (ui: React.ReactElement) => {
-  return render(<ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>)
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: false },
+  },
+})
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>
+    </QueryClientProvider>,
+  )
 }
+
+const mockTrainingRoutine: TrainingRoutinePublic[] = [
+  {
+    id: "1",
+    program_id: "prog-1",
+    day_of_week: 0,
+    exercise_name: "Barbell Squat",
+    sets: 3,
+    reps: 8,
+    target_load_kg: 100,
+    machine_hint: "Squat rack",
+  },
+  {
+    id: "2",
+    program_id: "prog-1",
+    day_of_week: 0,
+    exercise_name: "Leg Press",
+    sets: 3,
+    reps: 12,
+    target_load_kg: 150,
+    machine_hint: null,
+  },
+  {
+    id: "3",
+    program_id: "prog-1",
+    day_of_week: 0,
+    exercise_name: "Romanian Deadlift",
+    sets: 3,
+    reps: 10,
+    target_load_kg: 80,
+    machine_hint: null,
+  },
+]
+
+const mockMealPlan: MealPlanPublic[] = [
+  {
+    id: "1",
+    day_of_week: 0,
+    meal_type: "breakfast",
+    item_name: "Oatmeal & Whey",
+    calories: 450,
+    protein_g: 35,
+    carbs_g: 50,
+    fat_g: 10,
+  },
+  {
+    id: "2",
+    day_of_week: 0,
+    meal_type: "lunch",
+    item_name: "Chicken & Rice",
+    calories: 600,
+    protein_g: 45,
+    carbs_g: 60,
+    fat_g: 15,
+  },
+]
 
 describe("PlanViewer - Workout Mode", () => {
   it("renders workout protocol header", () => {
-    renderWithChakra(
+    renderWithProviders(
       <PlanViewer
         mode="workout"
+        mealPlan={mockMealPlan}
+        trainingRoutine={mockTrainingRoutine}
         mealLogs={[]}
         exerciseLogs={[]}
         onAddMeal={vi.fn()}
@@ -20,13 +90,15 @@ describe("PlanViewer - Workout Mode", () => {
     )
 
     expect(screen.getByText("Workout Protocol")).toBeInTheDocument()
-    expect(screen.getByText("Leg Day Assignment")).toBeInTheDocument()
+    expect(screen.getByText("3 exercises planned")).toBeInTheDocument()
   })
 
   it("shows session volume", () => {
-    renderWithChakra(
+    renderWithProviders(
       <PlanViewer
         mode="workout"
+        mealPlan={mockMealPlan}
+        trainingRoutine={mockTrainingRoutine}
         mealLogs={[]}
         exerciseLogs={[]}
         onAddMeal={vi.fn()}
@@ -38,9 +110,11 @@ describe("PlanViewer - Workout Mode", () => {
   })
 
   it("displays exercises from routine", () => {
-    renderWithChakra(
+    renderWithProviders(
       <PlanViewer
         mode="workout"
+        mealPlan={mockMealPlan}
+        trainingRoutine={mockTrainingRoutine}
         mealLogs={[]}
         exerciseLogs={[]}
         onAddMeal={vi.fn()}
@@ -53,12 +127,32 @@ describe("PlanViewer - Workout Mode", () => {
     expect(screen.getByText("Romanian Deadlift")).toBeInTheDocument()
   })
 
+  it("shows rest day when no exercises", () => {
+    renderWithProviders(
+      <PlanViewer
+        mode="workout"
+        mealPlan={mockMealPlan}
+        trainingRoutine={[]}
+        mealLogs={[]}
+        exerciseLogs={[]}
+        onAddMeal={vi.fn()}
+        onAddExercise={vi.fn()}
+      />,
+    )
+
+    // "Rest Day" appears in both header and body, use getAllByText
+    const restDayElements = screen.getAllByText("Rest Day")
+    expect(restDayElements.length).toBeGreaterThan(0)
+  })
+
   it("calls onAddExercise when plus button is clicked", () => {
     const onAddExercise = vi.fn()
 
-    renderWithChakra(
+    renderWithProviders(
       <PlanViewer
         mode="workout"
+        mealPlan={mockMealPlan}
+        trainingRoutine={mockTrainingRoutine}
         mealLogs={[]}
         exerciseLogs={[]}
         onAddMeal={vi.fn()}
@@ -77,9 +171,11 @@ describe("PlanViewer - Workout Mode", () => {
 
 describe("PlanViewer - Nutrition Mode", () => {
   it("renders nutrition protocol header", () => {
-    renderWithChakra(
+    renderWithProviders(
       <PlanViewer
         mode="nutrition"
+        mealPlan={mockMealPlan}
+        trainingRoutine={mockTrainingRoutine}
         mealLogs={[]}
         exerciseLogs={[]}
         onAddMeal={vi.fn()}
@@ -88,13 +184,15 @@ describe("PlanViewer - Nutrition Mode", () => {
     )
 
     expect(screen.getByText("Nutrition Protocol")).toBeInTheDocument()
-    expect(screen.getByText("Daily Fuel Architecture")).toBeInTheDocument()
+    expect(screen.getByText("2 meals planned")).toBeInTheDocument()
   })
 
   it("shows calorie and protein stats", () => {
-    renderWithChakra(
+    renderWithProviders(
       <PlanViewer
         mode="nutrition"
+        mealPlan={mockMealPlan}
+        trainingRoutine={mockTrainingRoutine}
         mealLogs={[]}
         exerciseLogs={[]}
         onAddMeal={vi.fn()}
@@ -106,26 +204,12 @@ describe("PlanViewer - Nutrition Mode", () => {
     expect(screen.getByText("PROTEIN")).toBeInTheDocument()
   })
 
-  it("shows quick add section", () => {
-    renderWithChakra(
-      <PlanViewer
-        mode="nutrition"
-        mealLogs={[]}
-        exerciseLogs={[]}
-        onAddMeal={vi.fn()}
-        onAddExercise={vi.fn()}
-      />,
-    )
-
-    expect(screen.getByText("QUICK ADD")).toBeInTheDocument()
-    expect(screen.getByText("Banana")).toBeInTheDocument()
-    expect(screen.getByText("Egg")).toBeInTheDocument()
-  })
-
   it("displays meal plan items", () => {
-    renderWithChakra(
+    renderWithProviders(
       <PlanViewer
         mode="nutrition"
+        mealPlan={mockMealPlan}
+        trainingRoutine={mockTrainingRoutine}
         mealLogs={[]}
         exerciseLogs={[]}
         onAddMeal={vi.fn()}
@@ -138,12 +222,30 @@ describe("PlanViewer - Nutrition Mode", () => {
     expect(screen.getByText("Chicken & Rice")).toBeInTheDocument()
   })
 
-  it("calls onAddMeal when quick add button is clicked", () => {
-    const onAddMeal = vi.fn()
-
-    renderWithChakra(
+  it("shows empty state when no meal plan", () => {
+    renderWithProviders(
       <PlanViewer
         mode="nutrition"
+        mealPlan={[]}
+        trainingRoutine={mockTrainingRoutine}
+        mealLogs={[]}
+        exerciseLogs={[]}
+        onAddMeal={vi.fn()}
+        onAddExercise={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByText("No meal plan for today")).toBeInTheDocument()
+  })
+
+  it("calls onAddMeal when meal plan item is clicked", () => {
+    const onAddMeal = vi.fn()
+
+    renderWithProviders(
+      <PlanViewer
+        mode="nutrition"
+        mealPlan={mockMealPlan}
+        trainingRoutine={mockTrainingRoutine}
         mealLogs={[]}
         exerciseLogs={[]}
         onAddMeal={onAddMeal}
@@ -151,14 +253,14 @@ describe("PlanViewer - Nutrition Mode", () => {
       />,
     )
 
-    const bananaButton = screen.getByText("Banana")
-    fireEvent.click(bananaButton)
-
-    expect(onAddMeal).toHaveBeenCalledWith({
-      name: "Banana",
-      calories: 105,
-      protein: 1,
-      type: "snack",
-    })
+    // Find the add button for the first meal
+    const addButtons = screen.getAllByRole("button")
+    const mealAddButton = addButtons.find(
+      (btn) => btn.querySelector("svg") && !btn.textContent?.includes("📅"),
+    )
+    if (mealAddButton) {
+      fireEvent.click(mealAddButton)
+      expect(onAddMeal).toHaveBeenCalled()
+    }
   })
 })

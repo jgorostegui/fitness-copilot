@@ -74,7 +74,7 @@ export type BodyLoginLoginAccessToken = {
 /**
  * ChatActionType
  */
-export type ChatActionType = 'log_food' | 'log_exercise' | 'reset' | 'none';
+export type ChatActionType = 'log_food' | 'log_exercise' | 'propose_food' | 'propose_exercise' | 'reset' | 'none';
 
 /**
  * ChatAttachmentType
@@ -534,6 +534,34 @@ export type ProfileMetrics = {
 };
 
 /**
+ * SimulatedDayResponse
+ *
+ * Response model for simulated day with camelCase serialization.
+ */
+export type SimulatedDayResponse = {
+    /**
+     * Simulatedday
+     */
+    simulatedDay: number;
+    /**
+     * Dayname
+     */
+    dayName: string;
+};
+
+/**
+ * SimulatedDayUpdate
+ *
+ * Request model for updating simulated day.
+ */
+export type SimulatedDayUpdate = {
+    /**
+     * Simulated Day
+     */
+    simulated_day: number;
+};
+
+/**
  * Token
  */
 export type Token = {
@@ -732,6 +760,10 @@ export type UserCreate = {
      */
     onboarding_complete?: boolean;
     /**
+     * Simulated Day
+     */
+    simulated_day?: number;
+    /**
      * Password
      */
     password: string;
@@ -797,6 +829,10 @@ export type UserProfilePublic = {
      * Onboardingcomplete
      */
     onboardingComplete: boolean;
+    /**
+     * Simulatedday
+     */
+    simulatedDay?: number;
 };
 
 /**
@@ -857,6 +893,10 @@ export type UserProfileUpdate = {
      * Onboarding Complete
      */
     onboarding_complete?: boolean | null;
+    /**
+     * Simulated Day
+     */
+    simulated_day?: number | null;
 };
 
 /**
@@ -937,6 +977,10 @@ export type UserPublic = {
      * Onboarding Complete
      */
     onboarding_complete?: boolean;
+    /**
+     * Simulated Day
+     */
+    simulated_day?: number;
     /**
      * Id
      */
@@ -1039,6 +1083,10 @@ export type UserUpdate = {
      * Onboarding Complete
      */
     onboarding_complete?: boolean;
+    /**
+     * Simulated Day
+     */
+    simulated_day?: number;
     /**
      * Password
      */
@@ -1602,6 +1650,47 @@ export type ProfileGetCurrentUserMetricsResponses = {
 
 export type ProfileGetCurrentUserMetricsResponse = ProfileGetCurrentUserMetricsResponses[keyof ProfileGetCurrentUserMetricsResponses];
 
+export type ProfileGetSimulatedDayData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/profile/me/day';
+};
+
+export type ProfileGetSimulatedDayResponses = {
+    /**
+     * Successful Response
+     */
+    200: SimulatedDayResponse;
+};
+
+export type ProfileGetSimulatedDayResponse = ProfileGetSimulatedDayResponses[keyof ProfileGetSimulatedDayResponses];
+
+export type ProfileUpdateSimulatedDayData = {
+    body: SimulatedDayUpdate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/profile/me/day';
+};
+
+export type ProfileUpdateSimulatedDayErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ProfileUpdateSimulatedDayError = ProfileUpdateSimulatedDayErrors[keyof ProfileUpdateSimulatedDayErrors];
+
+export type ProfileUpdateSimulatedDayResponses = {
+    /**
+     * Successful Response
+     */
+    200: SimulatedDayResponse;
+};
+
+export type ProfileUpdateSimulatedDayResponse = ProfileUpdateSimulatedDayResponses[keyof ProfileUpdateSimulatedDayResponses];
+
 export type ProgramsListTrainingProgramsData = {
     body?: never;
     path?: never;
@@ -1868,6 +1957,36 @@ export type ChatSendMessageResponses = {
 
 export type ChatSendMessageResponse = ChatSendMessageResponses[keyof ChatSendMessageResponses];
 
+export type ChatConfirmTrackingData = {
+    body?: never;
+    path: {
+        /**
+         * Message Id
+         */
+        message_id: string;
+    };
+    query?: never;
+    url: '/api/v1/chat/messages/{message_id}/confirm';
+};
+
+export type ChatConfirmTrackingErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ChatConfirmTrackingError = ChatConfirmTrackingErrors[keyof ChatConfirmTrackingErrors];
+
+export type ChatConfirmTrackingResponses = {
+    /**
+     * Successful Response
+     */
+    200: ChatMessagePublic;
+};
+
+export type ChatConfirmTrackingResponse = ChatConfirmTrackingResponses[keyof ChatConfirmTrackingResponses];
+
 export type UploadUploadImageData = {
     body: ImageUploadRequest;
     path?: never;
@@ -1892,6 +2011,34 @@ export type UploadUploadImageResponses = {
 };
 
 export type UploadUploadImageResponse = UploadUploadImageResponses[keyof UploadUploadImageResponses];
+
+export type UploadGetImageData = {
+    body?: never;
+    path: {
+        /**
+         * Attachment Id
+         */
+        attachment_id: string;
+    };
+    query?: never;
+    url: '/api/v1/upload/image/{attachment_id}';
+};
+
+export type UploadGetImageErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UploadGetImageError = UploadGetImageErrors[keyof UploadGetImageErrors];
+
+export type UploadGetImageResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type PrivateCreateUserData = {
     body: PrivateUserCreate;

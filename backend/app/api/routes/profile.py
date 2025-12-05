@@ -7,8 +7,17 @@ Provides endpoints for viewing and updating user profile and metrics.
 from fastapi import APIRouter, HTTPException
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import ProfileMetrics, UserProfilePublic, UserProfileUpdate
+from app.models import (
+    ProfileMetrics,
+    SimulatedDayResponse,
+    SimulatedDayUpdate,
+    UserProfilePublic,
+    UserProfileUpdate,
+)
 from app.services.calculations import CalculationService
+
+# Day names for simulated day
+DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 
@@ -36,6 +45,7 @@ def get_current_user_profile(current_user: CurrentUser) -> UserProfilePublic:
         fat_rest_g_per_kg=current_user.fat_rest_g_per_kg,
         fat_train_g_per_kg=current_user.fat_train_g_per_kg,
         onboarding_complete=current_user.onboarding_complete,
+        simulated_day=current_user.simulated_day,
     )
 
 
@@ -76,6 +86,7 @@ def update_current_user_profile(
         fat_rest_g_per_kg=current_user.fat_rest_g_per_kg,
         fat_train_g_per_kg=current_user.fat_train_g_per_kg,
         onboarding_complete=current_user.onboarding_complete,
+        simulated_day=current_user.simulated_day,
     )
 
 
@@ -98,3 +109,40 @@ def get_current_user_metrics(current_user: CurrentUser) -> ProfileMetrics:
         )
 
     return metrics
+
+
+@router.get("/me/day", response_model=SimulatedDayResponse)
+def get_simulated_day(current_user: CurrentUser) -> SimulatedDayResponse:
+    """
+    Get current user's simulated day.
+
+    Returns the simulated day number (0-6) and day name (Monday-Sunday).
+    Used for demo purposes to test different days in the weekly plan.
+    """
+    return SimulatedDayResponse(
+        simulated_day=current_user.simulated_day,
+        day_name=DAY_NAMES[current_user.simulated_day],
+    )
+
+
+@router.put("/me/day", response_model=SimulatedDayResponse)
+def update_simulated_day(
+    session: SessionDep,
+    current_user: CurrentUser,
+    day_update: SimulatedDayUpdate,
+) -> SimulatedDayResponse:
+    """
+    Update current user's simulated day.
+
+    Sets the simulated day (0-6) for demo purposes.
+    This affects which day's meal plan and training routine are shown.
+    """
+    current_user.simulated_day = day_update.simulated_day
+    session.add(current_user)
+    session.commit()
+    session.refresh(current_user)
+
+    return SimulatedDayResponse(
+        simulated_day=current_user.simulated_day,
+        day_name=DAY_NAMES[current_user.simulated_day],
+    )

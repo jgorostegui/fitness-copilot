@@ -1,0 +1,23 @@
+program_id,program_name,description,days_per_week,difficulty,day_of_week,exercise_name,machine_hint,sets,reps,target_load_kg
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,0,Bench Press,Barbell Bench,4,6,80
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,0,Barbell Rows,Barbell,4,6,70
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,0,Overhead Press,Barbell,3,8,50
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,0,Weighted Pull Ups,Pull Up Bar,3,8,10
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,0,Dumbbell Curls,Dumbbells,3,10,18
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,0,Tricep Dips,Dip Station,3,10,10
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,1,Squats,Squat Rack,4,6,100
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,1,Romanian Deadlifts,Barbell,4,8,80
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,1,Leg Press,Leg Press Machine,3,10,160
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,1,Leg Curls,Leg Curl Machine,3,10,45
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,1,Calf Raises,Calf Raise Machine,4,12,80
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,3,Incline Dumbbell Press,Incline Bench,4,8,35
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,3,Cable Rows,Cable Machine,4,8,60
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,3,Dumbbell Shoulder Press,Dumbbells,3,10,25
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,3,Lat Pulldowns,Cable Machine,3,10,60
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,3,Preacher Curls,Preacher Bench,3,10,20
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,3,Overhead Tricep Extension,Cable Machine,3,10,30
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,4,Deadlifts,Barbell,4,5,120
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,4,Front Squats,Barbell,3,8,70
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,4,Walking Lunges,Dumbbells,3,12,20
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,4,Leg Extensions,Leg Extension Machine,3,12,50
+ul_bulk,Upper Lower (Bulking),4-day Upper/Lower split for muscle growth,4,intermediate,4,Seated Calf Raises,Seated Calf Machine,4,15,40

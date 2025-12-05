@@ -25,7 +25,9 @@ export function useLogs(enabled = true) {
       return response.data as DailyLogsResponse
     },
     enabled,
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: 0, // Always refetch when invalidated
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   })
 
   const logMealMutation = useMutation({
@@ -36,9 +38,9 @@ export function useLogs(enabled = true) {
       }
       return response.data
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: LOGS_QUERY_KEY })
-      queryClient.invalidateQueries({ queryKey: SUMMARY_QUERY_KEY })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: LOGS_QUERY_KEY })
+      await queryClient.invalidateQueries({ queryKey: SUMMARY_QUERY_KEY })
     },
   })
 
@@ -50,9 +52,9 @@ export function useLogs(enabled = true) {
       }
       return response.data
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: LOGS_QUERY_KEY })
-      queryClient.invalidateQueries({ queryKey: SUMMARY_QUERY_KEY })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: LOGS_QUERY_KEY })
+      await queryClient.invalidateQueries({ queryKey: SUMMARY_QUERY_KEY })
     },
   })
 

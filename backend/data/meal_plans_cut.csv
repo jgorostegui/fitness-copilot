@@ -1,0 +1,29 @@
+day_of_week,meal_type,item_name,calories,protein_g,carbs_g,fat_g
+0,breakfast,Greek Yogurt with Berries,280,22,32,6
+0,lunch,Grilled Chicken Salad,420,42,18,20
+0,dinner,Baked Salmon with Asparagus,450,40,12,28
+0,snack,Protein Shake with Almond Milk,180,30,8,4
+1,breakfast,Egg White Omelette with Spinach,250,28,8,12
+1,lunch,Turkey Lettuce Wraps,380,35,15,20
+1,dinner,Lean Beef Stir Fry,480,45,25,22
+1,snack,Cottage Cheese with Cucumber,150,20,6,4
+2,breakfast,Overnight Oats with Protein,320,25,40,8
+2,lunch,Tuna Salad on Greens,400,38,12,22
+2,dinner,Grilled Chicken Breast with Broccoli,420,48,15,18
+2,snack,Hard Boiled Eggs,140,12,1,10
+3,breakfast,Scrambled Eggs with Avocado,350,22,8,26
+3,lunch,Shrimp and Vegetable Bowl,380,32,28,14
+3,dinner,Turkey Meatballs with Zucchini,440,42,18,22
+3,snack,Greek Yogurt,120,18,8,2
+4,breakfast,Protein Pancakes,300,28,30,8
+4,lunch,Chicken Caesar Salad,450,40,15,26
+4,dinner,Grilled White Fish with Vegetables,380,42,12,18
+4,snack,Almonds and String Cheese,180,12,4,14
+5,breakfast,Smoked Salmon on Toast,320,25,22,14
+5,lunch,Beef and Vegetable Soup,400,35,25,18
+5,dinner,Herb Roasted Chicken Thigh,460,38,8,30
+5,snack,Protein Bar,200,20,18,6
+6,breakfast,Veggie Egg Scramble,280,24,10,16
+6,lunch,Grilled Chicken Wrap,420,38,32,16
+6,dinner,Lean Pork Tenderloin with Sweet Potato,480,42,35,18
+6,snack,Celery with Almond Butter,160,6,8,12

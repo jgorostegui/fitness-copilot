@@ -59,6 +59,8 @@ class ChatMessageRole(str, Enum):
 class ChatActionType(str, Enum):
     LOG_FOOD = "log_food"
     LOG_EXERCISE = "log_exercise"
+    PROPOSE_FOOD = "propose_food"  # Preview before tracking (vision)
+    PROPOSE_EXERCISE = "propose_exercise"  # Preview before tracking (vision)
     RESET = "reset"
     NONE = "none"
 
@@ -161,6 +163,7 @@ class UserBase(SQLModel):
     fat_train_g_per_kg: float = Field(default=0.8, ge=0.5, le=1.5)
     tef_factor: float = Field(default=0.10, ge=0.05, le=0.15)
     onboarding_complete: bool = False
+    simulated_day: int = Field(default=0, ge=0, le=6)  # 0=Monday, 6=Sunday
 
 
 class User(UserBase, table=True):
@@ -218,6 +221,7 @@ class UserProfileUpdate(SQLModel):
     fat_train_g_per_kg: float | None = Field(default=None, ge=0.5, le=1.5)
     tef_factor: float | None = Field(default=None, ge=0.05, le=0.15)
     onboarding_complete: bool | None = None
+    simulated_day: int | None = Field(default=None, ge=0, le=6)  # 0=Monday, 6=Sunday
 
 
 class UserProfilePublic(CamelModel):
@@ -238,6 +242,7 @@ class UserProfilePublic(CamelModel):
     fat_rest_g_per_kg: float
     fat_train_g_per_kg: float
     onboarding_complete: bool
+    simulated_day: int = 0  # 0=Monday, 6=Sunday
 
 
 # ============================================================================
@@ -297,6 +302,7 @@ class MealLog(MealLogBase, table=True):
     user_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE", index=True
     )
+    simulated_day: int = Field(default=0, ge=0, le=6, index=True)  # 0=Monday, 6=Sunday
     logged_at: datetime = Field(default_factory=datetime.utcnow, index=True)
 
 
@@ -336,6 +342,7 @@ class ExerciseLog(ExerciseLogBase, table=True):
     user_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE", index=True
     )
+    simulated_day: int = Field(default=0, ge=0, le=6, index=True)  # 0=Monday, 6=Sunday
     logged_at: datetime = Field(default_factory=datetime.utcnow, index=True)
 
 
@@ -375,6 +382,19 @@ class DailySummary(CamelModel):
     workouts_completed: int
     calories_remaining: int
     protein_remaining: float
+
+
+class SimulatedDayResponse(CamelModel):
+    """Response model for simulated day with camelCase serialization."""
+
+    simulated_day: int  # 0-6 (Monday-Sunday)
+    day_name: str  # "Monday", "Tuesday", etc.
+
+
+class SimulatedDayUpdate(SQLModel):
+    """Request model for updating simulated day."""
+
+    simulated_day: int = Field(ge=0, le=6)  # 0=Monday, 6=Sunday
 
 
 class BodyMetrics(CamelModel):

@@ -7,8 +7,14 @@ Provides endpoints for logging meals and exercises.
 from fastapi import APIRouter
 
 from app.api.deps import CurrentUser, SessionDep
-from app.crud_fitness import create_exercise_log, get_exercise_logs_for_today
-from app.crud_nutrition import create_meal_log, get_meal_logs_for_today
+from app.crud_fitness import (
+    create_exercise_log,
+    get_exercise_logs_for_simulated_day,
+)
+from app.crud_nutrition import (
+    create_meal_log,
+    get_meal_logs_for_simulated_day,
+)
 from app.models import (
     DailyLogsResponse,
     ExerciseLogCreate,
@@ -28,10 +34,13 @@ def get_todays_logs(
     """
     Get today's meal and exercise logs.
 
-    Returns all logs created on the current date for the authenticated user.
+    Returns all logs for the user's current simulated day.
     """
-    meal_logs = get_meal_logs_for_today(session, current_user.id)
-    exercise_logs = get_exercise_logs_for_today(session, current_user.id)
+    simulated_day = current_user.simulated_day
+    meal_logs = get_meal_logs_for_simulated_day(session, current_user.id, simulated_day)
+    exercise_logs = get_exercise_logs_for_simulated_day(
+        session, current_user.id, simulated_day
+    )
 
     return DailyLogsResponse(
         meal_logs=[
@@ -70,9 +79,11 @@ def log_meal(
     """
     Log a meal.
 
-    Creates a new meal log entry for the authenticated user.
+    Creates a new meal log entry for the authenticated user on their current simulated day.
     """
-    meal_log = create_meal_log(session, current_user.id, meal_log_in)
+    meal_log = create_meal_log(
+        session, current_user.id, meal_log_in, current_user.simulated_day
+    )
 
     return MealLogPublic(
         id=meal_log.id,
@@ -95,9 +106,11 @@ def log_exercise(
     """
     Log an exercise.
 
-    Creates a new exercise log entry for the authenticated user.
+    Creates a new exercise log entry for the authenticated user on their current simulated day.
     """
-    exercise_log = create_exercise_log(session, current_user.id, exercise_log_in)
+    exercise_log = create_exercise_log(
+        session, current_user.id, exercise_log_in, current_user.simulated_day
+    )
 
     return ExerciseLogPublic(
         id=exercise_log.id,

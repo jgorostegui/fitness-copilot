@@ -88,7 +88,7 @@ def test_send_chat_message_exercise(client: TestClient) -> None:
 
 @pytest.mark.acceptance
 def test_send_chat_message_general(client: TestClient) -> None:
-    """Test POST /chat/messages with general message returns suggestions."""
+    """Test POST /chat/messages with general message returns context-aware response."""
     token = get_demo_token(client, "maintain")
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -102,7 +102,12 @@ def test_send_chat_message_general(client: TestClient) -> None:
     data = r.json()
     assert data["role"] == "assistant"
     assert data["actionType"] == "none"
-    assert "log" in data["content"].lower() or "help" in data["content"].lower()
+    # Context-aware responses may include progress info, greetings, or suggestions
+    content_lower = data["content"].lower()
+    assert any(
+        keyword in content_lower
+        for keyword in ["log", "help", "calorie", "goal", "support", "hi", "hello"]
+    )
 
 
 @pytest.mark.acceptance

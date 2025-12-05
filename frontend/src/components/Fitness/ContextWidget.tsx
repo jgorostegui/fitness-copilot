@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Text } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
-import { TODAY_ROUTINE } from "@/constants/fitness"
+import type { TrainingRoutinePublic } from "@/client/types.gen"
 import type { DailyStats, ExerciseLog, MealLog } from "@/types/fitness"
 
 interface ContextWidgetProps {
@@ -9,6 +9,7 @@ interface ContextWidgetProps {
   stats: DailyStats
   exerciseLogs: ExerciseLog[]
   mealLogs: MealLog[]
+  trainingRoutine: TrainingRoutinePublic[]
   onQuickLog: (text: string) => void
 }
 
@@ -22,6 +23,7 @@ export function ContextWidget({
   stats,
   exerciseLogs,
   mealLogs,
+  trainingRoutine,
   onQuickLog,
 }: ContextWidgetProps) {
   const [sessionTime, setSessionTime] = useState(0)
@@ -41,11 +43,12 @@ export function ContextWidget({
     const completedNames = new Set(
       exerciseLogs.map((l) => l.name.toLowerCase()),
     )
-    const nextIndex = TODAY_ROUTINE.findIndex(
-      (r) => !completedNames.has(r.exercise.toLowerCase()),
+    const nextIndex = trainingRoutine.findIndex(
+      (r) => !completedNames.has(r.exercise_name.toLowerCase()),
     )
-    const currentTarget = nextIndex !== -1 ? TODAY_ROUTINE[nextIndex] : null
-    const allDone = nextIndex === -1 && TODAY_ROUTINE.length > 0
+    const currentTarget = nextIndex !== -1 ? trainingRoutine[nextIndex] : null
+    const allDone = nextIndex === -1 && trainingRoutine.length > 0
+    const isRestDay = trainingRoutine.length === 0
 
     return (
       <Box
@@ -74,11 +77,13 @@ export function ContextWidget({
               🏋️ GYM MODE
             </Text>
             <Text fontSize="lg" fontWeight="bold">
-              {allDone
-                ? "Session Complete ✓"
-                : currentTarget?.exercise || "Rest Day"}
+              {isRestDay
+                ? "Rest Day 🧘"
+                : allDone
+                  ? "Session Complete ✓"
+                  : currentTarget?.exercise_name || "No exercise"}
             </Text>
-            {!allDone && currentTarget && (
+            {!isRestDay && !allDone && currentTarget && (
               <Flex gap={2} mt={1}>
                 <Text
                   fontSize="xs"
@@ -99,7 +104,7 @@ export function ContextWidget({
                   {currentTarget.reps} Reps
                 </Text>
                 <Text fontSize="xs" color="blue.600">
-                  {currentTarget.target}
+                  {currentTarget.target_load_kg}kg
                 </Text>
               </Flex>
             )}
@@ -178,10 +183,26 @@ export function ContextWidget({
         </Text>
         <Flex gap={2} flexWrap="wrap">
           {[
-            { emoji: "🍌", name: "Banana", text: "I ate a Banana" },
-            { emoji: "🥤", name: "Shake", text: "I had a Protein Shake" },
-            { emoji: "☕", name: "Coffee", text: "I drank a Coffee" },
-            { emoji: "🥚", name: "Eggs", text: "I ate 2 Eggs" },
+            {
+              emoji: "🥗",
+              name: "Chicken Salad",
+              text: "I ate a Grilled Chicken Salad",
+            },
+            {
+              emoji: "🥣",
+              name: "Oatmeal",
+              text: "I had Oatmeal with Berries",
+            },
+            {
+              emoji: "🍳",
+              name: "Eggs & Toast",
+              text: "I ate Eggs and Avocado Toast",
+            },
+            {
+              emoji: "🍗",
+              name: "Rice & Chicken",
+              text: "I had Rice and Grilled Chicken",
+            },
           ].map((item, idx) => (
             <Button
               key={idx}

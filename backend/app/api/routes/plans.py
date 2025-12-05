@@ -2,15 +2,14 @@
 Plan endpoints for today's meal and training plans.
 
 Provides endpoints for viewing today's scheduled meals and exercises.
+Uses simulated_day from user profile for demo purposes.
 """
-
-from datetime import datetime
 
 from fastapi import APIRouter
 
 from app.api.deps import CurrentUser, SessionDep
 from app.crud_fitness import get_training_routines_for_program
-from app.crud_nutrition import get_meal_plans_for_today
+from app.crud_nutrition import get_meal_plans_for_user
 from app.models import (
     MealPlanPublic,
     MealPlansPublic,
@@ -29,15 +28,17 @@ def get_todays_training(
     """
     Get today's training routine.
 
-    Returns exercises from the user's selected program for today's day of week.
+    Returns exercises from the user's selected program for the simulated day.
+    Uses simulated_day from user profile (for demo purposes).
     Returns empty list if no program is selected.
     """
     if current_user.selected_program_id is None:
         return TrainingRoutinesPublic(data=[], count=0)
 
-    today = datetime.utcnow().weekday()  # 0=Monday, 6=Sunday
+    # Use simulated_day instead of real day for demo purposes
+    simulated_day = current_user.simulated_day
     routines = get_training_routines_for_program(
-        session, current_user.selected_program_id, day_of_week=today
+        session, current_user.selected_program_id, day_of_week=simulated_day
     )
 
     return TrainingRoutinesPublic(
@@ -66,9 +67,12 @@ def get_todays_meal_plan(
     """
     Get today's meal plan.
 
-    Returns meal plan items for today's day of week.
+    Returns meal plan items for the simulated day.
+    Uses simulated_day from user profile (for demo purposes).
     """
-    meals = get_meal_plans_for_today(session, current_user.id)
+    # Use simulated_day instead of real day for demo purposes
+    simulated_day = current_user.simulated_day
+    meals = get_meal_plans_for_user(session, current_user.id, day_of_week=simulated_day)
 
     return MealPlansPublic(
         data=[

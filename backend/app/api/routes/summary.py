@@ -7,8 +7,8 @@ Provides endpoint for viewing daily progress metrics.
 from fastapi import APIRouter
 
 from app.api.deps import CurrentUser, SessionDep
-from app.crud_fitness import get_exercise_logs_for_today
-from app.crud_nutrition import get_meal_logs_for_today
+from app.crud_fitness import get_exercise_logs_for_simulated_day
+from app.crud_nutrition import get_meal_logs_for_simulated_day
 from app.models import DailySummary
 from app.services.calculations import CalculationService
 
@@ -30,9 +30,14 @@ def get_todays_summary(
     - Calories remaining (target - consumed)
     - Protein remaining (target - consumed)
     """
-    # Get today's logs
-    meal_logs = get_meal_logs_for_today(session, current_user.id)
-    exercise_logs = get_exercise_logs_for_today(session, current_user.id)
+    # Get logs for the user's current simulated day
+    simulated_day = current_user.simulated_day
+    meal_logs = get_meal_logs_for_simulated_day(
+        session, current_user.id, simulated_day
+    )
+    exercise_logs = get_exercise_logs_for_simulated_day(
+        session, current_user.id, simulated_day
+    )
 
     # Calculate consumed totals
     calories_consumed = sum(m.calories for m in meal_logs)

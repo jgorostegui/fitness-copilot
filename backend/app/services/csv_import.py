@@ -39,8 +39,9 @@ class CSVImportService:
         if not path.exists():
             return 0
 
-        # Track programs we've created
+        # Track programs we've created and whether they already had routines
         programs: dict[str, TrainingProgram] = {}
+        programs_with_routines: set[str] = set()
         routines_count = 0
 
         with open(path, newline="", encoding="utf-8") as f:
@@ -59,6 +60,14 @@ class CSVImportService:
 
                     if existing:
                         programs[program_key] = existing
+                        # Check if this program already has routines
+                        existing_routines = session.exec(
+                            select(TrainingRoutine).where(
+                                TrainingRoutine.program_id == existing.id
+                            )
+                        ).first()
+                        if existing_routines:
+                            programs_with_routines.add(program_key)
                     else:
                         program = TrainingProgram(
                             name=row["program_name"],
@@ -70,6 +79,10 @@ class CSVImportService:
                         session.add(program)
                         session.flush()  # Get the ID
                         programs[program_key] = program
+
+                # Skip creating routines if program already has them
+                if program_key in programs_with_routines:
+                    continue
 
                 # Create routine for this row
                 program = programs[program_key]
@@ -166,6 +179,58 @@ class CSVImportService:
             return 0
 
         return self.load_training_programs(session)
+
+    def load_meal_plans_for_persona(
+        self, session: Session, user_id: uuid.UUID, persona: str
+    ) -> int:
+        """
+        Load meal plans from persona-specific CSV for a user.
+
+        Args:
+            session: Database session
+            user_id: User ID to assign meal plans to
+            persona: One of "cut", "bulk", or "maintain"
+
+        Returns the number of meal plan items loaded.
+        """
+        csv_filename = f"meal_plans_{persona}.csv"
+        csv_path = str(self.data_dir / csv_filename)
+        return self.load_meal_plans(session, user_id, csv_path)
+
+    def load_training_programs_for_persona(
+        self, session: Session, persona: str
+    ) -> TrainingProgram | None:
+        """
+        Load training programs from persona-specific CSV.
+
+        Args:
+            session: Database session
+            persona: One of "cut", "bulk", or "maintain"
+
+        Returns the TrainingProgram created, or None if file doesn't exist.
+        """
+        csv_filename = f"routines_{persona}.csv"
+        csv_path = str(self.data_dir / csv_filename)
+
+        path = Path(csv_path)
+        if not path.exists():
+            return None
+
+        # Load programs from persona-specific CSV
+        self.load_training_programs(session, csv_path)
+
+        # Return the first program loaded (persona CSVs should have one program)
+        with open(path, newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            first_row = next(reader, None)
+            if first_row:
+                return session.exec(
+                    select(TrainingProgram).where(
+                        TrainingProgram.name == first_row["program_name"]
+                    )
+                ).first()
+
+        return None
 
 
 # Singleton instance
