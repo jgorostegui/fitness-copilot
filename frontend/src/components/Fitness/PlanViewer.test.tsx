@@ -263,4 +263,88 @@ describe("PlanViewer - Nutrition Mode", () => {
       expect(onAddMeal).toHaveBeenCalled()
     }
   })
+
+  it("displays quick add foods section", () => {
+    renderWithProviders(
+      <PlanViewer
+        mode="nutrition"
+        mealPlan={mockMealPlan}
+        trainingRoutine={mockTrainingRoutine}
+        mealLogs={[]}
+        exerciseLogs={[]}
+        onAddMeal={vi.fn()}
+        onAddExercise={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByText("QUICK ADD")).toBeInTheDocument()
+    expect(screen.getByText("Banana")).toBeInTheDocument()
+    expect(screen.getByText("Protein Shake")).toBeInTheDocument()
+    expect(screen.getByText("Greek Yogurt")).toBeInTheDocument()
+  })
+
+  it("calls onAddMeal when quick add food is clicked", () => {
+    const onAddMeal = vi.fn()
+
+    renderWithProviders(
+      <PlanViewer
+        mode="nutrition"
+        mealPlan={mockMealPlan}
+        trainingRoutine={mockTrainingRoutine}
+        mealLogs={[]}
+        exerciseLogs={[]}
+        onAddMeal={onAddMeal}
+        onAddExercise={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByText("Banana"))
+    expect(onAddMeal).toHaveBeenCalledWith({
+      name: "Banana",
+      calories: 105,
+      protein: 1,
+      type: "snack",
+    })
+  })
+
+  it("shows calorie exceeded feedback when over target", () => {
+    const mealLogs = [
+      { id: "1", name: "Big Meal", calories: 1200, protein: 50, type: "lunch" as const, time: new Date().toISOString() },
+    ]
+
+    renderWithProviders(
+      <PlanViewer
+        mode="nutrition"
+        mealPlan={mockMealPlan}
+        trainingRoutine={mockTrainingRoutine}
+        mealLogs={mealLogs}
+        exerciseLogs={[]}
+        onAddMeal={vi.fn()}
+        onAddExercise={vi.fn()}
+      />,
+    )
+
+    // Target is 1050 (450 + 600), consumed is 1200, excess is 150
+    expect(screen.getByTestId("calorie-excess")).toHaveTextContent("+150 over")
+  })
+
+  it("does not show excess when under target", () => {
+    const mealLogs = [
+      { id: "1", name: "Small Meal", calories: 300, protein: 20, type: "lunch" as const, time: new Date().toISOString() },
+    ]
+
+    renderWithProviders(
+      <PlanViewer
+        mode="nutrition"
+        mealPlan={mockMealPlan}
+        trainingRoutine={mockTrainingRoutine}
+        mealLogs={mealLogs}
+        exerciseLogs={[]}
+        onAddMeal={vi.fn()}
+        onAddExercise={vi.fn()}
+      />,
+    )
+
+    expect(screen.queryByTestId("calorie-excess")).not.toBeInTheDocument()
+  })
 })

@@ -4,6 +4,7 @@ import {
   Container,
   Flex,
   Heading,
+  SimpleGrid,
   Spinner,
   Text,
   VStack,
@@ -12,6 +13,16 @@ import { FiCheck, FiPlus } from "react-icons/fi"
 import type { MealPlanPublic, TrainingRoutinePublic } from "@/client/types.gen"
 import { DaySelector } from "@/components/Fitness/DaySelector"
 import type { ExerciseLog, MealLog } from "@/types/fitness"
+
+// Common quick-add foods for convenience
+const QUICK_ADD_FOODS = [
+  { name: "Banana", calories: 105, protein: 1, type: "snack" },
+  { name: "Protein Shake", calories: 150, protein: 25, type: "snack" },
+  { name: "Greek Yogurt", calories: 100, protein: 17, type: "snack" },
+  { name: "Apple", calories: 95, protein: 0, type: "snack" },
+  { name: "Almonds (28g)", calories: 164, protein: 6, type: "snack" },
+  { name: "Boiled Egg", calories: 78, protein: 6, type: "snack" },
+]
 
 interface PlanViewerProps {
   mode: "workout" | "nutrition"
@@ -41,6 +52,17 @@ export const PlanViewer = ({
   const totalProtein = mealLogs.reduce((acc, log) => acc + log.protein, 0)
   const targetCalories = mealPlan.reduce((acc, item) => acc + item.calories, 0)
   const targetProtein = mealPlan.reduce((acc, item) => acc + item.protein_g, 0)
+
+  // Calorie tracking with exceeded feedback
+  const effectiveTargetCalories = targetCalories || 2000
+  const caloriePercentage = (totalCalories / effectiveTargetCalories) * 100
+  const isOverCalories = totalCalories > effectiveTargetCalories
+  const calorieExcess = totalCalories - effectiveTargetCalories
+  const calorieBarColor = isOverCalories
+    ? "red.500"
+    : caloriePercentage > 90
+      ? "orange.500"
+      : "blue.500"
 
   // Count total sets logged (each log entry represents sets done)
   const totalSetsLogged = exerciseLogs.reduce((acc, log) => acc + log.sets, 0)
@@ -311,12 +333,29 @@ export const PlanViewer = ({
                   p={4}
                   borderRadius="xl"
                   border="1px"
-                  borderColor="gray.200"
+                  borderColor={isOverCalories ? "red.200" : "gray.200"}
                 >
-                  <Text fontSize="xs" fontWeight="bold" color="gray.400" mb={1}>
-                    CALORIES
-                  </Text>
-                  <Text fontSize="2xl" fontWeight="bold" mb={2}>
+                  <Flex justify="space-between" align="center" mb={1}>
+                    <Text fontSize="xs" fontWeight="bold" color="gray.400">
+                      CALORIES
+                    </Text>
+                    {isOverCalories && (
+                      <Text
+                        fontSize="xs"
+                        fontWeight="bold"
+                        color="red.500"
+                        data-testid="calorie-excess"
+                      >
+                        +{calorieExcess} over
+                      </Text>
+                    )}
+                  </Flex>
+                  <Text
+                    fontSize="2xl"
+                    fontWeight="bold"
+                    mb={2}
+                    color={isOverCalories ? "red.600" : "inherit"}
+                  >
                     {totalCalories}
                   </Text>
                   <Box
@@ -327,10 +366,11 @@ export const PlanViewer = ({
                   >
                     <Box
                       h="full"
-                      bg="blue.500"
+                      bg={calorieBarColor}
                       borderRadius="full"
-                      w={`${Math.min(100, (totalCalories / (targetCalories || 2000)) * 100)}%`}
-                      transition="width 0.5s"
+                      w={`${Math.min(100, caloriePercentage)}%`}
+                      transition="all 0.5s"
+                      data-testid="calorie-progress-bar"
                     />
                   </Box>
                   <Text fontSize="xs" color="gray.400" mt={1}>
@@ -462,6 +502,43 @@ export const PlanViewer = ({
                   </VStack>
                 </Box>
               )}
+
+              <Box>
+                <Text fontSize="xs" fontWeight="bold" color="gray.500" mb={3}>
+                  QUICK ADD
+                </Text>
+                <SimpleGrid columns={2} gap={2}>
+                  {QUICK_ADD_FOODS.map((food) => (
+                    <Button
+                      key={food.name}
+                      size="sm"
+                      variant="outline"
+                      colorPalette="green"
+                      justifyContent="flex-start"
+                      h="auto"
+                      py={2}
+                      px={3}
+                      onClick={() =>
+                        handleQuickAddFood(
+                          food.name,
+                          food.calories,
+                          food.protein,
+                          food.type,
+                        )
+                      }
+                    >
+                      <Box textAlign="left">
+                        <Text fontSize="xs" fontWeight="medium">
+                          {food.name}
+                        </Text>
+                        <Text fontSize="xs" color="gray.500">
+                          {food.calories} kcal • {food.protein}g
+                        </Text>
+                      </Box>
+                    </Button>
+                  ))}
+                </SimpleGrid>
+              </Box>
 
               {mealLogs.length > 0 && (
                 <Box pt={2} borderTop="1px" borderColor="gray.200">
