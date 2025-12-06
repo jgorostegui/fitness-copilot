@@ -45,6 +45,22 @@ KNOWN_FOODS = {
     "rice and chicken",
     "protein shake",
     "shake",
+    # More complete meals
+    "greek yogurt",
+    "yogurt",
+    "tuna salad",
+    "turkey sandwich",
+    "steak",
+    "pasta",
+    "spaghetti",
+    "pizza slice",
+    "pizza",
+    "burger",
+    "hamburger",
+    "salad",
+    "smoothie",
+    "coffee",
+    "latte",
     # Simple ingredients
     "banana",
     "chicken",
@@ -56,6 +72,10 @@ KNOWN_FOODS = {
     "apple",
     "bread",
     "milk",
+    "almonds",
+    "peanut butter",
+    "cheese",
+    "avocado",
 }
 
 # Exercise keywords

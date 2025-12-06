@@ -80,7 +80,7 @@ def test_demo_login_maintain_creates_user(client: TestClient) -> None:
 
     profile = profile_r.json()
     assert profile["onboardingComplete"] is False
-    assert profile["weightKg"] == 65.0  # Updated for smart-assistant feature
+    assert profile["weightKg"] == 93.0  # Maintain persona weight
     assert profile["goalMethod"] == "maintenance"
 
 

@@ -126,4 +126,4 @@ Working with Kiro on this project taught me a lot about effective AI-assisted de
 
 *Built for Kiroween 2025*
 
-*#codewithkiro #kiroween #specsnotcode*
+*#codewithkiro #kiroween
