@@ -1,19 +1,34 @@
 # Fitness Copilot 🧟‍♂️
 
-**An AI-Powered Fitness App Built with Kiro SDD**
-
-> *An AI-powered fitness copilot where computer vision and natural language are integrated with a strict database schema. Context-aware coaching meets validated data tracking.*
-
 **🎃 Kiroween 2025**
 
-## What Makes This Unique
+> What if you could snap a photo of your meal or workout and get instant, context-aware feedback? Not just "that's 500 calories" but "you've got 600 left for today, and your leg workout is still pending."
 
-We stitched together **incompatible systems** that shouldn't cooperate:
+## What It Does
 
-- 👁️ **Google Gemini Vision** (can say anything) → 🛡️ **Pydantic Validation** (enforces truth) → 🦴 **PostgreSQL** (stores facts)
-- 🎨 **Chat** (adaptive, conversational) ↔️ 📈 **Monitor Dashboard** (rigid, mathematical) = **Split-Brain Interface**
+Fitness Copilot is an AI-powered fitness tracking app that combines:
 
-**The system works** because of context: Before every AI request, we inject your training plan, today's progress, and recent conversation. The AI doesn't just see a leg press photo—it knows this exercise is in your plan today, you've done 3 workouts this week, and you have 600 calories left.
+- **Vision-based logging**: Snap a photo of your meal or gym equipment, and AI analyzes it instantly
+- **Context-aware coaching**: The AI knows your training plan, today's progress, and recent conversation before responding
+- **Validated tracking**: All data is validated before being stored—the AI proposes, the system validates
+- **Dual interface**:
+  - **Monitor**: A dashboard for tracking calories, protein, and workout progress
+  - **Chat**: Natural language input for logging and coaching
+
+The system doesn't just track—it understands your full situation and provides personalized guidance.
+
+## How It Works
+
+We connected **AI flexibility** with **data integrity**:
+
+- 👁️ **AI Vision** (understands images) → 🛡️ **Validation Layer** (enforces rules) → 🦴 **Database** (stores facts)
+- 🎨 **Chat** (adaptive, conversational) ↔️ 📈 **Monitor** (structured metrics)
+
+**Context is everything**: Before every AI request, we inject your training plan, today's progress, and recent conversation. The AI doesn't just see a leg press photo—it knows this exercise is in your plan today, you've done 3 workouts this week, and you have 600 calories left.
+
+**Strict validation**: Exercises are only logged if they're in today's training plan. Send a photo of a leg press on chest day? You'll get a friendly rejection, not a database entry.
+
+→ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed flow diagrams.
 
 ## Tech Stack
 
@@ -181,9 +196,16 @@ This repo is set up for AI-assisted, spec-driven development with Kiro:
 
 These files are not required to run the app, but they are useful when pairing with Kiro or other coding agents.
 
+## Architecture
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed documentation including:
+- System overview and component diagrams
+- Chat message flow (text → LLM → validation → database)
+- Vision flow (image → classification → analysis → validation)
+- Context building and prompt architecture
+
 ## Documentation
 
-- [Development Guide](./development.md)
-- [Deployment Guide](./deployment.md)
+- [Architecture Guide](./ARCHITECTURE.md) - System design and data flows
 - [Backend README](./backend/README.md)
 - [Frontend README](./frontend/README.md)

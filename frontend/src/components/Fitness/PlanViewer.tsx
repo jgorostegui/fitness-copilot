@@ -60,8 +60,8 @@ export const PlanViewer = ({
     })
   }
 
-  const handleLogSet = (exerciseName: string, reps: number) => {
-    onAddExercise({ name: exerciseName, sets: 1, reps, weight: 0 })
+  const handleLogSet = (exerciseName: string, reps: number, weight: number) => {
+    onAddExercise({ name: exerciseName, sets: 1, reps, weight })
   }
 
   if (isLoading) {
@@ -229,12 +229,17 @@ export const PlanViewer = ({
                             </Box>
                             <Button
                               size="sm"
-                              colorPalette="blue"
+                              colorPalette={isComplete ? "gray" : "blue"}
+                              disabled={isComplete}
                               onClick={() =>
-                                handleLogSet(item.exercise_name, item.reps)
+                                handleLogSet(
+                                  item.exercise_name,
+                                  item.reps,
+                                  item.target_load_kg,
+                                )
                               }
                             >
-                              <FiPlus />
+                              {isComplete ? <FiCheck /> : <FiPlus />}
                             </Button>
                           </Flex>
 

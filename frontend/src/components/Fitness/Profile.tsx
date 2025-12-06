@@ -105,6 +105,8 @@ export const Profile = ({
                 variant={theme === "dark" ? "solid" : "ghost"}
                 size="sm"
                 onClick={() => setTheme("dark")}
+                disabled
+                title="Dark mode coming soon"
               >
                 <FiMoon /> Dark
               </Button>

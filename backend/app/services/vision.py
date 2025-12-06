@@ -180,6 +180,27 @@ RECENT CONVERSATION:
                 gym_analysis = await self._analyze_gym_equipment(
                     image_url, image_base64, context
                 )
+                # If gym_analysis is None, exercise is not in today's plan
+                if gym_analysis is None:
+                    scheduled_names = []
+                    if context and context.scheduled_exercises:
+                        scheduled_names = [
+                            e["name"] for e in context.scheduled_exercises
+                        ]
+
+                    if scheduled_names:
+                        return VisionResult(
+                            category=category,
+                            error_message=(
+                                f"❌ This exercise is not in today's workout plan.\n\n"
+                                f"Today's exercises: {', '.join(scheduled_names)}"
+                            ),
+                        )
+                    else:
+                        return VisionResult(
+                            category=category,
+                            error_message="❌ Today is a rest day - no exercises scheduled!",
+                        )
                 return VisionResult(category=category, gym_analysis=gym_analysis)
 
             if category == ImageCategory.FOOD:
@@ -237,51 +258,76 @@ Respond with ONLY the category name, nothing else."""
         image_url: str | None,
         image_base64: str | None,
         context: UserContext | None = None,
-    ) -> GymEquipmentAnalysis:
-        """Analyze gym equipment image for exercise details."""
+    ) -> GymEquipmentAnalysis | None:
+        """
+        Analyze gym equipment image for exercise details.
+
+        Returns None if the exercise is not in today's training plan.
+        """
+        # Get today's scheduled exercises
+        scheduled_names = []
+        if context and context.scheduled_exercises:
+            scheduled_names = [e["name"] for e in context.scheduled_exercises]
+
+        # Build the prompt with today's exercises
+        if scheduled_names:
+            exercises_list = ", ".join(scheduled_names)
+            schedule_section = f"TODAY'S SCHEDULED EXERCISES: {exercises_list}"
+        else:
+            schedule_section = "TODAY'S SCHEDULE: Rest day - no exercises scheduled."
+
         system_context = self._build_system_context(context)
 
         prompt = f"""Analyze this gym equipment image.
 
 {system_context}
 
-TASK: Identify the exercise and provide guidance.
+{schedule_section}
 
-RULES:
-1. If this exercise is in TODAY'S TRAINING PLAN, use those exact sets/reps/weight
-2. If not in the plan, suggest reasonable defaults based on the user's goal
-3. ONLY use exercise names from the ALLOWED EXERCISES list if provided
-4. Provide form cues specific to the user's goal (strength vs hypertrophy)
+TASK: Identify the exercise shown in the image.
+
+CRITICAL RULES:
+1. ONLY identify exercises that are in TODAY'S SCHEDULED EXERCISES
+2. If the equipment/exercise is NOT in today's schedule, return exercise_name as null
+3. If it IS in today's schedule, use the exact name, sets, reps, and weight from the plan
+4. Provide form cues specific to the user's goal
 
 Respond in JSON format ONLY (no markdown, no explanation):
-{{"exercise_name": "Name of exercise", "form_cues": ["Tip 1", "Tip 2"], "suggested_sets": 3, "suggested_reps": 10, "suggested_weight_kg": 0, "in_todays_plan": false, "goal_specific_advice": "Brief advice"}}"""
+{{"exercise_name": "Name or null if not in today's plan", "form_cues": ["Tip 1", "Tip 2"], "suggested_sets": 3, "suggested_reps": 10, "suggested_weight_kg": 0, "goal_specific_advice": "Brief advice"}}"""
 
         result = await self.llm.extract_json_from_image(prompt, image_url, image_base64)
 
         if result:
             data = result[0] if isinstance(result, list) else result
+            exercise_name = data.get("exercise_name")
+
+            # If LLM returned null or exercise not in today's plan, return None
+            if not exercise_name:
+                return None
+
+            # Double-check: validate against scheduled exercises
+            is_scheduled = any(
+                name.lower() == exercise_name.lower() for name in scheduled_names
+            )
+            if not is_scheduled:
+                logger.info(
+                    f"[VISION] Exercise '{exercise_name}' not in today's plan: {scheduled_names}"
+                )
+                return None
+
             return GymEquipmentAnalysis(
-                exercise_name=data.get("exercise_name", "Unknown Exercise"),
+                exercise_name=exercise_name,
                 form_cues=data.get(
                     "form_cues", ["Maintain proper form", "Control the movement"]
                 ),
                 suggested_sets=data.get("suggested_sets", 3),
                 suggested_reps=data.get("suggested_reps", 10),
                 suggested_weight_kg=data.get("suggested_weight_kg", 0),
-                in_todays_plan=data.get("in_todays_plan", False),
+                in_todays_plan=True,  # Always true now since we validate
                 goal_specific_advice=data.get("goal_specific_advice", ""),
             )
 
-        # Fallback
-        return GymEquipmentAnalysis(
-            exercise_name="Unknown Exercise",
-            form_cues=["Maintain proper form", "Control the movement"],
-            suggested_sets=3,
-            suggested_reps=10,
-            suggested_weight_kg=0,
-            in_todays_plan=False,
-            goal_specific_advice="",
-        )
+        return None
 
     async def _analyze_food(
         self,

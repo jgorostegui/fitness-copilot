@@ -171,17 +171,15 @@ export const FitnessApp = () => {
   if (!currentProfile) {
     return <Onboarding onComplete={setProfile} />
   }
-  const themeClass = currentProfile.theme === "dark" ? "dark" : ""
 
   return (
     <Box
       h="100vh"
       w="full"
-      bg={currentProfile.theme === "dark" ? "gray.900" : "gray.50"}
-      color={currentProfile.theme === "dark" ? "white" : "gray.900"}
+      bg="gray.50"
+      color="gray.900"
       position="relative"
       overflow="hidden"
-      className={themeClass}
     >
       <Box h="full" pb={16}>
         {activeTab === "monitor" && (

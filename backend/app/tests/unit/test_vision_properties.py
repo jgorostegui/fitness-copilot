@@ -355,10 +355,11 @@ class TestClassificationRouting:
         Feature: vision, Property 2: Classification routes to correct analyzer
 
         For any image classified as "gym_equipment", the system SHALL invoke
-        gym equipment analysis.
+        gym equipment analysis when exercise is in today's plan.
 
         Validates: Requirements 1.2
         """
+        from app.services.context import UserContext
         from app.services.vision import (
             ImageCategory,
             VisionService,
@@ -382,7 +383,25 @@ class TestClassificationRouting:
         )
         service._llm = mock_llm
 
-        result = await service.analyze_image(image_base64="dGVzdA==")
+        # Create context with Leg Press in today's scheduled exercises
+        context = UserContext(
+            user_id="test-user",
+            goal_method="maintenance",
+            weight_kg=70,
+            height_cm=170,
+            activity_level="moderately_active",
+            sex="male",
+            calories_consumed=0,
+            calories_target=2000,
+            protein_consumed=0,
+            protein_target=150,
+            workouts_completed=0,
+            scheduled_exercises=[
+                {"name": "Leg Press", "sets": 3, "reps": 10, "target_weight": 80}
+            ],
+        )
+
+        result = await service.analyze_image(image_base64="dGVzdA==", context=context)
 
         assert result.category == ImageCategory.GYM_EQUIPMENT
         assert result.gym_analysis is not None

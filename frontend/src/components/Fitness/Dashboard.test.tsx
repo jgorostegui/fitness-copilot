@@ -105,8 +105,8 @@ describe("Dashboard", () => {
       />,
     )
 
-    // Check for the Exercises label in the circular progress
-    expect(screen.getByText("Exercises")).toBeInTheDocument()
+    // Check for the Sets label in the circular progress
+    expect(screen.getByText("Sets")).toBeInTheDocument()
     // Check for the Completed label in the card
     expect(screen.getByText("Completed")).toBeInTheDocument()
   })

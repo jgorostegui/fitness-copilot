@@ -9,12 +9,20 @@ Uses a two-tier approach:
 
 from __future__ import annotations
 
+import json
 import logging
+import re
 import uuid
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from app.models import ChatActionType, ChatAttachmentType
+from app.services.prompts import (
+    ExerciseExtractionContext,
+    build_exercise_extraction_prompt,
+    build_fallback_system_prompt,
+    build_system_prompt,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -410,6 +418,8 @@ class BrainService:
         The LLM extracts the exact exercise name, sets, reps, and weight from
         natural language input. This is more accurate than keyword matching.
 
+        Validates that the exercise is in today's scheduled plan before logging.
+
         Returns BrainResponse if exercise found, None otherwise.
         """
         logger.info(f"[BRAIN] Parsing exercise with LLM from: '{content}'")
@@ -418,31 +428,19 @@ class BrainService:
             logger.info("[BRAIN] No LLM available, falling back to keyword matching")
             return self._parse_exercise(content, user_id)
 
-        # Build context for allowed exercises
+        # Build context for today's scheduled exercises
         context = self._build_context(user_id) if user_id else None
-        allowed_exercises = context.allowed_exercises if context else []
+        scheduled_exercises = context.scheduled_exercises if context else []
+        scheduled_names = [ex.get("name", "") for ex in scheduled_exercises]
+        is_rest_day = len(scheduled_names) == 0
 
-        # Build the extraction prompt
-        exercises_hint = ""
-        if allowed_exercises:
-            exercises_hint = (
-                f"\nUser's training program includes: {', '.join(allowed_exercises)}"
-            )
-
-        extraction_prompt = f"""Extract exercise information from this message. Return ONLY a JSON object.
-
-Message: "{content}"
-{exercises_hint}
-
-Return JSON with these fields:
-- exercise_name: The exact exercise name (use proper form like "Incline Dumbbell Press", "Romanian Deadlift", etc.)
-- sets: Number of sets (integer, default 3 if not mentioned)
-- reps: Number of reps (integer, default 10 if not mentioned)
-- weight_kg: Weight in kg (number, default 0 if not mentioned, convert lbs to kg if needed)
-
-If this is NOT about logging an exercise, return: {{"exercise_name": null}}
-
-JSON:"""
+        # Build the extraction prompt using the prompts module
+        prompt_ctx = ExerciseExtractionContext(
+            user_message=content,
+            scheduled_exercises=scheduled_names,
+            is_rest_day=is_rest_day,
+        )
+        extraction_prompt = build_exercise_extraction_prompt(prompt_ctx)
 
         logger.debug(f"[BRAIN] LLM extraction prompt:\n{extraction_prompt}")
 
@@ -452,10 +450,6 @@ JSON:"""
 
             if not response:
                 return self._parse_exercise(content, user_id)
-
-            # Parse JSON response
-            import json
-            import re
 
             # Extract JSON from response (handle markdown code blocks)
             json_match = re.search(r"\{[^}]+\}", response, re.DOTALL)
@@ -470,13 +464,34 @@ JSON:"""
                 logger.info("[BRAIN] LLM determined this is not an exercise log")
                 return None
 
-            sets = int(data.get("sets", 3))
+            sets = int(data.get("sets", 1))
             reps = int(data.get("reps", 10))
             weight = float(data.get("weight_kg", 0))
 
             logger.info(
                 f"[BRAIN] LLM extracted: {exercise_name}, {sets}x{reps} @ {weight}kg"
             )
+
+            # Check if exercise is in today's scheduled plan
+            is_scheduled = any(
+                name.lower() == exercise_name.lower() for name in scheduled_names
+            )
+
+            if not is_scheduled:
+                # Exercise not in today's plan - don't log it
+                logger.info(
+                    f"[BRAIN] Exercise '{exercise_name}' not in today's plan: {scheduled_names}"
+                )
+                if scheduled_names:
+                    return BrainResponse(
+                        content=f"❌ {exercise_name} is not in today's workout plan.\n\nToday's exercises: {', '.join(scheduled_names)}",
+                        action_type=ChatActionType.NONE,
+                    )
+                else:
+                    return BrainResponse(
+                        content="❌ Today is a rest day - no exercises scheduled!",
+                        action_type=ChatActionType.NONE,
+                    )
 
             progress_msg = self._build_exercise_progress_message(user_id, exercise_name)
             weight_str = f" @ {weight}kg" if weight > 0 else ""
@@ -695,106 +710,6 @@ JSON:"""
             action_type=ChatActionType.NONE,
         )
 
-    def _build_system_prompt(self, context: UserContext) -> str:
-        """Build a system prompt with user context for the LLM."""
-        # Format scheduled meals
-        meals_str = ""
-        if context.scheduled_meals:
-            meals_list = [
-                f"  - {m['meal_type']}: {m['item_name']} ({m['calories']} kcal, {m['protein_g']}g protein)"
-                for m in context.scheduled_meals
-            ]
-            meals_str = "\n".join(meals_list)
-        else:
-            meals_str = "  No meal plan for today"
-
-        # Format scheduled exercises with completion status
-        exercises_str = ""
-        if context.scheduled_exercises:
-            exercises_list = []
-            for e in context.scheduled_exercises:
-                exercise_name = e["name"]
-                target_sets = e["sets"]
-                target_reps = e["reps"]
-                target_weight = e["target_weight"]
-
-                # Find completed sets for this exercise
-                completed_sets = sum(
-                    c["sets"]
-                    for c in context.completed_exercises
-                    if c["name"].lower() == exercise_name.lower()
-                )
-
-                status = (
-                    f"({completed_sets}/{target_sets} sets done)"
-                    if completed_sets > 0
-                    else "(not started)"
-                )
-                exercises_list.append(
-                    f"  - {exercise_name}: {target_sets}x{target_reps} @ {target_weight}kg {status}"
-                )
-            exercises_str = "\n".join(exercises_list)
-        else:
-            exercises_str = "  Rest day - no exercises scheduled"
-
-        # Format completed exercises (actual logs)
-        completed_str = ""
-        if context.completed_exercises:
-            completed_list = [
-                f"  - {c['name']}: {c['sets']} sets x {c['reps']} reps @ {c['weight_kg']}kg"
-                for c in context.completed_exercises
-            ]
-            completed_str = "\n".join(completed_list)
-        else:
-            completed_str = "  No exercises logged yet"
-
-        # Calculate progress percentages
-        cal_pct = (
-            int((context.calories_consumed / context.calories_target) * 100)
-            if context.calories_target > 0
-            else 0
-        )
-        protein_pct = (
-            int((context.protein_consumed / context.protein_target) * 100)
-            if context.protein_target > 0
-            else 0
-        )
-
-        return f"""You are a friendly, knowledgeable fitness coach assistant for the Fitness Copilot app.
-You help users with nutrition, exercise, and fitness questions.
-
-## User Profile
-- Goal: {context.goal_method.replace('_', ' ').title()}
-- Weight: {context.weight_kg}kg
-- Height: {context.height_cm}cm
-- Activity Level: {context.activity_level.replace('_', ' ').title()}
-- Sex: {context.sex}
-
-## Today's Progress ({context.simulated_day_name})
-- Calories: {context.calories_consumed}/{context.calories_target} kcal ({cal_pct}%)
-- Protein: {context.protein_consumed:.0f}/{context.protein_target:.0f}g ({protein_pct}%)
-- Exercises completed: {context.workouts_completed}
-
-## Today's Meal Plan
-{meals_str}
-
-## Today's Training Plan
-{exercises_str}
-
-## Completed Exercise Logs
-{completed_str}
-
-## Guidelines
-- Be encouraging and supportive
-- Give personalized advice based on the user's goal ({context.goal_method})
-- Reference their current progress when relevant
-- Keep responses concise but helpful (2-3 sentences max)
-- If they mention food or exercise, suggest they log it with specific phrases like "I ate..." or "I did..."
-- Don't make up information about their logs - only reference what's shown above
-- DO NOT use markdown formatting (no **bold**, *italic*, or bullet points). Use plain text only.
-- Use emojis sparingly for friendliness
-"""
-
     async def _llm_response(
         self, content: str, user_id: uuid.UUID | None = None
     ) -> BrainResponse:
@@ -808,18 +723,14 @@ You help users with nutrition, exercise, and fitness questions.
         if user_id:
             context = self._build_context(user_id)
 
-        # Build prompt
+        # Build prompt using prompts module
         if context:
-            system_prompt = self._build_system_prompt(context)
+            system_prompt = build_system_prompt(context)
             full_prompt = f"{system_prompt}\n\nUser message: {content}\n\nAssistant:"
         else:
             full_prompt = (
-                """You are a friendly fitness coach assistant. Help the user with their fitness questions.
-Keep responses concise and helpful.
-
-User message: """
-                + content
-                + "\n\nAssistant:"
+                build_fallback_system_prompt()
+                + f"\n\nUser message: {content}\n\nAssistant:"
             )
 
         # Log the full prompt for debugging
