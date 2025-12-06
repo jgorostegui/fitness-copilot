@@ -4,7 +4,7 @@
 
 What if you could snap a photo of your meal or workout and get instant, context-aware feedback? Not just "that's 500 calories" but "you've got 600 left for today, and your leg workout is still pending."
 
-The inspiration came from wanting to build something ambitious under hackathon constraints—something that stitches together incompatible systems and makes them cooperate. When you combine proper guardrails, spec-driven development, and tight steering docs, you can build things that would normally take weeks.
+The inspiration came from wanting to build something ambitious—something that stitches together incompatible systems and makes them cooperate. With proper guardrails, spec-driven development, and tight steering docs, this entire project was built in a day and a half.
 
 ## What it does
 
@@ -78,7 +78,7 @@ What makes this work is how we stitched together incompatible systems:
 - **Natural language input** → **Two-tier parser** (keyword matching + LLM fallback) → **Structured logs**
 - **Oracle Chat** (adaptive, conversational) ↔️ **Monitor Dashboard** (rigid, mathematical)
 
-The key innovation is **context injection**: Before every AI request, we inject the user's training plan, today's progress, and recent conversation. The AI doesn't just see a photo—it understands the full situation.
+The key innovation is **context injection**: before every AI request, we inject the user's training plan, today's progress, and recent conversation. The AI doesn't just see a photo—it understands the full situation.
 
 ## Next Steps
 

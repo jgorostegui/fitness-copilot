@@ -6,6 +6,8 @@
 
 > What if you could snap a photo of your meal or workout and get instant, context-aware feedback? Not just "that's 500 calories" but "you've got 600 left for today, and your leg workout is still pending."
 
+![UI Showcase](./images/ui-showcase2-horizontal.png)
+
 ## What It Does
 
 Fitness Copilot is an AI-powered fitness tracking app that combines:

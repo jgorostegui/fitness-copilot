@@ -1,29 +1,36 @@
 day_of_week,meal_type,item_name,calories,protein_g,carbs_g,fat_g
-0,breakfast,Oatmeal with Berries and Honey,380,12,62,10
-0,lunch,Grilled Chicken Caesar Wrap,520,38,42,22
-0,dinner,Salmon with Quinoa and Vegetables,580,42,45,24
-0,snack,Apple with Almond Butter,220,6,28,12
-1,breakfast,Scrambled Eggs with Whole Wheat Toast,420,24,35,22
-1,lunch,Mediterranean Chicken Bowl,550,40,48,22
-1,dinner,Lean Beef Stir Fry with Brown Rice,620,42,58,24
-1,snack,Greek Yogurt with Granola,240,18,28,6
-2,breakfast,Smoothie Bowl with Protein,400,28,48,12
-2,lunch,Turkey and Avocado Sandwich,520,35,45,24
-2,dinner,Grilled Chicken with Sweet Potato,560,45,48,18
-2,snack,Mixed Nuts and Dried Fruit,260,8,24,16
-3,breakfast,Avocado Toast with Poached Eggs,450,22,38,26
-3,lunch,Shrimp Pad Thai,580,32,68,20
-3,dinner,Pork Tenderloin with Roasted Vegetables,540,42,35,24
-3,snack,Cottage Cheese with Pineapple,200,20,22,4
-4,breakfast,Protein Pancakes with Maple Syrup,480,28,58,14
-4,lunch,Chicken Burrito Bowl,600,42,55,24
-4,dinner,Baked Cod with Asparagus and Rice,520,40,48,18
-4,snack,Hummus with Veggie Sticks,180,6,18,10
-5,breakfast,Eggs Benedict with Turkey Bacon,520,32,35,28
-5,lunch,Asian Chicken Salad,480,38,32,22
-5,dinner,Grilled Ribeye with Baked Potato,680,48,45,34
-5,snack,Protein Shake,220,30,12,6
-6,breakfast,French Toast with Fresh Fruit,460,18,62,16
-6,lunch,Fish Tacos with Slaw,540,32,52,24
-6,dinner,Herb Roasted Chicken with Vegetables,580,45,38,26
-6,snack,Dark Chocolate and Almonds,240,6,22,16
+0,breakfast,Oatmeal with Berries and Honey,480,15,78,13
+0,lunch,Grilled Chicken Caesar Wrap,680,50,55,29
+0,dinner,Salmon with Quinoa and Vegetables,760,55,59,31
+0,snack,Apple with Almond Butter,320,9,41,18
+0,snack,Protein Shake,260,35,14,7
+1,breakfast,Scrambled Eggs with Whole Wheat Toast,540,31,45,28
+1,lunch,Mediterranean Chicken Bowl,720,52,63,29
+1,dinner,Lean Beef Stir Fry with Brown Rice,810,55,76,31
+1,snack,Greek Yogurt with Granola,340,26,40,9
+1,snack,Mixed Nuts,190,6,8,16
+2,breakfast,Smoothie Bowl with Protein,520,36,62,16
+2,lunch,Turkey and Avocado Sandwich,680,46,59,31
+2,dinner,Grilled Chicken with Sweet Potato,730,59,63,24
+2,snack,Mixed Nuts and Dried Fruit,380,12,35,23
+2,snack,Cottage Cheese,190,20,8,6
+3,breakfast,Avocado Toast with Poached Eggs,580,28,49,34
+3,lunch,Shrimp Pad Thai,760,42,89,26
+3,dinner,Pork Tenderloin with Roasted Vegetables,700,55,46,31
+3,snack,Cottage Cheese with Pineapple,280,28,31,6
+3,snack,Protein Bar,280,20,30,10
+4,breakfast,Protein Pancakes with Maple Syrup,620,36,75,18
+4,lunch,Chicken Burrito Bowl,780,55,72,31
+4,dinner,Baked Cod with Asparagus and Rice,680,52,63,24
+4,snack,Hummus with Veggie Sticks,260,9,26,14
+4,snack,Greek Yogurt,260,18,20,10
+5,breakfast,Eggs Benedict with Turkey Bacon,680,42,46,37
+5,lunch,Asian Chicken Salad,620,50,42,29
+5,dinner,Grilled Ribeye with Baked Potato,880,62,59,44
+5,snack,Protein Shake,280,38,15,8
+5,snack,Almonds,240,8,8,20
+6,breakfast,French Toast with Fresh Fruit,600,24,81,21
+6,lunch,Fish Tacos with Slaw,700,42,68,31
+6,dinner,Herb Roasted Chicken with Vegetables,760,59,50,34
+6,snack,Dark Chocolate and Almonds,340,9,31,23
+6,snack,Banana with Peanut Butter,300,10,38,14
