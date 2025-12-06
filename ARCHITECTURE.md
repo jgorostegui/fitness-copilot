@@ -68,7 +68,7 @@ The primary client is a mobile-first single-page application that exposes:
 - **Monitor view** - daily progress gauges, meal logs, and exercise logs.
 - **Workout view** - current training routine and adherence.
 - **Nutrition view** - meal plans, logged meals, and remaining targets.
-- **Chat view** - conversation with the fitness assistant, including image attachments.
+- **Chat view** - conversation with the fitness assistant, supporting text, voice input, and image attachments.
 - **Profile view** - basic profile information, theme, and reset/logout actions.
 
 This client:
@@ -331,6 +331,45 @@ sequenceDiagram
 - Vision returns `PROPOSE_*` action types (preview before tracking)
 - User must confirm with "Add to Track" button
 - Form tips are available on-demand via "Show Form Tips"
+
+### Voice Input Flow
+
+Voice input uses the browser's native Web Speech API to transcribe speech to text, then flows through the same Brain service as typed messages:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant ChatUI as Chat Interface
+    participant Hook as useSpeechRecognition
+    participant WebSpeech as Web Speech API
+    participant API as API Route
+    participant Brain as Brain Service
+
+    User->>ChatUI: Tap mic button
+    ChatUI->>Hook: startRecording()
+    Hook->>WebSpeech: recognition.start()
+    
+    Note over WebSpeech: User speaks...
+    
+    User->>ChatUI: Tap mic again (or silence)
+    ChatUI->>Hook: stopRecording()
+    Hook->>WebSpeech: recognition.stop()
+    
+    WebSpeech-->>Hook: onresult(transcript)
+    Hook-->>ChatUI: onTranscript("I had a chicken salad")
+    
+    Note over ChatUI: Same flow as typed text
+    ChatUI->>API: POST /chat {content: "I had a chicken salad"}
+    API->>Brain: process_message_async(content, user_id)
+    Brain-->>API: BrainResponse(LOG_FOOD, action_data)
+    API-->>ChatUI: Message + logged meal
+```
+
+**Key design decisions:**
+- Browser-native STT avoids API costs, latency, and backend complexity
+- Transcribed text flows through the same `sendMessage()` path as typed text
+- Graceful degradation: unsupported browsers (Firefox) show a friendly message
+- No backend changes required—voice is purely a frontend feature
 
 ### Context Building
 

@@ -9,11 +9,12 @@
 Fitness Copilot is an AI-powered fitness tracking app that combines:
 
 - **Vision-based logging**: Snap a photo of your meal or exercise, and Google Gemini Vision analyzes it
+- **Voice input**: Speak your food or exercise logs instead of typing (browser-native Web Speech API)
 - **Context-aware coaching**: The AI knows your training plan, today's progress, and recent conversation before responding
 - **Validated tracking**: All data is validated before being stored—the AI proposes, the system validates
 - **Dual interface**:
   - **Monitor**: A _typical_ dashboard for tracking metrics.
-  - **Chat**: An interactive chat interface for unstructured input and coaching.
+  - **Chat**: An interactive chat interface for text, voice, and image input.
 
 The system doesn't just track—it understands your full situation and provides personalized guidance.
 
@@ -195,8 +196,10 @@ These files are not required to run the app, but they are useful when pairing wi
 ## Architecture
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed documentation including:
+
 - System overview and component diagrams
 - Chat message flow (text → LLM → validation → database)
+- Voice input flow (speech → Web Speech API → same text flow)
 - Vision flow (image → classification → analysis → validation)
 - Context building and prompt architecture
 
