@@ -8,7 +8,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { FiCamera, FiMic, FiSend } from "react-icons/fi"
 import type {
   ChatMessagePublic,
@@ -23,9 +23,11 @@ import {
   isVisionResponse,
   VisionResponseCard,
 } from "@/components/Fitness/VisionResponseCard"
+import { toaster } from "@/components/ui/toaster"
 import { useChat } from "@/hooks/useChat"
 import { useImageUpload } from "@/hooks/useImageUpload"
 import { useLogs } from "@/hooks/useLogs"
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition"
 import { useSummary } from "@/hooks/useSummary"
 import { useTrainingRoutine } from "@/hooks/useTrainingRoutine"
 import type { DailyStats, ExerciseLog, MealLog } from "@/types/fitness"
@@ -52,14 +54,46 @@ const mapMealLog = (log: MealLogPublic): MealLog => ({
 
 export function ChatInterface() {
   const [inputText, setInputText] = useState("")
-  const [isRecording, setIsRecording] = useState(false)
   const [widgetMode, setWidgetMode] = useState<"gym" | "kitchen">("gym")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const recordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Use API hooks
   const { messages, isLoading, sendMessage, isSending } = useChat()
+
+  // Handle voice transcript - send as regular message
+  const handleVoiceTranscript = useCallback(
+    (text: string) => {
+      if (text.trim() && !isSending) {
+        sendMessage({
+          content: text,
+          attachment_type: "none",
+        })
+      }
+    },
+    [sendMessage, isSending],
+  )
+
+  // Handle voice errors
+  const handleVoiceError = useCallback((error: string) => {
+    toaster.create({
+      title: "Voice Input Error",
+      description: error,
+      type: "error",
+      duration: 4000,
+    })
+  }, [])
+
+  // Speech recognition hook
+  const {
+    isRecording,
+    isSupported: isVoiceSupported,
+    startRecording,
+    stopRecording,
+  } = useSpeechRecognition({
+    onTranscript: handleVoiceTranscript,
+    onError: handleVoiceError,
+  })
   const { uploadImage, isUploading } = useImageUpload()
   const { mealLogs: apiMealLogs, exerciseLogs: apiExerciseLogs } = useLogs()
   const { summary } = useSummary()
@@ -130,26 +164,24 @@ export function ChatInterface() {
     setInputText("")
   }
 
-  const startRecording = () => {
-    if (isSending) return
-    setIsRecording(true)
-    recordingTimeoutRef.current = setTimeout(() => {}, 500)
-  }
-
-  const stopRecording = () => {
-    if (!isRecording) return
-    setIsRecording(false)
-
-    if (recordingTimeoutRef.current) {
-      clearTimeout(recordingTimeoutRef.current)
-      recordingTimeoutRef.current = null
+  // Toggle recording on mic button click
+  const handleMicClick = () => {
+    if (!isVoiceSupported) {
+      toaster.create({
+        title: "Voice Not Supported",
+        description:
+          "Voice input is not supported in this browser. Try Chrome or Safari.",
+        type: "warning",
+        duration: 4000,
+      })
+      return
     }
 
-    sendMessage({
-      content: "I just did 3 sets of leg press at 100kg",
-      attachment_type: "audio",
-      attachment_url: "mock://voice-recording",
-    })
+    if (isRecording) {
+      stopRecording()
+    } else {
+      startRecording()
+    }
   }
 
   const renderMessage = (msg: ChatMessagePublic) => {
@@ -389,15 +421,34 @@ export function ChatInterface() {
           />
 
           <IconButton
-            aria-label="Voice input"
+            aria-label={isRecording ? "Stop recording" : "Voice input"}
             variant="ghost"
-            color={isRecording ? "red.500" : "gray.500"}
+            color={
+              isRecording
+                ? "red.500"
+                : isVoiceSupported
+                  ? "gray.500"
+                  : "gray.300"
+            }
             bg={isRecording ? "red.100" : undefined}
-            onMouseDown={startRecording}
-            onMouseUp={stopRecording}
-            onMouseLeave={() => isRecording && stopRecording()}
-            onTouchStart={startRecording}
-            onTouchEnd={stopRecording}
+            onClick={handleMicClick}
+            disabled={isSending}
+            title={
+              !isVoiceSupported
+                ? "Voice not supported in this browser"
+                : undefined
+            }
+            css={
+              isRecording
+                ? {
+                    animation: "pulse 1.5s ease-in-out infinite",
+                    "@keyframes pulse": {
+                      "0%, 100%": { opacity: 1 },
+                      "50%": { opacity: 0.5 },
+                    },
+                  }
+                : undefined
+            }
           >
             <FiMic />
           </IconButton>

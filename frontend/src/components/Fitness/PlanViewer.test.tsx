@@ -309,7 +309,14 @@ describe("PlanViewer - Nutrition Mode", () => {
 
   it("shows calorie exceeded feedback when over target", () => {
     const mealLogs = [
-      { id: "1", name: "Big Meal", calories: 1200, protein: 50, type: "lunch" as const, time: new Date().toISOString() },
+      {
+        id: "1",
+        name: "Big Meal",
+        calories: 1200,
+        protein: 50,
+        type: "lunch" as const,
+        time: new Date().toISOString(),
+      },
     ]
 
     renderWithProviders(
@@ -330,7 +337,14 @@ describe("PlanViewer - Nutrition Mode", () => {
 
   it("does not show excess when under target", () => {
     const mealLogs = [
-      { id: "1", name: "Small Meal", calories: 300, protein: 20, type: "lunch" as const, time: new Date().toISOString() },
+      {
+        id: "1",
+        name: "Small Meal",
+        calories: 300,
+        protein: 20,
+        type: "lunch" as const,
+        time: new Date().toISOString(),
+      },
     ]
 
     renderWithProviders(

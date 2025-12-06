@@ -8,25 +8,21 @@
 
 Fitness Copilot is an AI-powered fitness tracking app that combines:
 
-- **Vision-based logging**: Snap a photo of your meal or gym equipment, and AI analyzes it instantly
+- **Vision-based logging**: Snap a photo of your meal or exercise, and Google Gemini Vision analyzes it
 - **Context-aware coaching**: The AI knows your training plan, today's progress, and recent conversation before responding
 - **Validated tracking**: All data is validated before being stored—the AI proposes, the system validates
 - **Dual interface**:
-  - **Monitor**: A dashboard for tracking calories, protein, and workout progress
-  - **Chat**: Natural language input for logging and coaching
+  - **Monitor**: A _typical_ dashboard for tracking metrics.
+  - **Chat**: An interactive chat interface for unstructured input and coaching.
 
 The system doesn't just track—it understands your full situation and provides personalized guidance.
 
 ## How It Works
 
-We connected **AI flexibility** with **data integrity**:
+The key innovation is **context injection**: before every AI request, we inject the user's training plan, today's progress, and recent conversation. The AI doesn't just see a photo—it understands the full situation.
 
-- 👁️ **AI Vision** (understands images) → 🛡️ **Validation Layer** (enforces rules) → 🦴 **Database** (stores facts)
-- 🎨 **Chat** (adaptive, conversational) ↔️ 📈 **Monitor** (structured metrics)
-
-**Context is everything**: Before every AI request, we inject your training plan, today's progress, and recent conversation. The AI doesn't just see a leg press photo—it knows this exercise is in your plan today, you've done 3 workouts this week, and you have 600 calories left.
-
-**Strict validation**: Exercises are only logged if they're in today's training plan. Send a photo of a leg press on chest day? You'll get a friendly rejection, not a database entry.
+- **AI Vision** (understands images) → **Validation Layer** (enforces rules) → **Database** (stores facts)
+- **Chat** (adaptive, conversational) ↔️ **Monitor** (structured metrics)
 
 → See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed flow diagrams.
 
@@ -207,5 +203,3 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed documentation including:
 ## Documentation
 
 - [Architecture Guide](./ARCHITECTURE.md) - System design and data flows
-- [Backend README](./backend/README.md)
-- [Frontend README](./frontend/README.md)

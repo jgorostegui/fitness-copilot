@@ -77,6 +77,22 @@ class BrainService:
         "rice and chicken": FoodMacros(calories=550, protein=45, carbs=55, fat=12),
         "protein shake": FoodMacros(calories=200, protein=30, carbs=10, fat=4),
         "shake": FoodMacros(calories=200, protein=30, carbs=10, fat=4),
+        # More complete meals
+        "greek yogurt": FoodMacros(calories=150, protein=15, carbs=12, fat=5),
+        "yogurt": FoodMacros(calories=150, protein=15, carbs=12, fat=5),
+        "tuna salad": FoodMacros(calories=380, protein=35, carbs=8, fat=22),
+        "turkey sandwich": FoodMacros(calories=420, protein=28, carbs=45, fat=14),
+        "steak": FoodMacros(calories=450, protein=42, carbs=0, fat=30),
+        "pasta": FoodMacros(calories=380, protein=12, carbs=72, fat=4),
+        "spaghetti": FoodMacros(calories=380, protein=12, carbs=72, fat=4),
+        "pizza slice": FoodMacros(calories=285, protein=12, carbs=36, fat=10),
+        "pizza": FoodMacros(calories=285, protein=12, carbs=36, fat=10),
+        "burger": FoodMacros(calories=540, protein=25, carbs=40, fat=30),
+        "hamburger": FoodMacros(calories=540, protein=25, carbs=40, fat=30),
+        "salad": FoodMacros(calories=150, protein=5, carbs=12, fat=10),
+        "smoothie": FoodMacros(calories=250, protein=8, carbs=45, fat=5),
+        "coffee": FoodMacros(calories=5, protein=0.3, carbs=0, fat=0),
+        "latte": FoodMacros(calories=190, protein=10, carbs=18, fat=7),
         # Simple ingredients (for text parsing)
         "banana": FoodMacros(calories=105, protein=1.3, carbs=27, fat=0.4),
         "chicken": FoodMacros(calories=165, protein=31, carbs=0, fat=3.6),
@@ -88,6 +104,10 @@ class BrainService:
         "apple": FoodMacros(calories=95, protein=0.5, carbs=25, fat=0.3),
         "bread": FoodMacros(calories=79, protein=2.7, carbs=15, fat=1),
         "milk": FoodMacros(calories=149, protein=8, carbs=12, fat=8),
+        "almonds": FoodMacros(calories=164, protein=6, carbs=6, fat=14),
+        "peanut butter": FoodMacros(calories=188, protein=8, carbs=6, fat=16),
+        "cheese": FoodMacros(calories=113, protein=7, carbs=0.4, fat=9),
+        "avocado": FoodMacros(calories=240, protein=3, carbs=12, fat=22),
     }
 
     # Food keywords that trigger food parsing
