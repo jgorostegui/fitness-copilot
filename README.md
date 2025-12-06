@@ -8,6 +8,8 @@
 
 ![UI Showcase](./images/ui-showcase2-horizontal.png)
 
+▶️ **[Watch the 3-minute demo](https://www.youtube.com/watch?v=nlwR8h1CgtE)** — See text, voice, and vision logging in action.
+
 ## What It Does
 
 Fitness Copilot is an AI-powered fitness tracking app that combines:

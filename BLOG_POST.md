@@ -76,7 +76,7 @@ What makes this work is how we stitched together incompatible systems:
 
 - **AI Vision** (flexible estimation) → **Pydantic Validation** (enforces schema & ranges) → **PostgreSQL** (stores structured data)
 - **Natural language input** → **Two-tier parser** (keyword matching + LLM fallback) → **Structured logs**
-- **Oracle Chat** (adaptive, conversational) ↔️ **Monitor Dashboard** (rigid, mathematical)
+- **Chat** (adaptive, conversational) ↔️ **Monitor Dashboard** (rigid, mathematical)
 
 The key innovation is **context injection**: before every AI request, we inject the user's training plan, today's progress, and recent conversation. The AI doesn't just see a photo—it understands the full situation.
 
