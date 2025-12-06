@@ -1,5 +1,7 @@
 # Fitness Copilot 🧟‍♂️
 
+![Kiroween 2025 Banner](./banner_kiroween.jpg)
+
 **🎃 Kiroween 2025**
 
 > What if you could snap a photo of your meal or workout and get instant, context-aware feedback? Not just "that's 500 calories" but "you've got 600 left for today, and your leg workout is still pending."
@@ -202,7 +204,3 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed documentation including:
 - Voice input flow (speech → Web Speech API → same text flow)
 - Vision flow (image → classification → analysis → validation)
 - Context building and prompt architecture
-
-## Documentation
-
-- [Architecture Guide](./ARCHITECTURE.md) - System design and data flows

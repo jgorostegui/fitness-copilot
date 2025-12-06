@@ -259,16 +259,25 @@ class BrainService:
         self, content: str, user_id: uuid.UUID | None = None
     ) -> BrainResponse | None:
         """
-        Parse food from message content using simple keyword matching.
+        Parse food from message content.
 
-        Tier 1: Check known foods with simple `in` check (prioritize longer matches)
-        Tier 2: Try LLM for unknown foods (if enabled) - not implemented yet
+        Priority order:
+        1. Check today's meal plan for matching items (use planned macros)
+        2. Check known foods in FOOD_DB (fallback)
+        3. LLM fallback (not implemented yet)
 
         Returns BrainResponse if food found, None otherwise.
         """
         lower = content.lower()
 
-        # Tier 1: Check known foods, prioritizing longer matches (complete dishes)
+        # Priority 1: Check today's meal plan first
+        # This ensures "baked salmon" matches "Baked Salmon with Asparagus" from the plan
+        if user_id:
+            meal_plan_match = self._match_meal_plan(lower, user_id)
+            if meal_plan_match:
+                return meal_plan_match
+
+        # Priority 2: Check known foods in FOOD_DB
         # Sort by length descending to match "grilled chicken salad" before "chicken"
         sorted_foods = sorted(self.FOOD_DB.keys(), key=len, reverse=True)
 
@@ -295,8 +304,81 @@ class BrainService:
                     },
                 )
 
-        # Tier 2: LLM fallback would go here
+        # Priority 3: LLM fallback would go here
         # For now, return None to fall through to general response
+        return None
+
+    def _match_meal_plan(
+        self, content_lower: str, user_id: uuid.UUID
+    ) -> BrainResponse | None:
+        """
+        Try to match user input against today's meal plan.
+
+        Uses fuzzy matching: if any significant word from the meal plan item
+        appears in the user's message, it's a match.
+
+        Returns BrainResponse if match found, None otherwise.
+        """
+        context = self._build_context(user_id)
+        if not context or not context.scheduled_meals:
+            return None
+
+        # Try to match against scheduled meals
+        # Sort by item_name length (longer = more specific = higher priority)
+        sorted_meals = sorted(
+            context.scheduled_meals,
+            key=lambda m: len(m.get("item_name", "")),
+            reverse=True,
+        )
+
+        for meal in sorted_meals:
+            item_name = meal.get("item_name", "")
+            item_lower = item_name.lower()
+
+            # Extract significant words (3+ chars, not common words)
+            common_words = {"with", "and", "the", "for"}
+            significant_words = [
+                word
+                for word in item_lower.split()
+                if len(word) >= 3 and word not in common_words
+            ]
+
+            # Check if any significant word from the meal plan is in user's message
+            # e.g., "baked salmon" matches "Baked Salmon with Asparagus"
+            matched_words = [word for word in significant_words if word in content_lower]
+
+            # Require at least one significant word match
+            if matched_words:
+                calories = meal.get("calories", 0)
+                protein_g = meal.get("protein_g", 0)
+                carbs_g = meal.get("carbs_g", 0)
+                fat_g = meal.get("fat_g", 0)
+                meal_type = meal.get("meal_type", "snack")
+
+                # Build progress feedback
+                progress_msg = self._build_food_progress_message(
+                    user_id, calories, protein_g
+                )
+
+                logger.info(
+                    f"[BRAIN] Matched meal plan item '{item_name}' "
+                    f"(matched words: {matched_words})"
+                )
+
+                return BrainResponse(
+                    content=f"✅ Logged {item_name}: {calories} kcal, {protein_g}g protein{progress_msg}",
+                    action_type=ChatActionType.LOG_FOOD,
+                    action_data={
+                        "food": item_name.lower(),
+                        "meal_name": item_name,
+                        "meal_type": meal_type,
+                        "calories": calories,
+                        "protein_g": protein_g,
+                        "carbs_g": carbs_g,
+                        "fat_g": fat_g,
+                    },
+                )
+
         return None
 
     def _build_food_progress_message(
@@ -439,6 +521,7 @@ class BrainService:
         natural language input. This is more accurate than keyword matching.
 
         Validates that the exercise is in today's scheduled plan before logging.
+        When user doesn't specify sets/reps/weight, uses planned values as defaults.
 
         Returns BrainResponse if exercise found, None otherwise.
         """
@@ -484,20 +567,30 @@ class BrainService:
                 logger.info("[BRAIN] LLM determined this is not an exercise log")
                 return None
 
-            sets = int(data.get("sets", 1))
-            reps = int(data.get("reps", 10))
-            weight = float(data.get("weight_kg", 0))
+            # LLM defaults (used to detect if user specified values)
+            LLM_DEFAULT_SETS = 1
+            LLM_DEFAULT_REPS = 10
+            LLM_DEFAULT_WEIGHT = 0
+
+            sets = int(data.get("sets", LLM_DEFAULT_SETS))
+            reps = int(data.get("reps", LLM_DEFAULT_REPS))
+            weight = float(data.get("weight_kg", LLM_DEFAULT_WEIGHT))
 
             logger.info(
                 f"[BRAIN] LLM extracted: {exercise_name}, {sets}x{reps} @ {weight}kg"
             )
 
             # Check if exercise is in today's scheduled plan
-            is_scheduled = any(
-                name.lower() == exercise_name.lower() for name in scheduled_names
+            scheduled_ex = next(
+                (
+                    ex
+                    for ex in scheduled_exercises
+                    if ex.get("name", "").lower() == exercise_name.lower()
+                ),
+                None,
             )
 
-            if not is_scheduled:
+            if not scheduled_ex:
                 # Exercise not in today's plan - don't log it
                 logger.info(
                     f"[BRAIN] Exercise '{exercise_name}' not in today's plan: {scheduled_names}"
@@ -512,6 +605,26 @@ class BrainService:
                         content="❌ Today is a rest day - no exercises scheduled!",
                         action_type=ChatActionType.NONE,
                     )
+
+            # Use planned values as defaults when LLM returned defaults
+            # (i.e., user didn't specify these values)
+            planned_sets = scheduled_ex.get("sets", sets)
+            planned_reps = scheduled_ex.get("reps", reps)
+            planned_weight = scheduled_ex.get("target_weight", weight)
+
+            if sets == LLM_DEFAULT_SETS:
+                sets = planned_sets
+                logger.info(f"[BRAIN] Using planned sets: {sets}")
+            if reps == LLM_DEFAULT_REPS:
+                reps = planned_reps
+                logger.info(f"[BRAIN] Using planned reps: {reps}")
+            if weight == LLM_DEFAULT_WEIGHT:
+                weight = planned_weight
+                logger.info(f"[BRAIN] Using planned weight: {weight}kg")
+
+            logger.info(
+                f"[BRAIN] Final values: {exercise_name}, {sets}x{reps} @ {weight}kg"
+            )
 
             progress_msg = self._build_exercise_progress_message(user_id, exercise_name)
             weight_str = f" @ {weight}kg" if weight > 0 else ""

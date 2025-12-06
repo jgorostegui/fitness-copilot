@@ -139,6 +139,8 @@ export const FitnessApp = () => {
             onboarding_complete: true,
           })
           setProfile(localProfile)
+          // Ensure we start on the Dashboard after onboarding
+          setActiveTab("monitor")
         }}
         onBack={() => {
           // Go back to demo login to choose a different persona
